@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="TradeLog"/>
+<title>TradeLog – Nhật Ký Giao Dịch</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --gold: #c9a84c;
+    --gold-dim: #c9a84c55;
+    --gold-faint: #c9a84c18;
+    --bg: #080808;
+    --bg2: #111108;
+    --bg3: #1a1a10;
+    --text: #e8dcc8;
+    --text-dim: #e8dcc888;
+    --win: #4caf50;
+    --loss: #ef5350;
+    --be: #90a4ae;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Crimson Pro', serif; overflow: hidden; }
+  
+  /* SCROLLABLE SCREENS */
+  .screen { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; display: none; flex-direction: column; }
+  .screen.active { display: flex; }
+  ::-webkit-scrollbar { display: none; }
+
+  /* HEADER */
+  .header {
+    position: sticky; top: 0; z-index: 100;
+    background: linear-gradient(180deg, #0d0d08 0%, #080808ee 100%);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--gold-dim);
+    padding: 12px 18px 10px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .header-title { text-align: center; flex: 1; }
+  .header-title .label { font-size: 9px; letter-spacing: 5px; color: var(--gold-dim); text-transform: uppercase; font-family: 'Cinzel', serif; }
+  .header-title .name { font-family: 'Cinzel', serif; font-size: 17px; color: var(--gold); letter-spacing: 2px; }
+  .header-btn { background: none; border: none; color: var(--gold); font-size: 24px; cursor: pointer; width: 36px; text-align: center; font-family: 'Crimson Pro', serif; }
+
+  /* STATS BAR */
+  .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--gold-faint); background: var(--bg2); flex-shrink: 0; }
+  .stat { padding: 10px 0; text-align: center; border-right: 1px solid var(--gold-faint); }
+  .stat:last-child { border-right: none; }
+  .stat-val { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 600; color: var(--gold); }
+  .stat-lbl { font-size: 9px; letter-spacing: 2px; color: var(--gold-dim); text-transform: uppercase; margin-top: 2px; }
+
+  /* TRADE LIST */
+  .trade-item {
+    padding: 15px 18px; border-bottom: 1px solid var(--gold-faint);
+    cursor: pointer; transition: background 0.15s;
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .trade-item:active { background: var(--gold-faint); }
+  .trade-title { font-family: 'Cinzel', serif; font-size: 14px; color: var(--gold); margin-bottom: 3px; font-weight: 600; }
+  .trade-tags { font-size: 13px; color: var(--gold-dim); }
+  .trade-date { font-size: 11px; color: #c9a84c44; margin-top: 4px; font-style: italic; }
+  .trade-right { text-align: right; }
+  .trade-pnl { font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600; }
+  .trade-bias { font-size: 13px; margin-top: 4px; }
+  .win { color: var(--win); }
+  .loss { color: var(--loss); }
+  .be { color: var(--be); }
+
+  /* EMPTY STATE */
+  .empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--gold-dim); padding: 40px; text-align: center; }
+  .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+  .empty-text { font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 2px; line-height: 2; }
+
+  /* FORM */
+  .form-body { padding: 16px 18px 100px; flex: 1; }
+  .field { margin-bottom: 16px; }
+  .field-label { font-size: 10px; letter-spacing: 3px; color: var(--gold-dim); text-transform: uppercase; font-family: 'Cinzel', serif; display: block; margin-bottom: 7px; }
+  .field input, .field textarea {
+    width: 100%; background: var(--bg3);
+    border: 1px solid var(--gold-faint); border-radius: 8px;
+    padding: 11px 13px; color: var(--text); font-size: 15px;
+    font-family: 'Crimson Pro', serif; outline: none;
+    transition: border-color 0.2s;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--gold-dim); }
+  .field textarea { resize: vertical; min-height: 80px; }
+
+  /* TOGGLE GROUP */
+  .toggle-group { display: flex; gap: 6px; }
+  .toggle-btn {
+    flex: 1; padding: 9px 4px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--gold-faint); background: transparent;
+    color: var(--gold-dim); font-size: 12px; font-family: 'Cinzel', serif;
+    letter-spacing: 0.5px; transition: all 0.15s; text-align: center;
+  }
+  .toggle-btn.active { border-color: var(--gold); background: var(--gold-faint); color: var(--gold); }
+
+  /* IMAGE TIMEFRAMES */
+  .tf-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+  .tf-slot {
+    flex: 0 0 88px; cursor: pointer;
+  }
+  .tf-img-box {
+    width: 88px; height: 66px; border-radius: 8px;
+    border: 1px dashed var(--gold-faint);
+    background: var(--bg3); overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; transition: border-color 0.2s;
+  }
+  .tf-img-box:active { border-color: var(--gold); }
+  .tf-img-box img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+  .tf-img-box .tf-placeholder { font-size: 20px; opacity: 0.4; }
+  .tf-label { font-size: 10px; color: var(--gold-dim); text-align: center; margin-top: 4px; font-family: 'Cinzel', serif; letter-spacing: 1px; }
+
+  /* DETAIL VIEW */
+  .detail-banner {
+    padding: 12px 18px; border-bottom: 1px solid var(--gold-faint);
+    display: flex; justify-content: space-between; align-items: center;
+    flex-shrink: 0;
+  }
+  .detail-body { padding: 14px 18px 100px; flex: 1; }
+  .section-label { font-size: 9px; letter-spacing: 4px; color: var(--gold-dim); text-transform: uppercase; font-family: 'Cinzel', serif; margin-bottom: 10px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
+  .stats-cell { background: var(--bg3); border-radius: 8px; padding: 10px 8px; text-align: center; }
+  .stats-cell .lbl { font-size: 9px; letter-spacing: 2px; color: var(--gold-dim); text-transform: uppercase; margin-bottom: 5px; font-family: 'Cinzel', serif; }
+  .stats-cell .val { font-size: 15px; color: var(--gold); font-family: 'Cinzel', serif; font-weight: 600; }
+
+  /* TF TABS */
+  .tf-tabs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 10px; padding-bottom: 2px; }
+  .tf-tab {
+    flex: 0 0 auto; padding: 5px 11px; border-radius: 6px; cursor: pointer;
+    border: 1px solid var(--gold-faint); background: transparent;
+    color: var(--gold-dim); font-size: 11px; font-family: 'Cinzel', serif;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .tf-tab.active { border-color: var(--gold); background: var(--gold-faint); color: var(--gold); }
+  .tf-preview {
+    width: 100%; height: 200px; border-radius: 10px;
+    background: var(--bg3); border: 1px solid var(--gold-faint);
+    overflow: hidden; display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+  }
+  .tf-preview img { width: 100%; height: 100%; object-fit: contain; }
+  .tf-preview .no-img { color: var(--gold-faint); text-align: center; font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 2px; }
+
+  /* NOTE BOX */
+  .note-box { background: var(--bg3); border: 1px solid var(--gold-faint); border-radius: 8px; padding: 13px 14px; margin-bottom: 20px; font-size: 14px; color: var(--text-dim); line-height: 1.7; font-style: italic; }
+
+  /* AI BUTTON */
+  .ai-btn {
+    width: 100%; padding: 14px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--gold-faint), transparent);
+    border: 1px solid var(--gold-dim); color: var(--gold);
+    font-size: 14px; font-family: 'Cinzel', serif; letter-spacing: 2px;
+    cursor: pointer; transition: all 0.2s; margin-bottom: 14px;
+  }
+  .ai-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .ai-result { background: var(--bg3); border: 1px solid var(--gold-faint); border-radius: 10px; padding: 14px 16px; font-size: 13px; color: var(--text-dim); line-height: 1.8; white-space: pre-wrap; }
+  .ai-result strong { color: var(--gold); font-family: 'Cinzel', serif; }
+
+  /* SAVE BTN */
+  .save-bar {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 480px;
+    background: linear-gradient(0deg, var(--bg) 80%, transparent);
+    padding: 16px 18px 28px;
+  }
+  .save-btn {
+    width: 100%; padding: 14px; border-radius: 10px;
+    background: linear-gradient(135deg, #c9a84c33, #c9a84c22);
+    border: 1px solid var(--gold); color: var(--gold);
+    font-size: 15px; font-family: 'Cinzel', serif; letter-spacing: 3px;
+    cursor: pointer;
+  }
+
+  /* LOADING */
+  .loading { display: flex; align-items: center; justify-content: center; padding: 40px; color: var(--gold-dim); font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 3px; }
+  @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+  .loading { animation: pulse 1.5s infinite; }
+
+  /* DELETE BTN */
+  .delete-btn { background: none; border: none; color: #ef535066; font-size: 13px; cursor: pointer; font-family: 'Cinzel', serif; letter-spacing: 1px; width: 100%; text-align: center; padding: 10px; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<!-- LIST SCREEN -->
+<div class="screen active" id="screen-list">
+  <div class="header">
+    <div style="width:36px"></div>
+    <div class="header-title">
+      <div class="label">Nhật Ký</div>
+      <div class="name">Giao Dịch</div>
+    </div>
+    <button class="header-btn" onclick="openNew()">+</button>
+  </div>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-val" id="stat-total">0</div><div class="stat-lbl">Tổng</div></div>
+    <div class="stat"><div class="stat-val win" id="stat-win">0</div><div class="stat-lbl">Win</div></div>
+    <div class="stat"><div class="stat-val loss" id="stat-loss">0</div><div class="stat-lbl">Loss</div></div>
+    <div class="stat"><div class="stat-val" id="stat-wr">0%</div><div class="stat-lbl">WR</div></div>
+  </div>
+  <div id="trade-list" style="flex:1"></div>
+</div>
+
+<!-- NEW TRADE SCREEN -->
+<div class="screen" id="screen-new">
+  <div class="header">
+    <button class="header-btn" onclick="showScreen('list')" style="font-size:20px">←</button>
+    <div class="header-title">
+      <div class="label">Thêm</div>
+      <div class="name">Lệnh Mới</div>
+    </div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="form-body">
+    <div class="field">
+      <label class="field-label">Tên lệnh / Câu hỏi</label>
+      <input id="f-title" type="text" placeholder="VD: Có tách thửa được ko..."/>
+    </div>
+    <div class="field">
+      <label class="field-label">Cặp tiền</label>
+      <input id="f-symbol" type="text" placeholder="VD: XAUUSD, EURUSD..."/>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div class="field">
+        <label class="field-label">Entry</label>
+        <input id="f-entry" type="text" placeholder="0.000"/>
+      </div>
+      <div class="field">
+        <label class="field-label">SL</label>
+        <input id="f-sl" type="text" placeholder="0.000"/>
+      </div>
+      <div class="field">
+        <label class="field-label">TP</label>
+        <input id="f-tp" type="text" placeholder="0.000"/>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">P&amp;L</label>
+      <input id="f-pnl" type="text" placeholder="+2R hoặc -1R"/>
+    </div>
+    <div class="field">
+      <label class="field-label">Bias</label>
+      <div class="toggle-group">
+        <button class="toggle-btn active" data-group="bias" data-val="Bullish" onclick="toggleSelect(this)">📈 Bullish</button>
+        <button class="toggle-btn" data-group="bias" data-val="Bearish" onclick="toggleSelect(this)">📉 Bearish</button>
+        <button class="toggle-btn" data-group="bias" data-val="Neutral" onclick="toggleSelect(this)">⚖️ Neutral</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Kết quả</label>
+      <div class="toggle-group">
+        <button class="toggle-btn active" data-group="result" data-val="Win" onclick="toggleSelect(this)">✅ Win</button>
+        <button class="toggle-btn" data-group="result" data-val="Loss" onclick="toggleSelect(this)">❌ Loss</button>
+        <button class="toggle-btn" data-group="result" data-val="BE" onclick="toggleSelect(this)">➖ BE</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Tags (cách nhau bằng dấu phẩy)</label>
+      <input id="f-tags" type="text" placeholder="VD: Kiền, Vị Tế, Tỷ"/>
+    </div>
+    <div class="field">
+      <label class="field-label">Ghi chú</label>
+      <textarea id="f-note" placeholder="Mô tả setup, lý do vào lệnh, bài học..."></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">Ảnh Biểu Đồ (D1 → M1)</label>
+      <div class="tf-row" id="tf-upload-row"></div>
+    </div>
+  </div>
+  <div class="save-bar">
+    <button class="save-btn" onclick="saveTrade()">LƯU LỆNH</button>
+  </div>
+</div>
+
+<!-- DETAIL SCREEN -->
+<div class="screen" id="screen-detail">
+  <div class="header">
+    <button class="header-btn" onclick="showScreen('list')" style="font-size:20px">←</button>
+    <div class="header-title">
+      <div class="label">Chi Tiết</div>
+      <div class="name" id="detail-header-title">—</div>
+    </div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="detail-banner" id="detail-banner"></div>
+  <div class="detail-body">
+    <div class="section-label">Thông Tin Lệnh</div>
+    <div class="stats-grid" id="detail-grid"></div>
+    <div class="section-label">Ghi Chú</div>
+    <div class="note-box" id="detail-note"></div>
+    <div class="section-label">Biểu Đồ Phân Tích</div>
+    <div class="tf-tabs" id="detail-tf-tabs"></div>
+    <div class="tf-preview" id="detail-tf-preview"></div>
+    <div class="section-label">Phân Tích AI</div>
+    <button class="ai-btn" id="ai-btn" onclick="analyzeAI()">🤖 PHÂN TÍCH AI</button>
+    <div class="ai-result" id="ai-result" style="display:none"></div>
+    <button class="delete-btn" id="delete-btn" onclick="deleteTrade()">🗑 Xóa lệnh này</button>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, orderBy, query } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDO21Q-RPuEeREv56Cl9fGXGXqF7yDiq_s",
+  authDomain: "backtest-2825d.firebaseapp.com",
+  projectId: "backtest-2825d",
+  storageBucket: "backtest-2825d.firebasestorage.app",
+  messagingSenderId: "807404241259",
+  appId: "1:807404241259:web:c65302e6cb83cd572d4c2e"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// TIMEFRAMES
+const TFS = ["D1","H4","H1","M30","M15","M5","M1"];
+let trades = [];
+let currentTrade = null;
+let currentTF = "D1";
+let formImages = {};
+
+// Expose to window
+window.db = db;
+window.collection = collection;
+window.addDoc = addDoc;
+window.getDocs = getDocs;
+window.deleteDoc = deleteDoc;
+window.doc = doc;
+window.query = query;
+window.orderBy = orderBy;
+window.TFS = TFS;
+window.trades = trades;
+window.currentTrade = currentTrade;
+window.currentTF = currentTF;
+window.formImages = formImages;
+
+// LOAD TRADES
+async function loadTrades() {
+  document.getElementById("trade-list").innerHTML = '<div class="loading">Đang tải...</div>';
+  try {
+    const q = query(collection(db, "trades"), orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+    trades = [];
+    snap.forEach(d => trades.push({ id: d.id, ...d.data() }));
+    window.trades = trades;
+    renderList();
+  } catch(e) {
+    document.getElementById("trade-list").innerHTML = '<div class="loading">Lỗi tải dữ liệu</div>';
+  }
+}
+
+function renderList() {
+  const wins = trades.filter(t => t.result === "Win").length;
+  const losses = trades.filter(t => t.result === "Loss").length;
+  const wr = trades.length ? Math.round(wins / trades.length * 100) : 0;
+  document.getElementById("stat-total").textContent = trades.length;
+  document.getElementById("stat-win").textContent = wins;
+  document.getElementById("stat-loss").textContent = losses;
+  document.getElementById("stat-wr").textContent = wr + "%";
+
+  const el = document.getElementById("trade-list");
+  if (!trades.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📒</div><div class="empty-text">Chưa có giao dịch nào<br>Nhấn + để thêm lệnh mới</div></div>`;
+    return;
+  }
+  el.innerHTML = trades.map(t => {
+    const cls = t.result === "Win" ? "win" : t.result === "Loss" ? "loss" : "be";
+    const biasEmoji = t.bias === "Bullish" ? "📈" : t.bias === "Bearish" ? "📉" : "⚖️";
+    const tags = Array.isArray(t.tags) ? t.tags.join(" · ") : (t.tags || "");
+    const date = t.createdAt ? new Date(t.createdAt).toLocaleString("vi-VN") : "";
+    return `<div class="trade-item" onclick="openDetail('${t.id}')">
+      <div>
+        <div class="trade-title">${t.title || "—"}</div>
+        <div class="trade-tags">${tags}</div>
+        <div class="trade-date">${date}</div>
+      </div>
+      <div class="trade-right">
+        <div class="trade-pnl ${cls}">${t.pnl || "—"}</div>
+        <div class="trade-bias">${biasEmoji}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+window.openDetail = function(id) {
+  currentTrade = trades.find(t => t.id === id);
+  window.currentTrade = currentTrade;
+  if (!currentTrade) return;
+  currentTF = "D1";
+
+  const cls = currentTrade.result === "Win" ? "win" : currentTrade.result === "Loss" ? "loss" : "be";
+  document.getElementById("detail-header-title").textContent = (currentTrade.title || "").substring(0, 20);
+  document.getElementById("detail-banner").innerHTML = `
+    <span style="font-size:13px;color:var(--gold-dim);font-style:italic">${currentTrade.createdAt ? new Date(currentTrade.createdAt).toLocaleString("vi-VN") : ""}</span>
+    <span class="${cls}" style="font-family:'Cinzel',serif;font-size:15px;font-weight:600">${currentTrade.result || ""} ${currentTrade.pnl || ""}</span>
+  `;
+
+  const items = [
+    ["Symbol", currentTrade.symbol || "—"],
+    ["Bias", currentTrade.bias || "—"],
+    ["Entry", currentTrade.entry || "—"],
+    ["SL", currentTrade.sl || "—"],
+    ["TP", currentTrade.tp || "—"],
+    ["P&L", currentTrade.pnl || "—"],
+  ];
+  document.getElementById("detail-grid").innerHTML = items.map(([l,v]) =>
+    `<div class="stats-cell"><div class="lbl">${l}</div><div class="val">${v}</div></div>`
+  ).join("");
+
+  document.getElementById("detail-note").textContent = currentTrade.note || "Không có ghi chú.";
+
+  // TF tabs
+  const imgs = currentTrade.images || {};
+  document.getElementById("detail-tf-tabs").innerHTML = TFS.map(tf =>
+    `<button class="tf-tab ${tf === currentTF ? 'active':''}" onclick="switchTF('${tf}')" id="tab-${tf}">${tf}</button>`
+  ).join("");
+  renderTFPreview();
+
+  document.getElementById("ai-result").style.display = "none";
+  document.getElementById("ai-btn").disabled = false;
+  document.getElementById("ai-btn").textContent = "🤖 PHÂN TÍCH AI";
+  showScreen("detail");
+};
+
+window.switchTF = function(tf) {
+  currentTF = tf;
+  window.currentTF = tf;
+  TFS.forEach(t => {
+    const el = document.getElementById("tab-" + t);
+    if (el) el.className = "tf-tab" + (t === tf ? " active" : "");
+  });
+  renderTFPreview();
+};
+
+function renderTFPreview() {
+  const imgs = (currentTrade && currentTrade.images) ? currentTrade.images : {};
+  const src = imgs[currentTF];
+  const el = document.getElementById("detail-tf-preview");
+  if (src) {
+    el.innerHTML = `<img src="${src}" alt="${currentTF}"/>`;
+  } else {
+    el.innerHTML = `<div class="no-img">📊<br><br>Chưa có ảnh ${currentTF}</div>`;
+  }
+}
+
+// SAVE TRADE
+window.saveTrade = async function() {
+  const title = document.getElementById("f-title").value.trim();
+  if (!title) { alert("Vui lòng nhập tên lệnh!"); return; }
+
+  const bias = document.querySelector('[data-group="bias"].active')?.dataset.val || "Bullish";
+  const result = document.querySelector('[data-group="result"].active')?.dataset.val || "Win";
+  const tags = document.getElementById("f-tags").value.split(",").map(t=>t.trim()).filter(Boolean);
+
+  const trade = {
+    title,
+    symbol: document.getElementById("f-symbol").value.trim(),
+    entry: document.getElementById("f-entry").value.trim(),
+    sl: document.getElementById("f-sl").value.trim(),
+    tp: document.getElementById("f-tp").value.trim(),
+    pnl: document.getElementById("f-pnl").value.trim(),
+    note: document.getElementById("f-note").value.trim(),
+    bias, result, tags,
+    images: { ...formImages },
+    createdAt: Date.now(),
+  };
+
+  try {
+    await addDoc(collection(db, "trades"), trade);
+    await loadTrades();
+    showScreen("list");
+  } catch(e) {
+    alert("Lỗi lưu: " + e.message);
+  }
+};
+
+// DELETE
+window.deleteTrade = async function() {
+  if (!currentTrade) return;
+  if (!confirm("Xóa lệnh này?")) return;
+  try {
+    await deleteDoc(doc(db, "trades", currentTrade.id));
+    await loadTrades();
+    showScreen("list");
+  } catch(e) { alert("Lỗi xóa: " + e.message); }
+};
+
+// AI ANALYSIS
+window.analyzeAI = async function() {
+  if (!currentTrade) return;
+  const btn = document.getElementById("ai-btn");
+  btn.disabled = true;
+  btn.textContent = "⚙️ Đang phân tích...";
+  const resultEl = document.getElementById("ai-result");
+  resultEl.style.display = "block";
+  resultEl.textContent = "Đang kết nối AI...";
+
+  const imgs = currentTrade.images || {};
+  const tfList = TFS.filter(tf => imgs[tf]).join(", ") || "Chưa có";
+
+  const prompt = `Bạn là trader chuyên nghiệp phân tích price action. Phân tích giao dịch:
+
+Tên: ${currentTrade.title}
+Symbol: ${currentTrade.symbol || "N/A"} | Bias: ${currentTrade.bias}
+Entry: ${currentTrade.entry} | SL: ${currentTrade.sl} | TP: ${currentTrade.tp}
+Kết quả: ${currentTrade.result} (${currentTrade.pnl})
+Ghi chú: ${currentTrade.note || "Không có"}
+Timeframes có ảnh: ${tfList}
+Tags: ${Array.isArray(currentTrade.tags) ? currentTrade.tags.join(", ") : ""}
+
+Phân tích ngắn gọn bằng tiếng Việt:
+1. Đánh giá Bias (D1→M1)
+2. Setup vào lệnh
+3. Quản lý RR
+4. Bài học rút ra
+5. Điểm mạnh`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(i => i.text || "").join("\n") || "Không thể phân tích.";
+    resultEl.textContent = text;
+  } catch {
+    resultEl.textContent = "❌ Lỗi kết nối. Thử lại sau.";
+  }
+  btn.disabled = false;
+  btn.textContent = "🔄 Phân Tích Lại";
+};
+
+// SCREEN NAV
+window.showScreen = function(name) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("screen-" + name).classList.add("active");
+  document.getElementById("screen-" + name).scrollTop = 0;
+};
+
+window.openNew = function() {
+  // reset form
+  ["f-title","f-symbol","f-entry","f-sl","f-tp","f-pnl","f-tags","f-note"].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+  document.querySelectorAll('[data-group="bias"]').forEach((b,i) => b.classList.toggle("active", i===0));
+  document.querySelectorAll('[data-group="result"]').forEach((b,i) => b.classList.toggle("active", i===0));
+  formImages = {};
+  window.formImages = formImages;
+  buildTFUploadRow();
+  showScreen("new");
+};
+
+window.toggleSelect = function(btn) {
+  const group = btn.dataset.group;
+  document.querySelectorAll(`[data-group="${group}"]`).forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+};
+
+function buildTFUploadRow() {
+  const row = document.getElementById("tf-upload-row");
+  row.innerHTML = TFS.map(tf => `
+    <div class="tf-slot" onclick="triggerUpload('${tf}')">
+      <div class="tf-img-box" id="tf-box-${tf}">
+        <div class="tf-placeholder">📷</div>
+      </div>
+      <div class="tf-label">${tf}</div>
+      <input type="file" accept="image/*" style="display:none" id="tf-input-${tf}" onchange="handleImg('${tf}', this)"/>
+    </div>
+  `).join("");
+}
+
+window.triggerUpload = function(tf) {
+  document.getElementById("tf-input-" + tf).click();
+};
+
+window.handleImg = function(tf, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    formImages[tf] = e.target.result;
+    window.formImages = formImages;
+    const box = document.getElementById("tf-box-" + tf);
+    box.innerHTML = `<img src="${e.target.result}" alt="${tf}"/>`;
+    box.style.border = "1px solid var(--gold)";
+  };
+  reader.readAsDataURL(file);
+};
+
+// INIT
+buildTFUploadRow();
+loadTrades();
+</script>
+</body>
+</html>
