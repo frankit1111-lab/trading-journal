@@ -217,6 +217,11 @@
     <div style="width:36px"></div>
   </div>
   <div class="form-body">
+    <!-- THỜI GIAN & CƠ BẢN -->
+    <div class="field">
+      <label class="field-label">Ngày & Giờ Vào Lệnh</label>
+      <input id="f-datetime" type="datetime-local" style="color-scheme: dark;"/>
+    </div>
     <div class="field">
       <label class="field-label">Tên lệnh / Câu hỏi</label>
       <input id="f-title" type="text" placeholder="VD: Có tách thửa được ko..."/>
@@ -225,6 +230,79 @@
       <label class="field-label">Cặp tiền</label>
       <input id="f-symbol" type="text" placeholder="VD: XAUUSD, EURUSD..."/>
     </div>
+
+    <!-- SESSION -->
+    <div class="field">
+      <label class="field-label">Session</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" data-group="session" data-val="Asian" onclick="toggleSelect(this)">🌏 Asian</button>
+        <button class="toggle-btn" data-group="session" data-val="London" onclick="toggleSelect(this)">🇬🇧 London</button>
+        <button class="toggle-btn active" data-group="session" data-val="New York" onclick="toggleSelect(this)">🗽 NY</button>
+        <button class="toggle-btn" data-group="session" data-val="Overlap" onclick="toggleSelect(this)">⚡ Overlap</button>
+      </div>
+    </div>
+
+    <!-- BIAS -->
+    <div class="field">
+      <label class="field-label">Bias HTF</label>
+      <div class="toggle-group">
+        <button class="toggle-btn active" data-group="bias" data-val="Bullish" onclick="toggleSelect(this)">📈 Bullish</button>
+        <button class="toggle-btn" data-group="bias" data-val="Bearish" onclick="toggleSelect(this)">📉 Bearish</button>
+        <button class="toggle-btn" data-group="bias" data-val="Neutral" onclick="toggleSelect(this)">⚖️ Neutral</button>
+      </div>
+    </div>
+
+    <!-- HTF PD ARRAY -->
+    <div class="field">
+      <label class="field-label">HTF PD Array (vùng giá vào)</label>
+      <div class="toggle-group" style="flex-wrap:wrap;gap:6px">
+        <button class="toggle-btn" data-group="pdarray" data-val="OB" onclick="toggleSelect(this)">OB</button>
+        <button class="toggle-btn" data-group="pdarray" data-val="FVG" onclick="toggleSelect(this)">FVG</button>
+        <button class="toggle-btn" data-group="pdarray" data-val="Breaker" onclick="toggleSelect(this)">Breaker</button>
+        <button class="toggle-btn" data-group="pdarray" data-val="Mitigation" onclick="toggleSelect(this)">Mitigation</button>
+        <button class="toggle-btn" data-group="pdarray" data-val="SIBI" onclick="toggleSelect(this)">SIBI</button>
+        <button class="toggle-btn" data-group="pdarray" data-val="BISI" onclick="toggleSelect(this)">BISI</button>
+        <button class="toggle-btn" data-group="pdarray" data-val="Rejection Block" onclick="toggleSelect(this)">Rej.Block</button>
+        <button class="toggle-btn" data-group="pdarray" data-val="Other" onclick="toggleSelect(this)">Other</button>
+      </div>
+    </div>
+
+    <!-- ENTRY MODEL -->
+    <div class="field">
+      <label class="field-label">Entry Model</label>
+      <div class="toggle-group" style="flex-wrap:wrap;gap:6px">
+        <button class="toggle-btn" data-group="model" data-val="CISD" onclick="toggleSelect(this)">CISD</button>
+        <button class="toggle-btn" data-group="model" data-val="MSS" onclick="toggleSelect(this)">MSS</button>
+        <button class="toggle-btn" data-group="model" data-val="SMT" onclick="toggleSelect(this)">SMT</button>
+        <button class="toggle-btn" data-group="model" data-val="OTE" onclick="toggleSelect(this)">OTE</button>
+        <button class="toggle-btn" data-group="model" data-val="Silver Bullet" onclick="toggleSelect(this)">Silver Bullet</button>
+        <button class="toggle-btn" data-group="model" data-val="Judas Swing" onclick="toggleSelect(this)">Judas Swing</button>
+        <button class="toggle-btn" data-group="model" data-val="Other" onclick="toggleSelect(this)">Other</button>
+      </div>
+    </div>
+
+    <!-- DRAW ON LIQUIDITY -->
+    <div class="field">
+      <label class="field-label">Draw on Liquidity (Target)</label>
+      <div class="toggle-group" style="flex-wrap:wrap;gap:6px">
+        <button class="toggle-btn" data-group="dol" data-val="BSL" onclick="toggleSelect(this)">BSL</button>
+        <button class="toggle-btn" data-group="dol" data-val="SSL" onclick="toggleSelect(this)">SSL</button>
+        <button class="toggle-btn" data-group="dol" data-val="EQH" onclick="toggleSelect(this)">EQH</button>
+        <button class="toggle-btn" data-group="dol" data-val="EQL" onclick="toggleSelect(this)">EQL</button>
+        <button class="toggle-btn" data-group="dol" data-val="NWOG" onclick="toggleSelect(this)">NWOG</button>
+        <button class="toggle-btn" data-group="dol" data-val="NDOG" onclick="toggleSelect(this)">NDOG</button>
+        <button class="toggle-btn" data-group="dol" data-val="Old High" onclick="toggleSelect(this)">Old High</button>
+        <button class="toggle-btn" data-group="dol" data-val="Old Low" onclick="toggleSelect(this)">Old Low</button>
+      </div>
+    </div>
+
+    <!-- CONFLUENCES -->
+    <div class="field">
+      <label class="field-label">Confluences</label>
+      <input id="f-confluences" type="text" placeholder="VD: KZ, Time of Day 10:00, NWOG..."/>
+    </div>
+
+    <!-- ENTRY / SL / TP / RR -->
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
       <div class="field">
         <label class="field-label">Entry</label>
@@ -239,18 +317,18 @@
         <input id="f-tp" type="text" placeholder="0.000"/>
       </div>
     </div>
-    <div class="field">
-      <label class="field-label">P&amp;L</label>
-      <input id="f-pnl" type="text" placeholder="+2R hoặc -1R"/>
-    </div>
-    <div class="field">
-      <label class="field-label">Bias</label>
-      <div class="toggle-group">
-        <button class="toggle-btn active" data-group="bias" data-val="Bullish" onclick="toggleSelect(this)">📈 Bullish</button>
-        <button class="toggle-btn" data-group="bias" data-val="Bearish" onclick="toggleSelect(this)">📉 Bearish</button>
-        <button class="toggle-btn" data-group="bias" data-val="Neutral" onclick="toggleSelect(this)">⚖️ Neutral</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="field">
+        <label class="field-label">P&amp;L</label>
+        <input id="f-pnl" type="text" placeholder="+2R hoặc -1R"/>
+      </div>
+      <div class="field">
+        <label class="field-label">RR thực tế</label>
+        <input id="f-rr" type="text" placeholder="VD: 1:3.5"/>
       </div>
     </div>
+
+    <!-- KẾT QUẢ -->
     <div class="field">
       <label class="field-label">Kết quả</label>
       <div class="toggle-group">
@@ -259,13 +337,37 @@
         <button class="toggle-btn" data-group="result" data-val="BE" onclick="toggleSelect(this)">➖ BE</button>
       </div>
     </div>
+
+    <!-- ĐÚNG PLAN -->
+    <div class="field">
+      <label class="field-label">Vào đúng plan?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn active" data-group="onplan" data-val="Đúng plan" onclick="toggleSelect(this)">✅ Đúng plan</button>
+        <button class="toggle-btn" data-group="onplan" data-val="Sai plan" onclick="toggleSelect(this)">❌ Sai plan</button>
+        <button class="toggle-btn" data-group="onplan" data-val="Một phần" onclick="toggleSelect(this)">⚡ Một phần</button>
+      </div>
+    </div>
+
+    <!-- CẢM XÚC -->
+    <div class="field">
+      <label class="field-label">Cảm xúc khi vào lệnh</label>
+      <div class="toggle-group" style="flex-wrap:wrap;gap:6px">
+        <button class="toggle-btn active" data-group="emotion" data-val="Tự tin" onclick="toggleSelect(this)">😎 Tự tin</button>
+        <button class="toggle-btn" data-group="emotion" data-val="FOMO" onclick="toggleSelect(this)">😰 FOMO</button>
+        <button class="toggle-btn" data-group="emotion" data-val="Do dự" onclick="toggleSelect(this)">😕 Do dự</button>
+        <button class="toggle-btn" data-group="emotion" data-val="Revenge" onclick="toggleSelect(this)">😤 Revenge</button>
+        <button class="toggle-btn" data-group="emotion" data-val="Bình thản" onclick="toggleSelect(this)">🧘 Bình thản</button>
+      </div>
+    </div>
+
+    <!-- TAGS & GHI CHÚ -->
     <div class="field">
       <label class="field-label">Tags (cách nhau bằng dấu phẩy)</label>
       <input id="f-tags" type="text" placeholder="VD: Kiền, Vị Tế, Tỷ"/>
     </div>
     <div class="field">
-      <label class="field-label">Ghi chú</label>
-      <textarea id="f-note" placeholder="Mô tả setup, lý do vào lệnh, bài học..."></textarea>
+      <label class="field-label">Ghi chú / Bài học</label>
+      <textarea id="f-note" placeholder="Mô tả setup, lý do vào lệnh, bài học rút ra..."></textarea>
     </div>
     <div class="field">
       <label class="field-label">Ảnh Biểu Đồ (D1 → M1)</label>
@@ -375,7 +477,7 @@ function renderList() {
     const cls = t.result === "Win" ? "win" : t.result === "Loss" ? "loss" : "be";
     const biasEmoji = t.bias === "Bullish" ? "📈" : t.bias === "Bearish" ? "📉" : "⚖️";
     const tags = Array.isArray(t.tags) ? t.tags.join(" · ") : (t.tags || "");
-    const date = t.createdAt ? new Date(t.createdAt).toLocaleString("vi-VN") : "";
+    const date = t.tradeDate ? new Date(t.tradeDate).toLocaleString("vi-VN") : (t.createdAt ? new Date(t.createdAt).toLocaleString("vi-VN") : "");
     return `<div class="trade-item" onclick="openDetail('${t.id}')">
       <div>
         <div class="trade-title">${t.title || "—"}</div>
@@ -398,18 +500,27 @@ window.openDetail = function(id) {
 
   const cls = currentTrade.result === "Win" ? "win" : currentTrade.result === "Loss" ? "loss" : "be";
   document.getElementById("detail-header-title").textContent = (currentTrade.title || "").substring(0, 20);
+  const displayDate = currentTrade.tradeDate ? new Date(currentTrade.tradeDate).toLocaleString("vi-VN") : (currentTrade.createdAt ? new Date(currentTrade.createdAt).toLocaleString("vi-VN") : "");
   document.getElementById("detail-banner").innerHTML = `
-    <span style="font-size:13px;color:var(--gold-dim);font-style:italic">${currentTrade.createdAt ? new Date(currentTrade.createdAt).toLocaleString("vi-VN") : ""}</span>
+    <span style="font-size:13px;color:var(--gold-dim);font-style:italic">${displayDate}</span>
     <span class="${cls}" style="font-family:'Cinzel',serif;font-size:15px;font-weight:600">${currentTrade.result || ""} ${currentTrade.pnl || ""}</span>
   `;
 
   const items = [
     ["Symbol", currentTrade.symbol || "—"],
+    ["Session", currentTrade.session || "—"],
     ["Bias", currentTrade.bias || "—"],
+    ["PD Array", currentTrade.pdarray || "—"],
+    ["Model", currentTrade.model || "—"],
+    ["DOL Target", currentTrade.dol || "—"],
     ["Entry", currentTrade.entry || "—"],
     ["SL", currentTrade.sl || "—"],
     ["TP", currentTrade.tp || "—"],
     ["P&L", currentTrade.pnl || "—"],
+    ["RR", currentTrade.rr || "—"],
+    ["Theo plan", currentTrade.onplan || "—"],
+    ["Cảm xúc", currentTrade.emotion || "—"],
+    ["Confluences", currentTrade.confluences || "—"],
   ];
   document.getElementById("detail-grid").innerHTML = items.map(([l,v]) =>
     `<div class="stats-cell"><div class="lbl">${l}</div><div class="val">${v}</div></div>`
@@ -458,8 +569,15 @@ window.saveTrade = async function() {
 
   const bias = document.querySelector('[data-group="bias"].active')?.dataset.val || "Bullish";
   const result = document.querySelector('[data-group="result"].active')?.dataset.val || "Win";
+  const session = document.querySelector('[data-group="session"].active')?.dataset.val || "";
+  const pdarray = document.querySelector('[data-group="pdarray"].active')?.dataset.val || "";
+  const model = document.querySelector('[data-group="model"].active')?.dataset.val || "";
+  const dol = document.querySelector('[data-group="dol"].active')?.dataset.val || "";
+  const onplan = document.querySelector('[data-group="onplan"].active')?.dataset.val || "";
+  const emotion = document.querySelector('[data-group="emotion"].active')?.dataset.val || "";
   const tags = document.getElementById("f-tags").value.split(",").map(t=>t.trim()).filter(Boolean);
 
+  const datetime = document.getElementById("f-datetime").value;
   const trade = {
     title,
     symbol: document.getElementById("f-symbol").value.trim(),
@@ -467,9 +585,12 @@ window.saveTrade = async function() {
     sl: document.getElementById("f-sl").value.trim(),
     tp: document.getElementById("f-tp").value.trim(),
     pnl: document.getElementById("f-pnl").value.trim(),
+    rr: document.getElementById("f-rr").value.trim(),
+    confluences: document.getElementById("f-confluences").value.trim(),
     note: document.getElementById("f-note").value.trim(),
-    bias, result, tags,
+    bias, result, session, pdarray, model, dol, onplan, emotion, tags,
     images: { ...formImages },
+    tradeDate: datetime ? new Date(datetime).getTime() : null,
     createdAt: Date.now(),
   };
 
@@ -506,22 +627,25 @@ window.analyzeAI = async function() {
   const imgs = currentTrade.images || {};
   const tfList = TFS.filter(tf => imgs[tf]).join(", ") || "Chưa có";
 
-  const prompt = `Bạn là trader chuyên nghiệp phân tích price action. Phân tích giao dịch:
+  const prompt = `Bạn là ICT trader chuyên nghiệp. Phân tích giao dịch theo phương pháp ICT:
 
 Tên: ${currentTrade.title}
-Symbol: ${currentTrade.symbol || "N/A"} | Bias: ${currentTrade.bias}
-Entry: ${currentTrade.entry} | SL: ${currentTrade.sl} | TP: ${currentTrade.tp}
-Kết quả: ${currentTrade.result} (${currentTrade.pnl})
+Symbol: ${currentTrade.symbol || "N/A"} | Session: ${currentTrade.session || "N/A"}
+Bias HTF: ${currentTrade.bias} | PD Array: ${currentTrade.pdarray || "N/A"}
+Entry Model: ${currentTrade.model || "N/A"} | DOL Target: ${currentTrade.dol || "N/A"}
+Confluences: ${currentTrade.confluences || "N/A"}
+Entry: ${currentTrade.entry} | SL: ${currentTrade.sl} | TP: ${currentTrade.tp} | RR: ${currentTrade.rr || "N/A"}
+Kết quả: ${currentTrade.result} (${currentTrade.pnl}) | Theo plan: ${currentTrade.onplan || "N/A"}
+Cảm xúc: ${currentTrade.emotion || "N/A"}
 Ghi chú: ${currentTrade.note || "Không có"}
 Timeframes có ảnh: ${tfList}
-Tags: ${Array.isArray(currentTrade.tags) ? currentTrade.tags.join(", ") : ""}
 
-Phân tích ngắn gọn bằng tiếng Việt:
-1. Đánh giá Bias (D1→M1)
-2. Setup vào lệnh
-3. Quản lý RR
-4. Bài học rút ra
-5. Điểm mạnh`;
+Phân tích theo ICT methodology bằng tiếng Việt:
+1. **Bias & PD Array** — HTF bias có align với entry không?
+2. **Entry Model** — Setup có đúng model ICT không?
+3. **DOL & Confluences** — Target hợp lý không?
+4. **Execution** — Vào đúng plan không? Cảm xúc có ảnh hưởng không?
+5. **Bài học ICT** — Điều cần cải thiện theo ICT?`;
 
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -552,11 +676,17 @@ window.showScreen = function(name) {
 
 window.openNew = function() {
   // reset form
-  ["f-title","f-symbol","f-entry","f-sl","f-tp","f-pnl","f-tags","f-note"].forEach(id => {
+  ["f-title","f-symbol","f-entry","f-sl","f-tp","f-pnl","f-tags","f-note","f-datetime","f-rr","f-confluences"].forEach(id => {
     document.getElementById(id).value = "";
   });
   document.querySelectorAll('[data-group="bias"]').forEach((b,i) => b.classList.toggle("active", i===0));
   document.querySelectorAll('[data-group="result"]').forEach((b,i) => b.classList.toggle("active", i===0));
+  document.querySelectorAll('[data-group="session"]').forEach((b,i) => b.classList.toggle("active", i===2));
+  document.querySelectorAll('[data-group="pdarray"]').forEach(b => b.classList.remove("active"));
+  document.querySelectorAll('[data-group="model"]').forEach(b => b.classList.remove("active"));
+  document.querySelectorAll('[data-group="dol"]').forEach(b => b.classList.remove("active"));
+  document.querySelectorAll('[data-group="onplan"]').forEach((b,i) => b.classList.toggle("active", i===0));
+  document.querySelectorAll('[data-group="emotion"]').forEach((b,i) => b.classList.toggle("active", i===0));
   formImages = {};
   window.formImages = formImages;
   buildTFUploadRow();
