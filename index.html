@@ -548,7 +548,7 @@ function renderTFPreview() {
               style="width:${imgList.length === 1 ? '100%' : 'calc(50% - 4px)'};border-radius:8px;object-fit:cover;cursor:pointer;display:block;"/>
           `).join("")}
         </div>
-        ${caption ? `<div style="padding:8px 12px 12px;font-size:13px;color:var(--text-dim);font-style:italic;line-height:1.6;border-top:1px solid var(--gold-faint);">💬 ${caption}</div>` : ""}
+        ${caption ? `<div style="padding:8px 12px 12px;font-size:16px;color:var(--text-dim);font-style:italic;line-height:1.6;border-top:1px solid var(--gold-faint);">💬 ${caption}</div>` : ""}
       </div>`;
   } else {
     el.style.height = "160px";
@@ -728,7 +728,7 @@ function buildTFUploadRow() {
       <!-- Caption -->
       <div style="font-size:9px;letter-spacing:2px;color:var(--gold-dim);font-family:'Cinzel',serif;margin-bottom:5px;">CHÚ THÍCH</div>
       <textarea id="tf-caption-${tf}" placeholder="Ghi chú cho khung ${tf}..." 
-        style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:12px;font-family:'Crimson Pro',serif;outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;"
+        style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:16px;font-family:'Crimson Pro',serif;outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;"
         onpaste="handlePasteCaption('${tf}', event)"></textarea>
       <div style="font-size:10px;color:var(--gold-dim);opacity:0.6;margin-top:4px;">💡 Ctrl+V trong ô chú thích để dán ảnh nhanh</div>
       <input type="file" accept="image/*" multiple style="display:none" id="tf-input-${tf}" onchange="handleImgMulti('${tf}', this)"/>
@@ -852,7 +852,7 @@ function buildEditTFUploadRow() {
       <div id="e-tf-images-${tf}" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;min-height:60px;"></div>
       <div style="font-size:9px;letter-spacing:2px;color:var(--gold-dim);font-family:'Cinzel',serif;margin-bottom:5px;">CHÚ THÍCH</div>
       <textarea id="e-tf-caption-${tf}" placeholder="Ghi chú cho khung ${tf}..."
-        style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:12px;font-family:'Crimson Pro',serif;outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;"
+        style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:16px;font-family:'Crimson Pro',serif;outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;"
         onpaste="handleEditPasteCaption('${tf}', event)"></textarea>
       <input type="file" accept="image/*" multiple style="display:none" id="e-tf-input-${tf}" onchange="handleEditImgMulti('${tf}', this)"/>
     </div>
