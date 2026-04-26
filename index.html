@@ -307,7 +307,75 @@
     <div class="section-label">Phân Tích AI</div>
     <button class="ai-btn" id="ai-btn" onclick="analyzeAI()">🤖 PHÂN TÍCH AI</button>
     <div class="ai-result" id="ai-result" style="display:none"></div>
+    <button class="ai-btn" id="edit-btn" onclick="openEdit()" style="margin-top:6px;">✏️ SỬA LỆNH NÀY</button>
     <button class="delete-btn" id="delete-btn" onclick="deleteTrade()">🗑 Xóa lệnh này</button>
+  </div>
+</div>
+
+<!-- EDIT SCREEN -->
+<div class="screen" id="screen-edit">
+  <div class="header">
+    <button class="header-btn" onclick="showScreen('detail')" style="font-size:20px">←</button>
+    <div class="header-title">
+      <div class="label">Chỉnh Sửa</div>
+      <div class="name">Lệnh</div>
+    </div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="form-body">
+    <div class="field">
+      <label class="field-label">Ngày & Giờ Vào Lệnh</label>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;">
+        <input id="e-date" type="date" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 10px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;color-scheme:dark;"/>
+        <input id="e-hour" type="number" min="0" max="23" placeholder="Giờ" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 8px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;text-align:center;"/>
+        <input id="e-minute" type="number" min="0" max="59" placeholder="Phút" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 8px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;text-align:center;"/>
+        <button onclick="setEditNow()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:8px;padding:11px 4px;color:var(--gold);font-size:11px;cursor:pointer;font-family:'Cinzel',serif;">Now</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Tên lệnh / Câu hỏi</label>
+      <input id="e-title" type="text"/>
+    </div>
+    <div class="field">
+      <label class="field-label">Cặp tiền</label>
+      <input id="e-symbol" type="text"/>
+    </div>
+    <div class="field">
+      <label class="field-label">Kết quả</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" data-group="e-result" data-val="Win" onclick="toggleSelect(this)">✅ Win</button>
+        <button class="toggle-btn" data-group="e-result" data-val="Loss" onclick="toggleSelect(this)">❌ Loss</button>
+        <button class="toggle-btn" data-group="e-result" data-val="BE" onclick="toggleSelect(this)">➖ BE</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">P&amp;L</label>
+      <input id="e-pnl" type="text"/>
+    </div>
+    <div class="field">
+      <label class="field-label">Vào đúng plan?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" data-group="e-onplan" data-val="Đúng plan" onclick="toggleSelect(this)">✅ Đúng plan</button>
+        <button class="toggle-btn" data-group="e-onplan" data-val="Sai plan" onclick="toggleSelect(this)">❌ Sai plan</button>
+        <button class="toggle-btn" data-group="e-onplan" data-val="Một phần" onclick="toggleSelect(this)">⚡ Một phần</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Tags (cách nhau bằng dấu phẩy)</label>
+      <input id="e-tags" type="text"/>
+    </div>
+    <div class="field">
+      <label class="field-label">Ghi chú / Bài học</label>
+      <textarea id="e-note"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">Ảnh Biểu Đồ (D1 → M1)</label>
+      <div style="font-size:11px;color:var(--gold-dim);margin-bottom:8px;">📋 Nhấn "+ Thêm ảnh" hoặc Ctrl+V để dán ảnh</div>
+      <div id="e-tf-upload-row" style="display:flex;flex-direction:column;gap:12px;"></div>
+    </div>
+  </div>
+  <div class="save-bar">
+    <button class="save-btn" onclick="updateTrade()">CẬP NHẬT LỆNH</button>
   </div>
 </div>
 
@@ -330,6 +398,17 @@ const db = getFirestore(app);
 
 // TIMEFRAMES
 const TFS = ["D1","H4","H1","M30","M15","M5","M1","S30","S15","M2"];
+
+// DATE FORMAT: dd/mm/yyyy HH:mm
+function fmtDate(ts) {
+  const d = new Date(ts);
+  const dd = String(d.getDate()).padStart(2,"0");
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const yyyy = d.getFullYear();
+  const hh = String(d.getHours()).padStart(2,"0");
+  const min = String(d.getMinutes()).padStart(2,"0");
+  return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
+}
 let trades = [];
 let currentTrade = null;
 let currentTF = "D1";
@@ -383,7 +462,7 @@ function renderList() {
     const cls = t.result === "Win" ? "win" : t.result === "Loss" ? "loss" : "be";
     const biasEmoji = t.bias === "Bullish" ? "📈" : t.bias === "Bearish" ? "📉" : "⚖️";
     const tags = Array.isArray(t.tags) ? t.tags.join(" · ") : (t.tags || "");
-    const date = t.tradeDate ? new Date(t.tradeDate).toLocaleString("vi-VN") : (t.createdAt ? new Date(t.createdAt).toLocaleString("vi-VN") : "");
+    const date = t.tradeDate ? fmtDate(t.tradeDate) : (t.createdAt ? fmtDate(t.createdAt) : "");
     return `<div class="trade-item" onclick="openDetail('${t.id}')">
       <div>
         <div class="trade-title">${t.title || "—"}</div>
@@ -406,7 +485,7 @@ window.openDetail = function(id) {
 
   const cls = currentTrade.result === "Win" ? "win" : currentTrade.result === "Loss" ? "loss" : "be";
   document.getElementById("detail-header-title").textContent = (currentTrade.title || "").substring(0, 20);
-  const displayDate = currentTrade.tradeDate ? new Date(currentTrade.tradeDate).toLocaleString("vi-VN") : (currentTrade.createdAt ? new Date(currentTrade.createdAt).toLocaleString("vi-VN") : "");
+  const displayDate = currentTrade.tradeDate ? fmtDate(currentTrade.tradeDate) : (currentTrade.createdAt ? fmtDate(currentTrade.createdAt) : "");
   document.getElementById("detail-banner").innerHTML = `
     <span style="font-size:13px;color:var(--gold-dim);font-style:italic">${displayDate}</span>
     <span class="${cls}" style="font-family:'Cinzel',serif;font-size:15px;font-weight:600">${currentTrade.result || ""} ${currentTrade.pnl || ""}</span>
@@ -755,6 +834,213 @@ window.clearTF = function(tf) {
   renderTFImages(tf);
   const cap = document.getElementById("tf-caption-" + tf);
   if (cap) cap.value = "";
+};
+
+// EDIT FORM
+let editImages = {};
+let editCaptions = {};
+window.editImages = editImages;
+window.editCaptions = editCaptions;
+
+function buildEditTFUploadRow() {
+  const row = document.getElementById("e-tf-upload-row");
+  row.innerHTML = TFS.map(tf => `
+    <div style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:10px;padding:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold);letter-spacing:2px;">${tf}</div>
+        <button onclick="addEditTFImage('${tf}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:4px 10px;color:var(--gold);font-size:11px;cursor:pointer;font-family:'Cinzel',serif;">+ Thêm ảnh</button>
+      </div>
+      <div id="e-tf-images-${tf}" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;min-height:60px;"></div>
+      <div style="font-size:9px;letter-spacing:2px;color:var(--gold-dim);font-family:'Cinzel',serif;margin-bottom:5px;">CHÚ THÍCH</div>
+      <textarea id="e-tf-caption-${tf}" placeholder="Ghi chú cho khung ${tf}..."
+        style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:12px;font-family:'Crimson Pro',serif;outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;"
+        onpaste="handleEditPasteCaption('${tf}', event)"></textarea>
+      <input type="file" accept="image/*" multiple style="display:none" id="e-tf-input-${tf}" onchange="handleEditImgMulti('${tf}', this)"/>
+    </div>
+  `).join("");
+}
+
+window.addEditTFImage = function(tf) {
+  document.getElementById("e-tf-input-" + tf).click();
+};
+
+function renderEditTFImages(tf) {
+  const imgs = editImages[tf] || [];
+  const container = document.getElementById("e-tf-images-" + tf);
+  if (!container) return;
+  if (imgs.length === 0) {
+    container.innerHTML = `<div style="color:var(--gold-faint);font-size:12px;padding:10px;">Chưa có ảnh — nhấn "+ Thêm ảnh" hoặc Ctrl+V</div>`;
+    return;
+  }
+  container.innerHTML = imgs.map((src, i) => `
+    <div style="position:relative;flex:0 0 auto;">
+      <img src="${src}" style="width:90px;height:68px;object-fit:cover;border-radius:7px;border:1px solid var(--gold-dim);display:block;"/>
+      <button onclick="clearEditTFImage('${tf}',${i})" style="position:absolute;top:2px;right:2px;background:#000000aa;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:10px;cursor:pointer;line-height:1;">✕</button>
+    </div>
+  `).join("");
+}
+
+window.clearEditTFImage = function(tf, idx) {
+  if (!editImages[tf]) return;
+  editImages[tf].splice(idx, 1);
+  renderEditTFImages(tf);
+};
+
+window.handleEditPasteCaption = function(tf, event) {
+  const items = event.clipboardData?.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith("image/")) {
+      event.preventDefault();
+      const file = item.getAsFile();
+      const reader = new FileReader();
+      reader.onload = async e => {
+        const compressed = await compressImage(e.target.result);
+        if (!editImages[tf]) editImages[tf] = [];
+        editImages[tf].push(compressed);
+        renderEditTFImages(tf);
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+  }
+};
+
+window.handleEditImgMulti = function(tf, input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+  if (!editImages[tf]) editImages[tf] = [];
+  let loaded = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = async e => {
+      const compressed = await compressImage(e.target.result);
+      editImages[tf].push(compressed);
+      loaded++;
+      if (loaded === files.length) renderEditTFImages(tf);
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = "";
+};
+
+window.setEditNow = function() {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth()+1).padStart(2,"0");
+  const dd = String(now.getDate()).padStart(2,"0");
+  document.getElementById("e-date").value = `${yyyy}-${mm}-${dd}`;
+  document.getElementById("e-hour").value = now.getHours();
+  document.getElementById("e-minute").value = now.getMinutes();
+};
+
+window.openEdit = function() {
+  if (!currentTrade) return;
+  const t = currentTrade;
+
+  // Fill basic fields
+  document.getElementById("e-title").value = t.title || "";
+  document.getElementById("e-symbol").value = t.symbol || "";
+  document.getElementById("e-pnl").value = t.pnl || "";
+  document.getElementById("e-note").value = t.note || "";
+  document.getElementById("e-tags").value = Array.isArray(t.tags) ? t.tags.join(", ") : (t.tags || "");
+
+  // Fill date/time
+  if (t.tradeDate) {
+    const d = new Date(t.tradeDate);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const dd = String(d.getDate()).padStart(2,"0");
+    document.getElementById("e-date").value = `${yyyy}-${mm}-${dd}`;
+    document.getElementById("e-hour").value = d.getHours();
+    document.getElementById("e-minute").value = d.getMinutes();
+  } else {
+    document.getElementById("e-date").value = "";
+    document.getElementById("e-hour").value = "";
+    document.getElementById("e-minute").value = "";
+  }
+
+  // Set result toggle
+  document.querySelectorAll('[data-group="e-result"]').forEach(b => {
+    b.classList.toggle("active", b.dataset.val === (t.result || "Win"));
+  });
+
+  // Set onplan toggle
+  document.querySelectorAll('[data-group="e-onplan"]').forEach(b => {
+    b.classList.toggle("active", b.dataset.val === (t.onplan || "Đúng plan"));
+  });
+
+  // Load images & captions
+  editImages = {};
+  editCaptions = {};
+  const savedImgs = t.images || {};
+  const savedCaps = t.captions || {};
+  TFS.forEach(tf => {
+    const v = savedImgs[tf];
+    editImages[tf] = Array.isArray(v) ? [...v] : (v ? [v] : []);
+    editCaptions[tf] = savedCaps[tf] || "";
+  });
+  window.editImages = editImages;
+  window.editCaptions = editCaptions;
+
+  buildEditTFUploadRow();
+  TFS.forEach(tf => {
+    renderEditTFImages(tf);
+    const cap = document.getElementById("e-tf-caption-" + tf);
+    if (cap) cap.value = editCaptions[tf] || "";
+  });
+
+  showScreen("edit");
+};
+
+window.updateTrade = async function() {
+  if (!currentTrade) return;
+  const title = document.getElementById("e-title").value.trim();
+  if (!title) { alert("Vui lòng nhập tên lệnh!"); return; }
+
+  const result = document.querySelector('[data-group="e-result"].active')?.dataset.val || "Win";
+  const onplan = document.querySelector('[data-group="e-onplan"].active')?.dataset.val || "";
+  const tags = document.getElementById("e-tags").value.split(",").map(t=>t.trim()).filter(Boolean);
+
+  TFS.forEach(tf => {
+    const cap = document.getElementById("e-tf-caption-" + tf)?.value.trim();
+    if (cap) editCaptions[tf] = cap;
+  });
+
+  const dateVal = document.getElementById("e-date").value;
+  const hour = document.getElementById("e-hour").value || "0";
+  const minute = document.getElementById("e-minute").value || "0";
+  let tradeDate = currentTrade.tradeDate || null;
+  if (dateVal) {
+    const d = new Date(dateVal);
+    d.setHours(parseInt(hour), parseInt(minute), 0);
+    tradeDate = d.getTime();
+  }
+
+  const updatedData = {
+    title,
+    symbol: document.getElementById("e-symbol").value.trim(),
+    pnl: document.getElementById("e-pnl").value.trim(),
+    note: document.getElementById("e-note").value.trim(),
+    result, onplan, tags,
+    images: { ...editImages },
+    captions: { ...editCaptions },
+    tradeDate,
+    createdAt: currentTrade.createdAt || Date.now(),
+  };
+
+  try {
+    const { updateDoc } = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js");
+    await updateDoc(doc(db, "trades", currentTrade.id), updatedData);
+    await loadTrades();
+    // Update currentTrade reference
+    currentTrade = trades.find(t => t.id === currentTrade.id) || { ...currentTrade, ...updatedData };
+    window.currentTrade = currentTrade;
+    showScreen("detail");
+    window.openDetail(currentTrade.id);
+  } catch(e) {
+    alert("Lỗi cập nhật: " + e.message);
+  }
 };
 
 // INIT
