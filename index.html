@@ -483,14 +483,7 @@ window.saveTrade = async function() {
   const title = document.getElementById("f-title").value.trim();
   if (!title) { alert("Vui lòng nhập tên lệnh!"); return; }
 
-  const bias = document.querySelector('[data-group="bias"].active')?.dataset.val || "";
   const result = document.querySelector('[data-group="result"].active')?.dataset.val || "Win";
-  const session = "";
-  const pdarray = "";
-  const model = "";
-  const dol = "";
-  const onplan = document.querySelector('[data-group="onplan"].active')?.dataset.val || "";
-  const emotion = "";
   const tags = document.getElementById("f-tags").value.split(",").map(t=>t.trim()).filter(Boolean);
 
   // Collect captions
@@ -503,14 +496,9 @@ window.saveTrade = async function() {
   const trade = {
     title,
     symbol: document.getElementById("f-symbol").value.trim(),
-    entry: document.getElementById("f-entry").value.trim(),
-    sl: document.getElementById("f-sl").value.trim(),
-    tp: document.getElementById("f-tp").value.trim(),
     pnl: document.getElementById("f-pnl").value.trim(),
-    rr: document.getElementById("f-rr").value.trim(),
-    confluences: document.getElementById("f-confluences").value.trim(),
     note: document.getElementById("f-note").value.trim(),
-    result, onplan, tags,
+    result, tags,
     images: { ...formImages },
     captions: { ...formCaptions },
     tradeDate: datetime ? new Date(datetime).getTime() : null,
