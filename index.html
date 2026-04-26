@@ -231,103 +231,6 @@
       <input id="f-symbol" type="text" placeholder="VD: XAUUSD, EURUSD..."/>
     </div>
 
-    <!-- SESSION -->
-    <div class="field">
-      <label class="field-label">Session</label>
-      <div class="toggle-group">
-        <button class="toggle-btn" data-group="session" data-val="Asian" onclick="toggleSelect(this)">🌏 Asian</button>
-        <button class="toggle-btn" data-group="session" data-val="London" onclick="toggleSelect(this)">🇬🇧 London</button>
-        <button class="toggle-btn active" data-group="session" data-val="New York" onclick="toggleSelect(this)">🗽 NY</button>
-        <button class="toggle-btn" data-group="session" data-val="Overlap" onclick="toggleSelect(this)">⚡ Overlap</button>
-      </div>
-    </div>
-
-    <!-- BIAS -->
-    <div class="field">
-      <label class="field-label">Bias HTF</label>
-      <div class="toggle-group">
-        <button class="toggle-btn active" data-group="bias" data-val="Bullish" onclick="toggleSelect(this)">📈 Bullish</button>
-        <button class="toggle-btn" data-group="bias" data-val="Bearish" onclick="toggleSelect(this)">📉 Bearish</button>
-        <button class="toggle-btn" data-group="bias" data-val="Neutral" onclick="toggleSelect(this)">⚖️ Neutral</button>
-      </div>
-    </div>
-
-    <!-- HTF PD ARRAY -->
-    <div class="field">
-      <label class="field-label">HTF PD Array (vùng giá vào)</label>
-      <div class="toggle-group" style="flex-wrap:wrap;gap:6px">
-        <button class="toggle-btn" data-group="pdarray" data-val="OB" onclick="toggleSelect(this)">OB</button>
-        <button class="toggle-btn" data-group="pdarray" data-val="FVG" onclick="toggleSelect(this)">FVG</button>
-        <button class="toggle-btn" data-group="pdarray" data-val="Breaker" onclick="toggleSelect(this)">Breaker</button>
-        <button class="toggle-btn" data-group="pdarray" data-val="Mitigation" onclick="toggleSelect(this)">Mitigation</button>
-        <button class="toggle-btn" data-group="pdarray" data-val="SIBI" onclick="toggleSelect(this)">SIBI</button>
-        <button class="toggle-btn" data-group="pdarray" data-val="BISI" onclick="toggleSelect(this)">BISI</button>
-        <button class="toggle-btn" data-group="pdarray" data-val="Rejection Block" onclick="toggleSelect(this)">Rej.Block</button>
-        <button class="toggle-btn" data-group="pdarray" data-val="Other" onclick="toggleSelect(this)">Other</button>
-      </div>
-    </div>
-
-    <!-- ENTRY MODEL -->
-    <div class="field">
-      <label class="field-label">Entry Model</label>
-      <div class="toggle-group" style="flex-wrap:wrap;gap:6px">
-        <button class="toggle-btn" data-group="model" data-val="CISD" onclick="toggleSelect(this)">CISD</button>
-        <button class="toggle-btn" data-group="model" data-val="MSS" onclick="toggleSelect(this)">MSS</button>
-        <button class="toggle-btn" data-group="model" data-val="SMT" onclick="toggleSelect(this)">SMT</button>
-        <button class="toggle-btn" data-group="model" data-val="OTE" onclick="toggleSelect(this)">OTE</button>
-        <button class="toggle-btn" data-group="model" data-val="Silver Bullet" onclick="toggleSelect(this)">Silver Bullet</button>
-        <button class="toggle-btn" data-group="model" data-val="Judas Swing" onclick="toggleSelect(this)">Judas Swing</button>
-        <button class="toggle-btn" data-group="model" data-val="Other" onclick="toggleSelect(this)">Other</button>
-      </div>
-    </div>
-
-    <!-- DRAW ON LIQUIDITY -->
-    <div class="field">
-      <label class="field-label">Draw on Liquidity (Target)</label>
-      <div class="toggle-group" style="flex-wrap:wrap;gap:6px">
-        <button class="toggle-btn" data-group="dol" data-val="BSL" onclick="toggleSelect(this)">BSL</button>
-        <button class="toggle-btn" data-group="dol" data-val="SSL" onclick="toggleSelect(this)">SSL</button>
-        <button class="toggle-btn" data-group="dol" data-val="EQH" onclick="toggleSelect(this)">EQH</button>
-        <button class="toggle-btn" data-group="dol" data-val="EQL" onclick="toggleSelect(this)">EQL</button>
-        <button class="toggle-btn" data-group="dol" data-val="NWOG" onclick="toggleSelect(this)">NWOG</button>
-        <button class="toggle-btn" data-group="dol" data-val="NDOG" onclick="toggleSelect(this)">NDOG</button>
-        <button class="toggle-btn" data-group="dol" data-val="Old High" onclick="toggleSelect(this)">Old High</button>
-        <button class="toggle-btn" data-group="dol" data-val="Old Low" onclick="toggleSelect(this)">Old Low</button>
-      </div>
-    </div>
-
-    <!-- CONFLUENCES -->
-    <div class="field">
-      <label class="field-label">Confluences</label>
-      <input id="f-confluences" type="text" placeholder="VD: KZ, Time of Day 10:00, NWOG..."/>
-    </div>
-
-    <!-- ENTRY / SL / TP / RR -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-      <div class="field">
-        <label class="field-label">Entry</label>
-        <input id="f-entry" type="text" placeholder="0.000"/>
-      </div>
-      <div class="field">
-        <label class="field-label">SL</label>
-        <input id="f-sl" type="text" placeholder="0.000"/>
-      </div>
-      <div class="field">
-        <label class="field-label">TP</label>
-        <input id="f-tp" type="text" placeholder="0.000"/>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="field">
-        <label class="field-label">P&amp;L</label>
-        <input id="f-pnl" type="text" placeholder="+2R hoặc -1R"/>
-      </div>
-      <div class="field">
-        <label class="field-label">RR thực tế</label>
-        <input id="f-rr" type="text" placeholder="VD: 1:3.5"/>
-      </div>
-    </div>
-
     <!-- KẾT QUẢ -->
     <div class="field">
       <label class="field-label">Kết quả</label>
@@ -338,6 +241,11 @@
       </div>
     </div>
 
+    <div class="field">
+      <label class="field-label">P&amp;L</label>
+      <input id="f-pnl" type="text" placeholder="+2R hoặc -1R"/>
+    </div>
+
     <!-- ĐÚNG PLAN -->
     <div class="field">
       <label class="field-label">Vào đúng plan?</label>
@@ -345,18 +253,6 @@
         <button class="toggle-btn active" data-group="onplan" data-val="Đúng plan" onclick="toggleSelect(this)">✅ Đúng plan</button>
         <button class="toggle-btn" data-group="onplan" data-val="Sai plan" onclick="toggleSelect(this)">❌ Sai plan</button>
         <button class="toggle-btn" data-group="onplan" data-val="Một phần" onclick="toggleSelect(this)">⚡ Một phần</button>
-      </div>
-    </div>
-
-    <!-- CẢM XÚC -->
-    <div class="field">
-      <label class="field-label">Cảm xúc khi vào lệnh</label>
-      <div class="toggle-group" style="flex-wrap:wrap;gap:6px">
-        <button class="toggle-btn active" data-group="emotion" data-val="Tự tin" onclick="toggleSelect(this)">😎 Tự tin</button>
-        <button class="toggle-btn" data-group="emotion" data-val="FOMO" onclick="toggleSelect(this)">😰 FOMO</button>
-        <button class="toggle-btn" data-group="emotion" data-val="Do dự" onclick="toggleSelect(this)">😕 Do dự</button>
-        <button class="toggle-btn" data-group="emotion" data-val="Revenge" onclick="toggleSelect(this)">😤 Revenge</button>
-        <button class="toggle-btn" data-group="emotion" data-val="Bình thản" onclick="toggleSelect(this)">🧘 Bình thản</button>
       </div>
     </div>
 
@@ -371,7 +267,8 @@
     </div>
     <div class="field">
       <label class="field-label">Ảnh Biểu Đồ (D1 → M1)</label>
-      <div class="tf-row" id="tf-upload-row"></div>
+      <div style="font-size:11px;color:var(--gold-dim);margin-bottom:8px;">📋 Nhấn vào ô → Ctrl+V để dán ảnh, hoặc nhấn 📷 để chọn file</div>
+      <div id="tf-upload-row" style="display:flex;flex-direction:column;gap:12px;"></div>
     </div>
   </div>
   <div class="save-bar">
@@ -508,19 +405,8 @@ window.openDetail = function(id) {
 
   const items = [
     ["Symbol", currentTrade.symbol || "—"],
-    ["Session", currentTrade.session || "—"],
-    ["Bias", currentTrade.bias || "—"],
-    ["PD Array", currentTrade.pdarray || "—"],
-    ["Model", currentTrade.model || "—"],
-    ["DOL Target", currentTrade.dol || "—"],
-    ["Entry", currentTrade.entry || "—"],
-    ["SL", currentTrade.sl || "—"],
-    ["TP", currentTrade.tp || "—"],
     ["P&L", currentTrade.pnl || "—"],
-    ["RR", currentTrade.rr || "—"],
     ["Theo plan", currentTrade.onplan || "—"],
-    ["Cảm xúc", currentTrade.emotion || "—"],
-    ["Confluences", currentTrade.confluences || "—"],
   ];
   document.getElementById("detail-grid").innerHTML = items.map(([l,v]) =>
     `<div class="stats-cell"><div class="lbl">${l}</div><div class="val">${v}</div></div>`
@@ -553,29 +439,65 @@ window.switchTF = function(tf) {
 
 function renderTFPreview() {
   const imgs = (currentTrade && currentTrade.images) ? currentTrade.images : {};
-  const src = imgs[currentTF];
+  const captions = (currentTrade && currentTrade.captions) ? currentTrade.captions : {};
+  const tfImgs = imgs[currentTF];
+  const caption = captions[currentTF];
   const el = document.getElementById("detail-tf-preview");
-  if (src) {
-    el.innerHTML = `<img src="${src}" alt="${currentTF}"/>`;
+  el.style.height = "auto";
+
+  // Support both old single image (string) and new multiple images (array)
+  const imgList = Array.isArray(tfImgs) ? tfImgs : (tfImgs ? [tfImgs] : []);
+
+  if (imgList.length > 0) {
+    el.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;">
+          ${imgList.map((src, i) => `
+            <img src="${src}" onclick="openDetailImgFull('${currentTF}',${i})" 
+              style="width:${imgList.length === 1 ? '100%' : 'calc(50% - 4px)'};border-radius:8px;object-fit:cover;cursor:pointer;display:block;"/>
+          `).join("")}
+        </div>
+        ${caption ? `<div style="padding:8px 12px 12px;font-size:13px;color:var(--text-dim);font-style:italic;line-height:1.6;border-top:1px solid var(--gold-faint);">💬 ${caption}</div>` : ""}
+      </div>`;
   } else {
+    el.style.height = "160px";
     el.innerHTML = `<div class="no-img">📊<br><br>Chưa có ảnh ${currentTF}</div>`;
   }
 }
+
+window.openDetailImgFull = function(tf, idx) {
+  const imgs = (currentTrade && currentTrade.images) ? currentTrade.images : {};
+  const tfImgs = imgs[tf];
+  const imgList = Array.isArray(tfImgs) ? tfImgs : (tfImgs ? [tfImgs] : []);
+  const src = imgList[idx];
+  if (!src) return;
+  const overlay = document.createElement("div");
+  overlay.style.cssText = "position:fixed;inset:0;background:#000000ee;z-index:999;display:flex;align-items:center;justify-content:center;cursor:pointer;";
+  overlay.innerHTML = `<img src="${src}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px;"/>`;
+  overlay.onclick = () => document.body.removeChild(overlay);
+  document.body.appendChild(overlay);
+};
 
 // SAVE TRADE
 window.saveTrade = async function() {
   const title = document.getElementById("f-title").value.trim();
   if (!title) { alert("Vui lòng nhập tên lệnh!"); return; }
 
-  const bias = document.querySelector('[data-group="bias"].active')?.dataset.val || "Bullish";
+  const bias = document.querySelector('[data-group="bias"].active')?.dataset.val || "";
   const result = document.querySelector('[data-group="result"].active')?.dataset.val || "Win";
-  const session = document.querySelector('[data-group="session"].active')?.dataset.val || "";
-  const pdarray = document.querySelector('[data-group="pdarray"].active')?.dataset.val || "";
-  const model = document.querySelector('[data-group="model"].active')?.dataset.val || "";
-  const dol = document.querySelector('[data-group="dol"].active')?.dataset.val || "";
+  const session = "";
+  const pdarray = "";
+  const model = "";
+  const dol = "";
   const onplan = document.querySelector('[data-group="onplan"].active')?.dataset.val || "";
-  const emotion = document.querySelector('[data-group="emotion"].active')?.dataset.val || "";
+  const emotion = "";
   const tags = document.getElementById("f-tags").value.split(",").map(t=>t.trim()).filter(Boolean);
+
+  // Collect captions
+  TFS.forEach(tf => {
+    const cap = document.getElementById("tf-caption-" + tf)?.value.trim();
+    if (cap) formCaptions[tf] = cap;
+  });
 
   const datetime = document.getElementById("f-datetime").value;
   const trade = {
@@ -588,8 +510,9 @@ window.saveTrade = async function() {
     rr: document.getElementById("f-rr").value.trim(),
     confluences: document.getElementById("f-confluences").value.trim(),
     note: document.getElementById("f-note").value.trim(),
-    bias, result, session, pdarray, model, dol, onplan, emotion, tags,
+    result, onplan, tags,
     images: { ...formImages },
+    captions: { ...formCaptions },
     tradeDate: datetime ? new Date(datetime).getTime() : null,
     createdAt: Date.now(),
   };
@@ -676,20 +599,17 @@ window.showScreen = function(name) {
 
 window.openNew = function() {
   // reset form
-  ["f-title","f-symbol","f-entry","f-sl","f-tp","f-pnl","f-tags","f-note","f-datetime","f-rr","f-confluences"].forEach(id => {
+  ["f-title","f-symbol","f-tags","f-note","f-datetime","f-pnl"].forEach(id => {
     document.getElementById(id).value = "";
   });
-  document.querySelectorAll('[data-group="bias"]').forEach((b,i) => b.classList.toggle("active", i===0));
   document.querySelectorAll('[data-group="result"]').forEach((b,i) => b.classList.toggle("active", i===0));
-  document.querySelectorAll('[data-group="session"]').forEach((b,i) => b.classList.toggle("active", i===2));
-  document.querySelectorAll('[data-group="pdarray"]').forEach(b => b.classList.remove("active"));
-  document.querySelectorAll('[data-group="model"]').forEach(b => b.classList.remove("active"));
-  document.querySelectorAll('[data-group="dol"]').forEach(b => b.classList.remove("active"));
   document.querySelectorAll('[data-group="onplan"]').forEach((b,i) => b.classList.toggle("active", i===0));
-  document.querySelectorAll('[data-group="emotion"]').forEach((b,i) => b.classList.toggle("active", i===0));
   formImages = {};
+  formCaptions = {};
   window.formImages = formImages;
+  window.formCaptions = formCaptions;
   buildTFUploadRow();
+  TFS.forEach(tf => renderTFImages(tf));
   showScreen("new");
 };
 
@@ -702,36 +622,114 @@ window.toggleSelect = function(btn) {
 function buildTFUploadRow() {
   const row = document.getElementById("tf-upload-row");
   row.innerHTML = TFS.map(tf => `
-    <div class="tf-slot" onclick="triggerUpload('${tf}')">
-      <div class="tf-img-box" id="tf-box-${tf}">
-        <div class="tf-placeholder">📷</div>
+    <div style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:10px;padding:12px;">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold);letter-spacing:2px;">${tf}</div>
+        <button onclick="addTFImage('${tf}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:4px 10px;color:var(--gold);font-size:11px;cursor:pointer;font-family:'Cinzel',serif;">+ Thêm ảnh</button>
       </div>
-      <div class="tf-label">${tf}</div>
-      <input type="file" accept="image/*" style="display:none" id="tf-input-${tf}" onchange="handleImg('${tf}', this)"/>
+      <!-- Images grid -->
+      <div id="tf-images-${tf}" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;min-height:60px;"></div>
+      <!-- Caption -->
+      <div style="font-size:9px;letter-spacing:2px;color:var(--gold-dim);font-family:'Cinzel',serif;margin-bottom:5px;">CHÚ THÍCH</div>
+      <textarea id="tf-caption-${tf}" placeholder="Ghi chú cho khung ${tf}..." 
+        style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:12px;font-family:'Crimson Pro',serif;outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;"
+        onpaste="handlePasteCaption('${tf}', event)"></textarea>
+      <div style="font-size:10px;color:var(--gold-dim);opacity:0.6;margin-top:4px;">💡 Ctrl+V trong ô chú thích để dán ảnh nhanh</div>
+      <input type="file" accept="image/*" multiple style="display:none" id="tf-input-${tf}" onchange="handleImgMulti('${tf}', this)"/>
     </div>
   `).join("");
 }
 
-window.triggerUpload = function(tf) {
+window.addTFImage = function(tf) {
   document.getElementById("tf-input-" + tf).click();
 };
 
-window.handleImg = function(tf, input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    formImages[tf] = e.target.result;
-    window.formImages = formImages;
-    const box = document.getElementById("tf-box-" + tf);
-    box.innerHTML = `<img src="${e.target.result}" alt="${tf}"/>`;
-    box.style.border = "1px solid var(--gold)";
-  };
-  reader.readAsDataURL(file);
+window.clearTFImage = function(tf, idx) {
+  if (!formImages[tf]) return;
+  formImages[tf].splice(idx, 1);
+  renderTFImages(tf);
+};
+
+function renderTFImages(tf) {
+  const imgs = formImages[tf] || [];
+  const container = document.getElementById("tf-images-" + tf);
+  if (!container) return;
+  if (imgs.length === 0) {
+    container.innerHTML = `<div style="color:var(--gold-faint);font-size:12px;padding:10px;">Chưa có ảnh — nhấn "+ Thêm ảnh" hoặc Ctrl+V</div>`;
+    return;
+  }
+  container.innerHTML = imgs.map((src, i) => `
+    <div style="position:relative;flex:0 0 auto;">
+      <img src="${src}" style="width:90px;height:68px;object-fit:cover;border-radius:7px;border:1px solid var(--gold-dim);display:block;cursor:pointer;" onclick="openImgFull('${tf}',${i})"/>
+      <button onclick="clearTFImage('${tf}',${i})" style="position:absolute;top:2px;right:2px;background:#000000aa;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:10px;cursor:pointer;line-height:1;">✕</button>
+    </div>
+  `).join("");
+}
+
+window.openImgFull = function(tf, idx) {
+  const src = (formImages[tf] || [])[idx];
+  if (!src) return;
+  const overlay = document.createElement("div");
+  overlay.style.cssText = "position:fixed;inset:0;background:#000000ee;z-index:999;display:flex;align-items:center;justify-content:center;cursor:pointer;";
+  overlay.innerHTML = `<img src="${src}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px;"/>`;
+  overlay.onclick = () => document.body.removeChild(overlay);
+  document.body.appendChild(overlay);
+};
+
+window.handlePasteCaption = function(tf, event) {
+  const items = event.clipboardData?.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith("image/")) {
+      event.preventDefault();
+      const file = item.getAsFile();
+      const reader = new FileReader();
+      reader.onload = e => {
+        if (!formImages[tf]) formImages[tf] = [];
+        formImages[tf].push(e.target.result);
+        window.formImages = formImages;
+        renderTFImages(tf);
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+  }
+};
+
+window.handleImgMulti = function(tf, input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+  if (!formImages[tf]) formImages[tf] = [];
+  let loaded = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      formImages[tf].push(e.target.result);
+      loaded++;
+      if (loaded === files.length) {
+        window.formImages = formImages;
+        renderTFImages(tf);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = "";
+};
+
+window.clearTF = function(tf) {
+  formImages[tf] = [];
+  delete formCaptions[tf];
+  renderTFImages(tf);
+  const cap = document.getElementById("tf-caption-" + tf);
+  if (cap) cap.value = "";
 };
 
 // INIT
+let formCaptions = {};
+window.formCaptions = formCaptions;
 buildTFUploadRow();
+TFS.forEach(tf => renderTFImages(tf));
 loadTrades();
 </script>
 </body>
