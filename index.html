@@ -65,9 +65,12 @@
   .detail-body{padding:14px 18px 100px;flex:1;}
   .section-label{font-size:11px;letter-spacing:4px;color:var(--gold);text-transform:uppercase;font-family:'Cinzel',serif;margin-bottom:10px;opacity:0.9;}
   .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;}
-  .stats-cell{background:var(--bg3);border-radius:8px;padding:10px 8px;text-align:center;}
-  .stats-cell .lbl{font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:5px;font-family:'Cinzel',serif;opacity:0.85;}
-  .stats-cell .val{font-size:15px;color:var(--gold);font-family:'Cinzel',serif;font-weight:600;}
+  .stats-cell{background:var(--bg3);border-radius:8px;padding:12px 8px;text-align:center;border:1px solid var(--gold-faint);}
+  .stats-cell .lbl{font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;font-family:'Cinzel',serif;opacity:1;}
+  .stats-cell .val{font-size:15px;color:var(--text);font-family:'Cinzel',serif;font-weight:600;}
+  .stats-cell .val.win{color:var(--win);}
+  .stats-cell .val.loss{color:var(--loss);}
+  .stats-cell .val.be{color:var(--be);}
 
   .tf-tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px;}
   .tf-tab{flex:0 0 auto;padding:5px 11px;border-radius:6px;cursor:pointer;border:1px solid var(--gold-faint);background:transparent;color:var(--gold);opacity:0.6;font-size:11px;font-family:'Cinzel',serif;transition:all 0.15s;white-space:nowrap;position:relative;}
@@ -75,7 +78,7 @@
   .tf-tab.has-img{border-color:var(--gold);color:var(--gold);opacity:0.85;}
   .tf-tab.has-img::after{content:'';position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%;background:#4caf50;box-shadow:0 0 4px #4caf50aa;}
   .tf-preview{width:100%;height:200px;border-radius:10px;background:var(--bg3);border:1px solid var(--gold-faint);overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
-  .tf-preview .no-img{color:var(--gold);opacity:0.35;text-align:center;font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;line-height:2;}
+  .tf-preview .no-img{color:var(--gold);opacity:0.5;text-align:center;font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;line-height:2;}
 
   .note-box{background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:13px 14px;margin-bottom:20px;font-size:15px;color:var(--text);line-height:1.7;font-style:italic;}
   .ai-btn{width:100%;padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--gold-faint),transparent);border:1px solid var(--gold-dim);color:var(--gold);font-size:14px;font-family:'Cinzel',serif;letter-spacing:2px;cursor:pointer;transition:all 0.2s;margin-bottom:10px;}
@@ -274,9 +277,9 @@
     <div class="field">
       <label class="field-label">Ngày & Giờ Vào Lệnh</label>
       <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;">
-        <input id="e-date" type="date" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 10px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;"/>
-        <input id="e-hour" type="number" min="0" max="23" placeholder="Giờ" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 8px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;text-align:center;"/>
-        <input id="e-minute" type="number" min="0" max="59" placeholder="Phút" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 8px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;text-align:center;"/>
+        <input id="e-date" type="date" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 10px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;" oninput="formDirty=true"/>
+        <input id="e-hour" type="number" min="0" max="23" placeholder="Giờ" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 8px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;text-align:center;" oninput="formDirty=true"/>
+        <input id="e-minute" type="number" min="0" max="59" placeholder="Phút" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 8px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;text-align:center;" oninput="formDirty=true"/>
         <button onclick="setEditNow()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:8px;padding:11px 4px;color:var(--gold);font-size:11px;cursor:pointer;font-family:'Cinzel',serif;">Now</button>
       </div>
     </div>
@@ -619,7 +622,7 @@ window.openDetail=function(id){
   document.getElementById("detail-banner").innerHTML=`
     <span style="font-size:13px;color:var(--gold);opacity:0.55;font-style:italic;">${dd}${currentTrade.folder?" · 🗂 "+esc(currentTrade.folder):""}</span>
     <span class="${cls}" style="font-family:'Cinzel',serif;font-size:15px;font-weight:600;">${esc(currentTrade.result)||""} ${esc(currentTrade.pnl)||""}</span>`;
-  document.getElementById("detail-grid").innerHTML=[["Symbol",currentTrade.symbol||"—"],["P&L",currentTrade.pnl||"—"],["Theo plan",currentTrade.onplan||"—"]].map(([l,v])=>`<div class="stats-cell"><div class="lbl">${l}</div><div class="val" style="word-break:break-word;font-size:13px;">${v}</div></div>`).join("");
+  document.getElementById("detail-grid").innerHTML=[["Symbol",esc(currentTrade.symbol||"—")],["P&L",esc(currentTrade.pnl||"—")],["Theo plan",esc(currentTrade.onplan||"—")]].map(([l,v])=>`<div class="stats-cell"><div class="lbl">${l}</div><div class="val">${v}</div></div>`).join("");
   document.getElementById("detail-note").textContent=currentTrade.note||"Không có ghi chú.";
   const imgs=currentTrade.images||{};
   document.getElementById("detail-tf-tabs").innerHTML=TFS.map(tf=>{
@@ -725,7 +728,7 @@ window.addTFImg=tf=>document.getElementById("tf-input-"+tf).click();
 window.clearTFImg=function(tf,i){if(!formImages[tf]) return;formImages[tf].splice(i,1);renderTFImages(tf);};
 function renderTFImages(tf){
   const imgs=formImages[tf]||[]; const c=document.getElementById("tf-images-"+tf); if(!c) return;
-  if(!imgs.length){c.innerHTML=`<div style="color:var(--gold);opacity:0.35;font-size:12px;padding:10px;">Chưa có ảnh</div>`;return;}
+  if(!imgs.length){c.innerHTML=`<div style="color:var(--gold);opacity:0.5;font-size:12px;padding:10px;">Chưa có ảnh</div>`;return;}
   c.innerHTML=imgs.map((src,i)=>`<div style="position:relative;flex:0 0 auto;"><img src="${src}" style="width:90px;height:68px;object-fit:cover;border-radius:7px;border:1px solid var(--gold-dim);display:block;cursor:pointer;" onclick="viewImg(this.parentElement.querySelector('img').src)"/><button onclick="clearTFImg('${tf}',${i})" style="position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:10px;cursor:pointer;line-height:1;">✕</button></div>`).join("");
 }
 window.viewImg=function(src){const o=document.createElement("div");o.style.cssText="position:fixed;inset:0;background:#000e;z-index:999;display:flex;align-items:center;justify-content:center;cursor:pointer;";o.innerHTML=`<img src="${src}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px;"/>`;o.onclick=()=>document.body.removeChild(o);document.body.appendChild(o);};
@@ -773,7 +776,7 @@ window.addEditTFImg=tf=>document.getElementById("e-tf-input-"+tf).click();
 window.clearEditTFImg=function(tf,i){if(!editImages[tf]) return;editImages[tf].splice(i,1);renderEditTFImages(tf);};
 function renderEditTFImages(tf){
   const imgs=editImages[tf]||[]; const c=document.getElementById("e-tf-images-"+tf); if(!c) return;
-  if(!imgs.length){c.innerHTML=`<div style="color:var(--gold);opacity:0.35;font-size:12px;padding:10px;">Chưa có ảnh</div>`;return;}
+  if(!imgs.length){c.innerHTML=`<div style="color:var(--gold);opacity:0.5;font-size:12px;padding:10px;">Chưa có ảnh</div>`;return;}
   c.innerHTML=imgs.map((src,i)=>`<div style="position:relative;flex:0 0 auto;"><img src="${src}" style="width:90px;height:68px;object-fit:cover;border-radius:7px;border:1px solid var(--gold-dim);display:block;"/><button onclick="clearEditTFImg('${tf}',${i})" style="position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:10px;cursor:pointer;line-height:1;">✕</button></div>`).join("");
 }
 window.handleEditPaste=function(tf,event){
@@ -841,7 +844,7 @@ function renderStats(){
     </div>
     <div class="section-label">Theo Tháng</div>
     <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:20px;">
-      ${months.length?months.map(([m,v])=>{const t2=v.w+v.l+v.be;return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--gold-faint);"><div style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold);">📅 ${m}</div><div style="display:flex;gap:8px;font-size:13px;"><span class="win">✅${v.w}</span><span class="loss">❌${v.l}</span><span style="color:var(--gold);opacity:0.55;">${t2?Math.round(v.w/t2*100):0}%WR</span></div></div>`;}).join(""):"<div style='color:var(--gold);opacity:0.35;padding:10px;text-align:center;'>Chưa có dữ liệu</div>"}
+      ${months.length?months.map(([m,v])=>{const t2=v.w+v.l+v.be;return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--gold-faint);"><div style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold);">📅 ${m}</div><div style="display:flex;gap:8px;font-size:13px;"><span class="win">✅${v.w}</span><span class="loss">❌${v.l}</span><span style="color:var(--gold);opacity:0.55;">${t2?Math.round(v.w/t2*100):0}%WR</span></div></div>`;}).join(""):"<div style='color:var(--gold);opacity:0.5;padding:10px;text-align:center;'>Chưa có dữ liệu</div>"}
     </div>
     <div class="section-label">Xuất Dữ Liệu</div>
     <div style="display:flex;gap:10px;margin-bottom:20px;">
