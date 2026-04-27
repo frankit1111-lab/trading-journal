@@ -1588,7 +1588,7 @@ Phân tích chi tiết bằng tiếng Việt:
   try{
     const r=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
-      headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-iab":"true"},
+      headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
         model:"claude-sonnet-4-20250514",
         max_tokens:1200,
@@ -1624,7 +1624,7 @@ window.analyzePattern=async function(){
   }).join("\n");
   const prompt=`Bạn là ICT trading coach. Phân tích ${recent.length} lệnh gần nhất của trader:\n\n${summary}\n\nTìm ra (bằng tiếng Việt, ngắn gọn):\n1. **Pattern lặp lại** — Lỗi nào hay gặp nhất?\n2. **Điểm mạnh nhất quán** — Trader đang làm tốt gì?\n3. **1 điều cần cải thiện ngay** — Khuyến nghị cụ thể nhất\n4. **Tỷ lệ đúng plan** — Nhận xét về discipline`;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-iab":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,messages:[{role:"user",content:prompt}]})});
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,messages:[{role:"user",content:prompt}]})});
     const data=await r.json();
     if(res) res.textContent=data.content?.map(i=>i.text||"").join("\n")||"Không thể phân tích.";
   }catch{if(res) res.textContent="❌ Lỗi kết nối.";}
@@ -2553,7 +2553,6 @@ function renderTheory() {
         <div class="theory-card-content">
           ${(()=>{const svg=getTheoryDiagramSVG(t.id);return svg?`<div style="margin:14px 0;">${svg}<div class="theory-diagram-caption">${t.tag} — Sơ đồ minh họa</div></div>`:"";})()}
           ${t.rules.map(r=>`<div class="theory-rule"><div class="theory-rule-dot"></div><div class="theory-rule-text">${r.t}</div></div>`).join("")}
-          ${t.img?`<div style="margin:14px 0;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--gold);line-height:1.9;white-space:pre;overflow-x:auto;">${t.img}</div>`:""}
           ${t.highlight?`<div class="theory-highlight ${t.highlight.type==="warn"?"warn":t.highlight.type==="info"?"info":""}">💡 ${t.highlight.text}</div>`:""}
           ${t.quiz?renderQuizCard(t):""}
           <button onclick="toggleMastered('${t.id}')" style="width:100%;margin-top:14px;padding:12px;border-radius:10px;border:1px solid ${mastered?"var(--win)":"var(--gold-faint)"};background:${mastered?"#4caf5018":"transparent"};color:${mastered?"var(--win)":"var(--gold)"};font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;cursor:pointer;transition:all 0.2s;">
@@ -2697,24 +2696,23 @@ window.handleImportFile=function(input){
 
 async function processImportFile(file) {
   const drop=document.getElementById("import-drop");
-  drop.textContent="⏳ Đang đọc file...";
+  drop.innerHTML='<div style="font-size:24px;margin-bottom:8px;">⏳</div><div style="font-family:\'Cinzel\',serif;font-size:11px;color:var(--gold);">Đang đọc file...</div>';
   try{
-    let text="";
     if(file.name.endsWith(".docx")){
-      // Read docx as binary and extract text via API
       const b64=await new Promise((res,rej)=>{
         const r=new FileReader(); r.onload=e=>res(e.target.result.split(",")[1]); r.onerror=rej; r.readAsDataURL(file);
       });
-      document.getElementById("import-text").value="[File: "+file.name+" - "+Math.round(file.size/1024)+"KB]\n(Đang gửi cho AI đọc...)";
+      document.getElementById("import-text").value="[File: "+file.name+"]\n(AI đang đọc...)";
+      drop.innerHTML='<div style="font-size:24px;margin-bottom:8px;">✅</div><div style="font-family:\'Cinzel\',serif;font-size:11px;color:var(--win);">ĐÃ TẢI: '+file.name+'</div>';
       await runImportAI(b64, file.name);
       return;
     } else {
-      text=await file.text();
+      const text=await file.text();
+      document.getElementById("import-text").value=text;
+      drop.innerHTML='<div style="font-size:24px;margin-bottom:8px;">✅</div><div style="font-family:\'Cinzel\',serif;font-size:11px;color:var(--win);">ĐÃ TẢI: '+file.name+'</div>';
     }
-    document.getElementById("import-text").value=text;
-    drop.innerHTML='<div style="font-size:24px;margin-bottom:8px;">✅</div><div style="font-family:\'Cinzel\',serif;font-size:11px;color:var(--win);">ĐÃ TẢI: '+file.name+'</div>';
   }catch(e){
-    drop.innerHTML='<div style="color:var(--loss);">❌ Lỗi đọc file: '+e.message+'</div>';
+    drop.innerHTML='<div style="color:var(--loss);">❌ Lỗi: '+e.message+'</div>';
   }
 }
 
@@ -2727,38 +2725,53 @@ window.runImportAI=async function(docxB64=null, fileName=""){
   resultEl.style.display="block";
   resultEl.innerHTML='<div class="loading">AI đang phân tích và nhập lệnh...</div>';
 
-  const systemPrompt=`Bạn là AI chuyên nhập lệnh trading từ văn bản. 
-Đọc nội dung được cung cấp và trích xuất TẤT CẢ các lệnh trading.
-Mỗi lệnh phải có: ngày, tên/mô tả, symbol (nếu có), kết quả (Win/Loss/BE), P&L (nếu có), ghi chú.
+  const systemPrompt=`Bạn là AI chuyên đọc nhật ký trading ICT. Đọc file/text được cung cấp và trích xuất TẤT CẢ các ngày giao dịch thực tế.
 
-Trả về CHÍNH XÁC JSON array, không có gì khác:
+Với mỗi ngày, hãy:
+1. Xác định ngày (DD/MM/YYYY)
+2. Tạo tên lệnh mô tả ngắn gọn
+3. Trích xuất ghi chú theo TỪNG KHUNG THỜI GIAN (D1, H4, H1, M30, M15, M5, M1)
+   - Ví dụ: nếu thấy "H4 KO CÓ BIAS" → captions.H4 = "H4 KO CÓ BIAS"
+   - Nếu thấy "OB H1 CANH SHORT" → captions.H1 = "OB H1 CANH SHORT"
+   - Nếu thấy "OB M15" → captions.M15 = "OB M15"
+4. Ghi chú tổng hợp toàn bộ nội dung ngày đó vào note
+
+Trả về CHÍNH XÁC JSON array (không có gì khác):
 [
   {
-    "date": "DD/MM/YYYY HH:mm hoặc DD/MM/YYYY",
-    "title": "tên lệnh hoặc mô tả ngắn",
-    "symbol": "XAUUSD hoặc để trống",
-    "result": "Win|Loss|BE",
-    "pnl": "+2R hoặc -1R hoặc để trống",
-    "note": "ghi chú chi tiết nếu có",
-    "tags": ["tag1","tag2"]
+    "date": "DD/MM/YYYY",
+    "title": "tên ngắn mô tả setup chính",
+    "symbol": "",
+    "result": "Unknown",
+    "pnl": "",
+    "note": "toàn bộ nội dung phân tích ngày đó",
+    "tags": ["ICT","import"],
+    "captions": {
+      "D1": "ghi chú D1 nếu có",
+      "H4": "ghi chú H4 nếu có",
+      "H1": "ghi chú H1 nếu có",
+      "M30": "ghi chú M30 nếu có",
+      "M15": "ghi chú M15 nếu có",
+      "M5": "ghi chú M5 nếu có",
+      "M1": "ghi chú M1 nếu có"
+    }
   }
 ]
-Nếu không tìm thấy lệnh nào, trả về [].
-Ngày định dạng Việt Nam. Kết quả phải là Win, Loss, hoặc BE.`;
+Chỉ điền captions cho timeframe có đề cập. Nếu không có → bỏ qua key đó.`;
 
   try{
     let userContent;
     if(docxB64){
       userContent=[
-        {type:"text",text:"Đây là file "+fileName+". Hãy đọc và trích xuất tất cả lệnh trading trong file này:\n"+systemPrompt},
-        {type:"document",source:{type:"base64",media_type:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",data:docxB64}}
+        {type:"document",source:{type:"base64",media_type:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",data:docxB64}},
+        {type:"text",text:"Đọc file Word trên và trích xuất tất cả ngày giao dịch trong phần 'V. VÍ DỤ THỰC TẾ' hoặc bất kỳ phần nào có ngày cụ thể.\n\n"+systemPrompt}
       ];
     } else {
       userContent=systemPrompt+"\n\nNội dung cần đọc:\n"+text;
     }
 
     const r=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-iab":"true"},
+      method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:4000,messages:[{role:"user",content:userContent}]})
     });
     const data=await r.json();
@@ -2813,8 +2826,8 @@ window.confirmImport=async function(){
       const validResult = ['Win','Loss','BE'].includes(t.result) ? t.result : 'Win';
       await addDoc(collection(db,"trades"),{
         title:t.title||"Lệnh import",symbol:t.symbol||"",result:validResult,
-        pnl:t.pnl||"",note:t.note||"",tags:Array.isArray(t.tags)?t.tags:[],
-        folder:"",onplan:"",images:{},captions:{},tradeDate,createdAt:Date.now()
+        pnl:t.pnl||"",note:t.note||"",tags:Array.isArray(t.tags)?t.tags:["import"],
+        folder:"",onplan:"",images:{},captions:t.captions||{},tradeDate,createdAt:Date.now()
       });
       ok++;
     }catch(e){fail++;}
@@ -3020,7 +3033,7 @@ Phân tích CHI TIẾT theo ICT framework bằng tiếng Việt (thực tế, kh
 
   const userContent=imgContents.length>0?[...imgContents,{type:"text",text:textPrompt}]:textPrompt;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-iab":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1600,messages:[{role:"user",content:userContent}]})});
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1600,messages:[{role:"user",content:userContent}]})});
     const data=await r.json();
     const aiText=data.content?.map(i=>i.text||"").join("\n")||"Không thể phân tích.";
     res.textContent=aiText;
@@ -3079,7 +3092,7 @@ Phân tích CHUYÊN SÂU bằng tiếng Việt (thực tế, cụ thể):
 
 7. **Mục tiêu tuần tới** — SMART goal: cụ thể, đo được, khả thi`;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-iab":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1400,messages:[{role:"user",content:prompt}]})});
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1400,messages:[{role:"user",content:prompt}]})});
     const data=await r.json();
     if(res)res.textContent=data.content?.map(i=>i.text||"").join("\n")||"Không thể phân tích.";
   }catch{if(res)res.textContent="❌ Lỗi kết nối.";}
