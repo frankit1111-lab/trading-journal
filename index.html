@@ -10,238 +10,151 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet"/>
 <style>
   :root {
-    --gold: #c9a84c;
-    --gold-dim: #c9a84c55;
-    --gold-faint: #c9a84c18;
-    --bg: #080808;
-    --bg2: #111108;
-    --bg3: #1a1a10;
-    --text: #e8dcc8;
-    --text-dim: #e8dcc888;
-    --win: #4caf50;
-    --loss: #ef5350;
-    --be: #90a4ae;
+    --gold:#c9a84c; --gold-dim:#c9a84c55; --gold-faint:#c9a84c18;
+    --bg:#080808; --bg2:#111108; --bg3:#1a1a10;
+    --text:#e8dcc8; --text-dim:#e8dcc888;
+    --win:#4caf50; --loss:#ef5350; --be:#90a4ae;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Crimson Pro', serif; overflow: hidden; }
-  
-  /* SCROLLABLE SCREENS */
-  .screen { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; display: none; flex-direction: column; }
-  .screen.active { display: flex; }
-  ::-webkit-scrollbar { display: none; }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Crimson Pro',serif;overflow:hidden;}
+  .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;}
+  .screen.active{display:flex;}
+  ::-webkit-scrollbar{display:none;}
 
-  /* HEADER */
-  .header {
-    position: sticky; top: 0; z-index: 100;
-    background: linear-gradient(180deg, #0d0d08 0%, #080808ee 100%);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--gold-dim);
-    padding: 12px 18px 10px;
-    display: flex; align-items: center; justify-content: space-between;
-    flex-shrink: 0;
-  }
-  .header-title { text-align: center; flex: 1; }
-  .header-title .label { font-size: 9px; letter-spacing: 5px; color: #c9a84caa; text-transform: uppercase; font-family: 'Cinzel', serif; }
-  .header-title .name { font-family: 'Cinzel', serif; font-size: 17px; color: var(--gold); letter-spacing: 2px; }
-  .header-btn { background: none; border: none; color: var(--gold); font-size: 24px; cursor: pointer; width: 36px; text-align: center; font-family: 'Crimson Pro', serif; }
+  .header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d0d08 0%,#080808ee 100%);backdrop-filter:blur(12px);border-bottom:1px solid var(--gold-dim);padding:12px 18px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+  .header-title{text-align:center;flex:1;}
+  .header-title .label{font-size:9px;letter-spacing:5px;color:var(--gold);opacity:0.6;text-transform:uppercase;font-family:'Cinzel',serif;}
+  .header-title .name{font-family:'Cinzel',serif;font-size:17px;color:var(--gold);letter-spacing:2px;}
+  .header-btn{background:none;border:none;color:var(--gold);font-size:24px;cursor:pointer;width:36px;text-align:center;font-family:'Crimson Pro',serif;}
 
-  /* STATS BAR */
-  .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--gold-faint); background: var(--bg2); flex-shrink: 0; }
-  .stat { padding: 10px 0; text-align: center; border-right: 1px solid var(--gold-faint); }
-  .stat:last-child { border-right: none; }
-  .stat-val { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 600; color: var(--gold); }
-  .stat-lbl { font-size: 10px; letter-spacing: 2px; color: #c9a84caa; text-transform: uppercase; margin-top: 2px; }
+  .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--gold-faint);background:var(--bg2);flex-shrink:0;}
+  .stat{padding:10px 0;text-align:center;border-right:1px solid var(--gold-faint);}
+  .stat:last-child{border-right:none;}
+  .stat-val{font-family:'Cinzel',serif;font-size:18px;font-weight:600;color:var(--gold);}
+  .stat-lbl{font-size:10px;letter-spacing:2px;color:var(--gold);opacity:0.65;text-transform:uppercase;margin-top:2px;}
 
-  /* TRADE LIST */
-  .trade-item {
-    padding: 15px 18px; border-bottom: 1px solid var(--gold-faint);
-    cursor: pointer; transition: background 0.15s;
-    display: flex; justify-content: space-between; align-items: flex-start;
-  }
-  .trade-item:active { background: var(--gold-faint); }
-  .trade-title { font-family: 'Cinzel', serif; font-size: 14px; color: var(--gold); margin-bottom: 3px; font-weight: 600; }
-  .trade-tags { font-size: 13px; color: #c9a84cbb; }
-  .trade-date { font-size: 12px; color: #c9a84c88; margin-top: 4px; font-style: italic; }
-  .trade-right { text-align: right; }
-  .trade-pnl { font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600; }
-  .trade-bias { font-size: 13px; margin-top: 4px; }
-  .win { color: var(--win); }
-  .loss { color: var(--loss); }
-  .be { color: var(--be); }
+  .search-bar{padding:8px 14px;border-bottom:1px solid var(--gold-faint);background:var(--bg2);flex-shrink:0;}
+  .search-input{width:100%;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:20px;padding:8px 16px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;transition:border-color 0.2s;}
+  .search-input:focus{border-color:var(--gold-dim);}
+  .search-input::placeholder{color:var(--gold-dim);}
 
-  /* EMPTY STATE */
-  .empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #c9a84caa; padding: 40px; text-align: center; }
-  .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.6; }
-  .empty-text { font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 2px; line-height: 2; }
+  .trade-item{padding:15px 18px;border-bottom:1px solid var(--gold-faint);cursor:pointer;transition:background 0.15s;display:flex;justify-content:space-between;align-items:flex-start;}
+  .trade-item:active{background:var(--gold-faint);}
+  .trade-title{font-family:'Cinzel',serif;font-size:14px;color:var(--gold);margin-bottom:3px;font-weight:600;}
+  .trade-tags{font-size:13px;color:var(--gold);opacity:0.7;}
+  .trade-date{font-size:12px;color:var(--gold);opacity:0.5;margin-top:4px;font-style:italic;}
+  .trade-pnl{font-family:'Cinzel',serif;font-size:13px;font-weight:600;}
+  .win{color:var(--win);}.loss{color:var(--loss);}.be{color:var(--be);}
 
-  /* FORM */
-  .form-body { padding: 16px 18px 100px; flex: 1; }
-  .field { margin-bottom: 16px; }
-  .field-label { font-size: 11px; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; font-family: 'Cinzel', serif; display: block; margin-bottom: 7px; opacity: 0.85; }
-  .field input, .field textarea {
-    width: 100%; background: var(--bg3);
-    border: 1px solid var(--gold-faint); border-radius: 8px;
-    padding: 11px 13px; color: var(--text); font-size: 15px;
-    font-family: 'Crimson Pro', serif; outline: none;
-    transition: border-color 0.2s;
-  }
-  .field input:focus, .field textarea:focus { border-color: var(--gold-dim); }
-  .field textarea { resize: vertical; min-height: 80px; }
+  .empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--gold);padding:40px;text-align:center;}
+  .empty-icon{font-size:48px;margin-bottom:16px;opacity:0.4;}
+  .empty-text{font-family:'Cinzel',serif;font-size:13px;letter-spacing:2px;line-height:2;opacity:0.55;}
 
-  /* TOGGLE GROUP */
-  .toggle-group { display: flex; gap: 6px; }
-  .toggle-btn {
-    flex: 1; padding: 9px 4px; border-radius: 8px; cursor: pointer;
-    border: 1px solid var(--gold-faint); background: transparent;
-    color: #c9a84cbb; font-size: 12px; font-family: 'Cinzel', serif;
-    letter-spacing: 0.5px; transition: all 0.15s; text-align: center;
-  }
-  .toggle-btn.active { border-color: var(--gold); background: var(--gold-faint); color: var(--gold); }
+  .form-body{padding:16px 18px 100px;flex:1;}
+  .field{margin-bottom:16px;}
+  .field-label{font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;font-family:'Cinzel',serif;display:block;margin-bottom:7px;opacity:0.85;}
+  .field input,.field textarea,.field select{width:100%;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 13px;color:var(--text);font-size:15px;font-family:'Crimson Pro',serif;outline:none;transition:border-color 0.2s;}
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--gold-dim);}
+  .field textarea{resize:vertical;min-height:80px;}
 
-  /* IMAGE TIMEFRAMES */
-  .tf-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
-  .tf-slot {
-    flex: 0 0 88px; cursor: pointer;
-  }
-  .tf-img-box {
-    width: 88px; height: 66px; border-radius: 8px;
-    border: 1px dashed var(--gold-faint);
-    background: var(--bg3); overflow: hidden;
-    display: flex; align-items: center; justify-content: center;
-    flex-direction: column; transition: border-color 0.2s;
-  }
-  .tf-img-box:active { border-color: var(--gold); }
-  .tf-img-box img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
-  .tf-img-box .tf-placeholder { font-size: 20px; opacity: 0.4; }
-  .tf-label { font-size: 10px; color: var(--gold-dim); text-align: center; margin-top: 4px; font-family: 'Cinzel', serif; letter-spacing: 1px; }
+  .toggle-group{display:flex;gap:6px;}
+  .toggle-btn{flex:1;padding:9px 4px;border-radius:8px;cursor:pointer;border:1px solid var(--gold-faint);background:transparent;color:var(--gold);opacity:0.6;font-size:12px;font-family:'Cinzel',serif;letter-spacing:0.5px;transition:all 0.15s;text-align:center;}
+  .toggle-btn.active{border-color:var(--gold);background:var(--gold-faint);color:var(--gold);opacity:1;}
 
-  /* DETAIL VIEW */
-  .detail-banner {
-    padding: 12px 18px; border-bottom: 1px solid var(--gold-faint);
-    display: flex; justify-content: space-between; align-items: center;
-    flex-shrink: 0;
-  }
-  .detail-body { padding: 14px 18px 100px; flex: 1; }
-  .section-label { font-size: 11px; letter-spacing: 4px; color: var(--gold); text-transform: uppercase; font-family: 'Cinzel', serif; margin-bottom: 10px; opacity: 0.9; }
-  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
-  .stats-cell { background: var(--bg3); border-radius: 8px; padding: 10px 8px; text-align: center; }
-  .stats-cell .lbl { font-size: 10px; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; margin-bottom: 5px; font-family: 'Cinzel', serif; opacity: 0.85; }
-  .stats-cell .val { font-size: 15px; color: var(--gold); font-family: 'Cinzel', serif; font-weight: 600; }
+  .detail-banner{padding:12px 18px;border-bottom:1px solid var(--gold-faint);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+  .detail-body{padding:14px 18px 100px;flex:1;}
+  .section-label{font-size:11px;letter-spacing:4px;color:var(--gold);text-transform:uppercase;font-family:'Cinzel',serif;margin-bottom:10px;opacity:0.9;}
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;}
+  .stats-cell{background:var(--bg3);border-radius:8px;padding:10px 8px;text-align:center;}
+  .stats-cell .lbl{font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:5px;font-family:'Cinzel',serif;opacity:0.85;}
+  .stats-cell .val{font-size:15px;color:var(--gold);font-family:'Cinzel',serif;font-weight:600;}
 
-  /* TF TABS */
-  .tf-tabs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 10px; padding-bottom: 2px; }
-  .tf-tab {
-    flex: 0 0 auto; padding: 5px 11px; border-radius: 6px; cursor: pointer;
-    border: 1px solid var(--gold-faint); background: transparent;
-    color: #c9a84cbb; font-size: 11px; font-family: 'Cinzel', serif;
-    transition: all 0.15s; white-space: nowrap;
-  }
-  .tf-tab.active { border-color: var(--gold); background: var(--gold-faint); color: var(--gold); }
-  .tf-preview {
-    width: 100%; height: 200px; border-radius: 10px;
-    background: var(--bg3); border: 1px solid var(--gold-faint);
-    overflow: hidden; display: flex; align-items: center; justify-content: center;
-    margin-bottom: 20px;
-  }
-  .tf-preview img { width: 100%; height: 100%; object-fit: contain; }
-  .tf-preview .no-img { color: var(--gold-faint); text-align: center; font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 2px; }
+  .tf-tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px;}
+  .tf-tab{flex:0 0 auto;padding:5px 11px;border-radius:6px;cursor:pointer;border:1px solid var(--gold-faint);background:transparent;color:var(--gold);opacity:0.6;font-size:11px;font-family:'Cinzel',serif;transition:all 0.15s;white-space:nowrap;position:relative;}
+  .tf-tab.active{border-color:var(--gold);background:var(--gold-faint);color:var(--gold);opacity:1;}
+  .tf-tab.has-img{border-color:var(--gold);color:var(--gold);opacity:0.85;}
+  .tf-tab.has-img::after{content:'';position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%;background:#4caf50;box-shadow:0 0 4px #4caf50aa;}
+  .tf-preview{width:100%;height:200px;border-radius:10px;background:var(--bg3);border:1px solid var(--gold-faint);overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+  .tf-preview .no-img{color:var(--gold);opacity:0.35;text-align:center;font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;line-height:2;}
 
-  /* NOTE BOX */
-  .note-box { background: var(--bg3); border: 1px solid var(--gold-faint); border-radius: 8px; padding: 13px 14px; margin-bottom: 20px; font-size: 15px; color: var(--text); line-height: 1.7; font-style: italic; }
+  .note-box{background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:13px 14px;margin-bottom:20px;font-size:15px;color:var(--text);line-height:1.7;font-style:italic;}
+  .ai-btn{width:100%;padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--gold-faint),transparent);border:1px solid var(--gold-dim);color:var(--gold);font-size:14px;font-family:'Cinzel',serif;letter-spacing:2px;cursor:pointer;transition:all 0.2s;margin-bottom:10px;}
+  .ai-btn:disabled{opacity:0.5;cursor:not-allowed;}
+  .ai-result{background:var(--bg3);border:1px solid var(--gold-faint);border-radius:10px;padding:14px 16px;font-size:14px;color:var(--text);line-height:1.8;white-space:pre-wrap;margin-bottom:14px;}
+  .save-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:linear-gradient(0deg,var(--bg) 80%,transparent);padding:16px 18px 28px;}
+  .save-btn{width:100%;padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--gold-faint),var(--gold-dim));border:1px solid var(--gold);color:var(--gold);font-size:15px;font-family:'Cinzel',serif;letter-spacing:3px;cursor:pointer;transition:all 0.2s;}
+  .save-btn:disabled{opacity:0.5;cursor:not-allowed;}
+  .delete-btn{background:none;border:none;color:#ef535099;font-size:13px;cursor:pointer;font-family:'Cinzel',serif;letter-spacing:1px;width:100%;text-align:center;padding:10px;margin-top:6px;}
 
-  /* AI BUTTON */
-  .ai-btn {
-    width: 100%; padding: 14px; border-radius: 10px;
-    background: linear-gradient(135deg, var(--gold-faint), transparent);
-    border: 1px solid var(--gold-dim); color: var(--gold);
-    font-size: 14px; font-family: 'Cinzel', serif; letter-spacing: 2px;
-    cursor: pointer; transition: all 0.2s; margin-bottom: 14px;
-  }
-  .ai-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .ai-result { background: var(--bg3); border: 1px solid var(--gold-faint); border-radius: 10px; padding: 14px 16px; font-size: 14px; color: var(--text); line-height: 1.8; white-space: pre-wrap; }
-  .ai-result strong { color: var(--gold); font-family: 'Cinzel', serif; }
+  .loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--gold);font-family:'Cinzel',serif;font-size:12px;letter-spacing:3px;animation:pulse 1.5s infinite;}
+  @keyframes pulse{0%,100%{opacity:0.3}50%{opacity:0.8}}
 
-  /* SAVE BTN */
-  .save-bar {
-    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-    width: 100%; max-width: 480px;
-    background: linear-gradient(0deg, var(--bg) 80%, transparent);
-    padding: 16px 18px 28px;
-  }
-  .save-btn {
-    width: 100%; padding: 14px; border-radius: 10px;
-    background: linear-gradient(135deg, #c9a84c33, #c9a84c22);
-    border: 1px solid var(--gold); color: var(--gold);
-    font-size: 15px; font-family: 'Cinzel', serif; letter-spacing: 3px;
-    cursor: pointer;
-  }
+  .folder-bar{display:flex;gap:6px;overflow-x:auto;padding:8px 14px;border-bottom:1px solid var(--gold-faint);background:var(--bg2);flex-shrink:0;}
+  .folder-bar::-webkit-scrollbar{display:none;}
+  .folder-chip{flex:0 0 auto;padding:5px 13px;border-radius:20px;cursor:pointer;border:1px solid var(--gold-faint);background:transparent;color:var(--gold);opacity:0.7;font-size:11px;font-family:'Cinzel',serif;transition:all 0.15s;white-space:nowrap;letter-spacing:1px;}
+  .folder-chip.active{border-color:var(--gold);background:var(--gold-faint);color:var(--gold);opacity:1;}
+  .folder-chip.add-folder{border-style:dashed;}
+  .sort-bar{display:flex;align-items:center;justify-content:flex-end;padding:5px 14px;border-bottom:1px solid var(--gold-faint);background:var(--bg);flex-shrink:0;gap:8px;}
+  .sort-label{font-size:11px;color:var(--gold);opacity:0.65;font-family:'Cinzel',serif;letter-spacing:1px;}
+  .sort-btn{background:none;border:1px solid var(--gold-faint);border-radius:6px;color:var(--gold);opacity:0.65;font-size:11px;font-family:'Cinzel',serif;padding:3px 10px;cursor:pointer;transition:all 0.15s;}
+  .sort-btn.active{border-color:var(--gold);color:var(--gold);opacity:1;background:var(--gold-faint);}
 
-  /* LOADING */
-  .loading { display: flex; align-items: center; justify-content: center; padding: 40px; color: var(--gold-dim); font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 3px; }
-  @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
-  .loading { animation: pulse 1.5s infinite; }
+  .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--gold-dim);border-radius:20px;padding:10px 22px;color:var(--gold);font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;z-index:9999;backdrop-filter:blur(10px);transition:opacity 0.4s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 20px #00000055;}
 
-  /* TF TAB HAS IMAGE */
-  .tf-tab.has-img {
-    border-color: var(--gold);
-    color: var(--gold);
-    position: relative;
-  }
-  .tf-tab.has-img::after {
-    content: '';
-    position: absolute;
-    top: 3px; right: 3px;
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: #4caf50;
-    box-shadow: 0 0 4px #4caf50aa;
-  }
+  .chart-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .chart-bar-label{font-family:'Cinzel',serif;font-size:10px;color:var(--gold);opacity:0.65;width:50px;text-align:right;flex-shrink:0;}
+  .chart-bar-bg{flex:1;background:var(--bg);border-radius:4px;height:20px;overflow:hidden;}
+  .chart-bar-fill{height:100%;border-radius:4px;transition:width 0.6s ease;display:flex;align-items:center;padding-left:8px;}
+  .chart-bar-val{font-size:11px;font-family:'Cinzel',serif;color:#fff;font-weight:700;text-shadow:0 1px 2px #0006;}
 
-  /* FOLDER BAR */
-  .folder-bar {
-    display: flex; gap: 6px; overflow-x: auto;
-    padding: 8px 14px; border-bottom: 1px solid var(--gold-faint);
-    background: var(--bg2); flex-shrink: 0;
-  }
-  .folder-bar::-webkit-scrollbar { display: none; }
-  .folder-chip {
-    flex: 0 0 auto; padding: 5px 13px; border-radius: 20px; cursor: pointer;
-    border: 1px solid var(--gold-faint); background: transparent;
-    color: #c9a84cbb; font-size: 11px; font-family: 'Cinzel', serif;
-    transition: all 0.15s; white-space: nowrap; letter-spacing: 1px;
-  }
-  .folder-chip.active { border-color: var(--gold); background: var(--gold-faint); color: var(--gold); }
-  .folder-chip.add-folder { color: #c9a84cbb; border-style: dashed; }
+  .modal-overlay{position:fixed;inset:0;background:#000000cc;z-index:500;display:flex;align-items:flex-end;justify-content:center;}
+  .modal-sheet{background:var(--bg2);border-top:1px solid var(--gold-dim);border-radius:18px 18px 0 0;width:100%;max-width:480px;padding:20px 18px 40px;max-height:80vh;overflow-y:auto;}
+  .modal-title{font-family:'Cinzel',serif;font-size:13px;letter-spacing:3px;color:var(--gold);margin-bottom:16px;text-align:center;}
+  .modal-option{padding:13px 16px;border-radius:8px;margin-bottom:8px;cursor:pointer;border:1px solid var(--gold-faint);font-size:15px;color:var(--text);transition:all 0.15s;}
+  .modal-option:active{background:var(--gold-faint);}
+  .modal-option.selected{border-color:var(--gold);background:var(--gold-faint);color:var(--gold);}
+  .modal-cancel{width:100%;padding:12px;border-radius:8px;border:1px solid #ef535055;background:none;color:#ef535099;font-family:'Cinzel',serif;font-size:13px;cursor:pointer;margin-top:4px;}
 
-  /* SORT BAR */
-  .sort-bar {
-    display: flex; align-items: center; justify-content: flex-end;
-    padding: 5px 14px; border-bottom: 1px solid var(--gold-faint);
-    background: var(--bg); flex-shrink: 0; gap: 8px;
-  }
-  .sort-label { font-size: 11px; color: #c9a84cbb; font-family: 'Cinzel', serif; letter-spacing: 1px; }
-  .sort-btn {
-    background: none; border: 1px solid var(--gold-faint); border-radius: 6px;
-    color: #c9a84cbb; font-size: 11px; font-family: 'Cinzel', serif;
-    padding: 3px 10px; cursor: pointer; transition: all 0.15s;
-  }
-  .sort-btn.active { border-color: var(--gold); color: var(--gold); background: var(--gold-faint); }
+  /* SETTINGS */
+  .theme-mode-btn{padding:16px 8px;border-radius:12px;cursor:pointer;border:2px solid var(--gold-faint);background:var(--bg3);color:var(--text);transition:all 0.2s;text-align:center;width:100%;}
+  .theme-mode-btn.active{border-color:var(--gold);background:var(--gold-faint);}
+  .theme-size-btn{padding:14px 8px;border-radius:12px;cursor:pointer;border:2px solid var(--gold-faint);background:var(--bg3);color:var(--text);transition:all 0.2s;text-align:center;width:100%;}
+  .theme-size-btn.active{border-color:var(--gold);background:var(--gold-faint);}
+  .color-swatch{width:44px;height:44px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all 0.2s;position:relative;margin:0 auto;display:block;}
+  .color-swatch.active{border-color:#fff;box-shadow:0 0 0 2px var(--gold);}
+  .color-swatch.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#000;font-size:16px;font-weight:700;}
 
-  /* DELETE BTN */
-  .delete-btn { background: none; border: none; color: #ef535099; font-size: 13px; cursor: pointer; font-family: 'Cinzel', serif; letter-spacing: 1px; width: 100%; text-align: center; padding: 10px; margin-top: 10px; }
+  /* LIGHT MODE overrides */
+  body.light-mode{--bg:#f5f3ee;--bg2:#ede9e0;--bg3:#ddd8cc;--text:#1a1408;--text-dim:#1a140888;}
+  body.light-mode .header{background:linear-gradient(180deg,#ede9e0 0%,#f5f3eeee 100%) !important;}
+  body.light-mode .search-input{color-scheme:light;background:#fff;}
+  body.light-mode .modal-sheet{background:#ede9e0;}
+  body.light-mode input[type=date]{color-scheme:light;}
+  body.light-mode select{color-scheme:light;}
+
+  /* FONT SIZE scales */
+  body.font-small{font-size:13px;}
+  body.font-medium{font-size:15px;}
+  body.font-large{font-size:18px;}
+  body.font-small .trade-title{font-size:12px;}
+  body.font-large .trade-title{font-size:16px;}
+  body.font-small .note-box,body.font-small .ai-result{font-size:13px;}
+  body.font-large .note-box,body.font-large .ai-result{font-size:17px;}
+
+  /* FAB */
+  .fab{position:fixed;bottom:24px;right:20px;width:56px;height:56px;border-radius:50%;background:var(--gold);border:none;color:#fff;font-size:28px;cursor:pointer;z-index:300;box-shadow:0 4px 20px var(--gold-dim);display:none;align-items:center;justify-content:center;font-weight:700;line-height:1;transition:transform 0.15s;}
+  .fab:active{transform:scale(0.92);}
+  .fab.visible{display:flex;}
 </style>
 </head>
 <body>
 
-<!-- LIST SCREEN -->
+<!-- LIST -->
 <div class="screen active" id="screen-list">
   <div class="header">
-    <div style="width:36px"></div>
-    <div class="header-title">
-      <div class="label">Nhật Ký</div>
-      <div class="name">Giao Dịch</div>
-    </div>
-    <button class="header-btn" onclick="openNew()">+</button>
+    <button class="header-btn" onclick="showScreen('stats')" style="font-size:18px;">📊</button>
+    <div class="header-title"><div class="label">Nhật Ký</div><div class="name">Giao Dịch</div></div>
+    <button class="header-btn" onclick="showScreen('settings')" style="font-size:18px;">⚙️</button>
   </div>
   <div class="stats-bar">
     <div class="stat"><div class="stat-val" id="stat-total">0</div><div class="stat-lbl">Tổng</div></div>
@@ -249,54 +162,50 @@
     <div class="stat"><div class="stat-val loss" id="stat-loss">0</div><div class="stat-lbl">Loss</div></div>
     <div class="stat"><div class="stat-val" id="stat-wr">0%</div><div class="stat-lbl">WR</div></div>
   </div>
-  <!-- FOLDER BAR -->
-  <div class="folder-bar" id="folder-bar">
-    <button class="folder-chip active" data-folder="all" onclick="selectFolder('all')">📂 Tất cả</button>
+  <div class="search-bar">
+    <input class="search-input" id="search-input" placeholder="🔍  Tìm tên, symbol, tags..." oninput="renderList()"/>
   </div>
-  <!-- SORT BAR -->
+  <div class="folder-bar" id="folder-bar"></div>
   <div class="sort-bar">
     <span class="sort-label">Sắp xếp:</span>
     <button class="sort-btn active" id="sort-desc" onclick="setSort('desc')">↓ Mới nhất</button>
     <button class="sort-btn" id="sort-asc" onclick="setSort('asc')">↑ Cũ nhất</button>
   </div>
-  <div id="trade-list" style="flex:1"></div>
+  <div id="trade-list" style="flex:1;"></div>
 </div>
 
-<!-- NEW TRADE SCREEN -->
+<!-- GLOBAL FAB -->
+<button class="fab" id="fab-btn" onclick="openNew()">+</button>
+
+<!-- STATS -->
+<div class="screen" id="screen-stats">
+  <div class="header">
+    <button class="header-btn" onclick="showScreen('list')" style="font-size:20px;">←</button>
+    <div class="header-title"><div class="label">Báo Cáo</div><div class="name">Thống Kê</div></div>
+    <button class="header-btn" onclick="openNew()" style="font-size:20px;font-weight:700;">+</button>
+  </div>
+  <div id="stats-body" style="padding:16px 18px 40px;flex:1;overflow-y:auto;"></div>
+</div>
+
+<!-- NEW TRADE -->
 <div class="screen" id="screen-new">
   <div class="header">
-    <button class="header-btn" onclick="showScreen('list')" style="font-size:20px">←</button>
-    <div class="header-title">
-      <div class="label">Thêm</div>
-      <div class="name">Lệnh Mới</div>
-    </div>
-    <div style="width:36px"></div>
+    <button class="header-btn" onclick="confirmBack('list')" style="font-size:20px;">←</button>
+    <div class="header-title"><div class="label">Thêm</div><div class="name">Lệnh Mới</div></div>
+    <div style="width:36px;"></div>
   </div>
   <div class="form-body">
-    <!-- THỜI GIAN & CƠ BẢN -->
     <div class="field">
       <label class="field-label">Ngày & Giờ Vào Lệnh</label>
       <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;">
-        <input id="f-date" type="date" placeholder="dd/mm/yyyy"
-          style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 10px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;color-scheme:dark;"/>
-        <input id="f-hour" type="number" min="0" max="23" placeholder="Giờ"
-          style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 8px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;text-align:center;"/>
-        <input id="f-minute" type="number" min="0" max="59" placeholder="Phút"
-          style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 8px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;text-align:center;"/>
+        <input id="f-date" type="date" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 10px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;" oninput="formDirty=true"/>
+        <input id="f-hour" type="number" min="0" max="23" placeholder="Giờ" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 8px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;text-align:center;" oninput="formDirty=true"/>
+        <input id="f-minute" type="number" min="0" max="59" placeholder="Phút" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 8px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;text-align:center;" oninput="formDirty=true"/>
         <button onclick="setNow()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:8px;padding:11px 4px;color:var(--gold);font-size:11px;cursor:pointer;font-family:'Cinzel',serif;">Now</button>
       </div>
-      <div style="font-size:10px;color:var(--gold-dim);margin-top:5px;">📅 Hoặc nhấn Now để điền tự động</div>
     </div>
-    <div class="field">
-      <label class="field-label">Tên lệnh / Câu hỏi</label>
-      <input id="f-title" type="text" placeholder="VD: Có tách thửa được ko..."/>
-    </div>
-    <div class="field">
-      <label class="field-label">Cặp tiền</label>
-      <input id="f-symbol" type="text" placeholder="VD: XAUUSD, EURUSD..."/>
-    </div>
-
-    <!-- KẾT QUẢ -->
+    <div class="field"><label class="field-label">Tên lệnh / Câu hỏi</label><input id="f-title" type="text" placeholder="VD: Có tách thửa được ko..." oninput="formDirty=true"/></div>
+    <div class="field"><label class="field-label">Cặp tiền</label><input id="f-symbol" type="text" placeholder="VD: XAUUSD, EURUSD..." oninput="formDirty=true"/></div>
     <div class="field">
       <label class="field-label">Kết quả</label>
       <div class="toggle-group">
@@ -305,13 +214,7 @@
         <button class="toggle-btn" data-group="result" data-val="BE" onclick="toggleSelect(this)">➖ BE</button>
       </div>
     </div>
-
-    <div class="field">
-      <label class="field-label">P&amp;L</label>
-      <input id="f-pnl" type="text" placeholder="+2R hoặc -1R"/>
-    </div>
-
-    <!-- ĐÚNG PLAN -->
+    <div class="field"><label class="field-label">P&amp;L</label><input id="f-pnl" type="text" placeholder="+2R hoặc -1R" oninput="formDirty=true"/></div>
     <div class="field">
       <label class="field-label">Vào đúng plan?</label>
       <div class="toggle-group">
@@ -320,42 +223,27 @@
         <button class="toggle-btn" data-group="onplan" data-val="Một phần" onclick="toggleSelect(this)">⚡ Một phần</button>
       </div>
     </div>
-
-    <!-- TAGS & GHI CHÚ -->
     <div class="field">
       <label class="field-label">Thư mục</label>
-      <select id="f-folder" style="width:100%;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 13px;color:var(--text);font-size:15px;font-family:'Crimson Pro',serif;outline:none;appearance:none;">
-        <option value="">— Không phân loại —</option>
-      </select>
+      <select id="f-folder" onchange="formDirty=true"></select>
     </div>
-    <div class="field">
-      <label class="field-label">Tags (cách nhau bằng dấu phẩy)</label>
-      <input id="f-tags" type="text" placeholder="VD: Kiền, Vị Tế, Tỷ"/>
-    </div>
-    <div class="field">
-      <label class="field-label">Ghi chú / Bài học</label>
-      <textarea id="f-note" placeholder="Mô tả setup, lý do vào lệnh, bài học rút ra..."></textarea>
-    </div>
+    <div class="field"><label class="field-label">Tags (cách nhau bằng dấu phẩy)</label><input id="f-tags" type="text" placeholder="VD: Kiền, Vị Tế, Tỷ" oninput="formDirty=true"/></div>
+    <div class="field"><label class="field-label">Ghi chú / Bài học</label><textarea id="f-note" placeholder="Mô tả setup, lý do vào lệnh, bài học rút ra..." oninput="formDirty=true"></textarea></div>
     <div class="field">
       <label class="field-label">Ảnh Biểu Đồ (D1 → M1)</label>
-      <div style="font-size:11px;color:var(--gold-dim);margin-bottom:8px;">📋 Nhấn vào ô → Ctrl+V để dán ảnh, hoặc nhấn 📷 để chọn file</div>
+      <div style="font-size:11px;color:var(--gold);opacity:0.6;margin-bottom:8px;">📋 Nhấn "+ Thêm ảnh" hoặc Ctrl+V để dán ảnh</div>
       <div id="tf-upload-row" style="display:flex;flex-direction:column;gap:12px;"></div>
     </div>
   </div>
-  <div class="save-bar">
-    <button class="save-btn" onclick="saveTrade()">LƯU LỆNH</button>
-  </div>
+  <div class="save-bar"><button class="save-btn" id="save-btn" onclick="saveTrade()">LƯU LỆNH</button></div>
 </div>
 
-<!-- DETAIL SCREEN -->
+<!-- DETAIL -->
 <div class="screen" id="screen-detail">
   <div class="header">
-    <button class="header-btn" onclick="showScreen('list')" style="font-size:20px">←</button>
-    <div class="header-title">
-      <div class="label">Chi Tiết</div>
-      <div class="name" id="detail-header-title">—</div>
-    </div>
-    <div style="width:36px"></div>
+    <button class="header-btn" onclick="showScreen('list')" style="font-size:20px;">←</button>
+    <div class="header-title"><div class="label">Chi Tiết</div><div class="name" id="detail-header-title">—</div></div>
+    <button class="header-btn" onclick="openMoveFolder()" title="Chuyển thư mục" style="font-size:18px;">🗂</button>
   </div>
   <div class="detail-banner" id="detail-banner"></div>
   <div class="detail-body">
@@ -368,40 +256,32 @@
     <div class="tf-preview" id="detail-tf-preview"></div>
     <div class="section-label">Phân Tích AI</div>
     <button class="ai-btn" id="ai-btn" onclick="analyzeAI()">🤖 PHÂN TÍCH AI</button>
-    <div class="ai-result" id="ai-result" style="display:none"></div>
-    <button class="ai-btn" id="edit-btn" onclick="openEdit()" style="margin-top:6px;">✏️ SỬA LỆNH NÀY</button>
-    <button class="delete-btn" id="delete-btn" onclick="deleteTrade()">🗑 Xóa lệnh này</button>
+    <div class="ai-result" id="ai-result" style="display:none;"></div>
+    <button class="ai-btn" onclick="openEdit()">✏️ SỬA LỆNH NÀY</button>
+    <button class="ai-btn" onclick="duplicateTrade()" style="border-color:#4caf5066;color:#4caf50;">📋 NHÂN BẢN LỆNH</button>
+    <button class="delete-btn" onclick="deleteTrade()">🗑 Xóa lệnh này</button>
   </div>
 </div>
 
-<!-- EDIT SCREEN -->
+<!-- EDIT -->
 <div class="screen" id="screen-edit">
   <div class="header">
-    <button class="header-btn" onclick="showScreen('detail')" style="font-size:20px">←</button>
-    <div class="header-title">
-      <div class="label">Chỉnh Sửa</div>
-      <div class="name">Lệnh</div>
-    </div>
-    <div style="width:36px"></div>
+    <button class="header-btn" onclick="confirmBack('detail')" style="font-size:20px;">←</button>
+    <div class="header-title"><div class="label">Chỉnh Sửa</div><div class="name">Lệnh</div></div>
+    <div style="width:36px;"></div>
   </div>
   <div class="form-body">
     <div class="field">
       <label class="field-label">Ngày & Giờ Vào Lệnh</label>
       <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;">
-        <input id="e-date" type="date" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 10px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;color-scheme:dark;"/>
+        <input id="e-date" type="date" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 10px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;"/>
         <input id="e-hour" type="number" min="0" max="23" placeholder="Giờ" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 8px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;text-align:center;"/>
         <input id="e-minute" type="number" min="0" max="59" placeholder="Phút" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 8px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;text-align:center;"/>
         <button onclick="setEditNow()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:8px;padding:11px 4px;color:var(--gold);font-size:11px;cursor:pointer;font-family:'Cinzel',serif;">Now</button>
       </div>
     </div>
-    <div class="field">
-      <label class="field-label">Tên lệnh / Câu hỏi</label>
-      <input id="e-title" type="text"/>
-    </div>
-    <div class="field">
-      <label class="field-label">Cặp tiền</label>
-      <input id="e-symbol" type="text"/>
-    </div>
+    <div class="field"><label class="field-label">Tên lệnh / Câu hỏi</label><input id="e-title" type="text" oninput="formDirty=true"/></div>
+    <div class="field"><label class="field-label">Cặp tiền</label><input id="e-symbol" type="text" oninput="formDirty=true"/></div>
     <div class="field">
       <label class="field-label">Kết quả</label>
       <div class="toggle-group">
@@ -410,10 +290,7 @@
         <button class="toggle-btn" data-group="e-result" data-val="BE" onclick="toggleSelect(this)">➖ BE</button>
       </div>
     </div>
-    <div class="field">
-      <label class="field-label">P&amp;L</label>
-      <input id="e-pnl" type="text"/>
-    </div>
+    <div class="field"><label class="field-label">P&amp;L</label><input id="e-pnl" type="text" oninput="formDirty=true"/></div>
     <div class="field">
       <label class="field-label">Vào đúng plan?</label>
       <div class="toggle-group">
@@ -422,36 +299,96 @@
         <button class="toggle-btn" data-group="e-onplan" data-val="Một phần" onclick="toggleSelect(this)">⚡ Một phần</button>
       </div>
     </div>
-    <div class="field">
-      <label class="field-label">Thư mục</label>
-      <select id="e-folder" style="width:100%;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 13px;color:var(--text);font-size:15px;font-family:'Crimson Pro',serif;outline:none;appearance:none;">
-        <option value="">— Không phân loại —</option>
-      </select>
-    </div>
-    <div class="field">
-      <label class="field-label">Tags (cách nhau bằng dấu phẩy)</label>
-      <input id="e-tags" type="text"/>
-    </div>
-    <div class="field">
-      <label class="field-label">Ghi chú / Bài học</label>
-      <textarea id="e-note"></textarea>
-    </div>
+    <div class="field"><label class="field-label">Thư mục</label><select id="e-folder" onchange="formDirty=true"></select></div>
+    <div class="field"><label class="field-label">Tags (cách nhau bằng dấu phẩy)</label><input id="e-tags" type="text" oninput="formDirty=true"/></div>
+    <div class="field"><label class="field-label">Ghi chú / Bài học</label><textarea id="e-note" oninput="formDirty=true"></textarea></div>
     <div class="field">
       <label class="field-label">Ảnh Biểu Đồ (D1 → M1)</label>
-      <div style="font-size:11px;color:var(--gold-dim);margin-bottom:8px;">📋 Nhấn "+ Thêm ảnh" hoặc Ctrl+V để dán ảnh</div>
+      <div style="font-size:11px;color:var(--gold);opacity:0.6;margin-bottom:8px;">📋 Nhấn "+ Thêm ảnh" hoặc Ctrl+V để dán ảnh</div>
       <div id="e-tf-upload-row" style="display:flex;flex-direction:column;gap:12px;"></div>
     </div>
   </div>
-  <div class="save-bar">
-    <button class="save-btn" onclick="updateTrade()">CẬP NHẬT LỆNH</button>
+  <div class="save-bar"><button class="save-btn" id="update-btn" onclick="updateTrade()">CẬP NHẬT LỆNH</button></div>
+</div>
+
+<!-- MOVE FOLDER MODAL -->
+<div id="modal-move" style="display:none;" class="modal-overlay" onclick="closeMoveFolder(event)">
+  <div class="modal-sheet">
+    <div class="modal-title">CHUYỂN VÀO THƯ MỤC</div>
+    <div id="modal-folder-list"></div>
+    <button class="modal-cancel" onclick="document.getElementById('modal-move').style.display='none'">Huỷ</button>
   </div>
 </div>
 
-<!-- Firebase SDK -->
+<!-- SETTINGS -->
+<div class="screen" id="screen-settings">
+  <div class="header">
+    <button class="header-btn" onclick="showScreen('list')" style="font-size:20px;">←</button>
+    <div class="header-title"><div class="label">Tuỳ Chỉnh</div><div class="name">Giao Diện</div></div>
+    <div style="width:36px;"></div>
+  </div>
+  <div style="padding:20px 18px 60px;flex:1;overflow-y:auto;">
+
+    <!-- DARK / LIGHT MODE -->
+    <div class="section-label" style="margin-top:4px;">Chế Độ Nền</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px;">
+      <button class="theme-mode-btn active" id="mode-dark" onclick="setMode('dark')">
+        <div style="font-size:28px;margin-bottom:6px;">🌙</div>
+        <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;">DARK</div>
+      </button>
+      <button class="theme-mode-btn" id="mode-light" onclick="setMode('light')">
+        <div style="font-size:28px;margin-bottom:6px;">☀️</div>
+        <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;">LIGHT</div>
+      </button>
+    </div>
+
+    <!-- ACCENT COLOR -->
+    <div class="section-label">Màu Chủ Đạo</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px;" id="color-grid"></div>
+
+    <!-- FONT SIZE -->
+    <div class="section-label">Cỡ Chữ</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px;">
+      <button class="theme-size-btn" id="size-small" onclick="setFontSize('small')">
+        <div style="font-size:14px;margin-bottom:4px;font-family:'Cinzel',serif;">Aa</div>
+        <div style="font-size:10px;letter-spacing:1px;font-family:'Cinzel',serif;">NHỎ</div>
+      </button>
+      <button class="theme-size-btn active" id="size-medium" onclick="setFontSize('medium')">
+        <div style="font-size:20px;margin-bottom:4px;font-family:'Cinzel',serif;">Aa</div>
+        <div style="font-size:10px;letter-spacing:1px;font-family:'Cinzel',serif;">VỪA</div>
+      </button>
+      <button class="theme-size-btn" id="size-large" onclick="setFontSize('large')">
+        <div style="font-size:26px;margin-bottom:4px;font-family:'Cinzel',serif;">Aa</div>
+        <div style="font-size:10px;letter-spacing:1px;font-family:'Cinzel',serif;">LỚN</div>
+      </button>
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="section-label">Xem Trước</div>
+    <div style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:12px;padding:16px;margin-bottom:24px;">
+      <div style="font-family:'Cinzel',serif;font-size:14px;color:var(--gold);font-weight:600;margin-bottom:6px;">XAUUSD — Lệnh Mẫu</div>
+      <div style="font-size:13px;color:var(--text);margin-bottom:4px;">Giao dịch theo ICT setup, vào lệnh đúng plan tại FVG H1.</div>
+      <div style="display:flex;gap:10px;margin-top:10px;">
+        <span style="color:var(--win);font-family:'Cinzel',serif;font-size:13px;font-weight:600;">✅ Win</span>
+        <span style="color:var(--gold);font-family:'Cinzel',serif;font-size:13px;">+2.5R</span>
+      </div>
+    </div>
+
+    <!-- RESET -->
+    <button onclick="resetTheme()" style="width:100%;padding:12px;border-radius:10px;border:1px solid #ef535055;background:none;color:#ef535099;font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;cursor:pointer;margin-bottom:20px;">↺ ĐẶT LẠI MẶC ĐỊNH</button>
+
+    <!-- APP INFO -->
+    <div style="text-align:center;padding:16px 0;border-top:1px solid var(--gold-faint);">
+      <div style="font-family:'Cinzel',serif;font-size:15px;color:var(--gold);letter-spacing:3px;margin-bottom:6px;">📒 TRADELOG</div>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:4px;">Nhật Ký Giao Dịch ICT</div>
+      <div style="font-size:11px;color:var(--gold-dim);font-family:'Cinzel',serif;letter-spacing:1px;">Phiên bản 2.0</div>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, orderBy, query } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 const firebaseConfig = {
   apiKey: "AIzaSyDO21Q-RPuEeREv56Cl9fGXGXqF7yDiq_s",
   authDomain: "backtest-2825d.firebaseapp.com",
@@ -460,749 +397,612 @@ const firebaseConfig = {
   messagingSenderId: "807404241259",
   appId: "1:807404241259:web:c65302e6cb83cd572d4c2e"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
-// TIMEFRAMES
 const TFS = ["D1","H4","H1","M30","M15","M5","M1","S30","S15","M2"];
 
-// DATE FORMAT: dd/mm/yyyy HH:mm
+// ── State ──
+let trades = [], currentTrade = null, currentTF = "D1";
+let currentFolder = "all", currentSort = "desc";
+let folders = ["all"];
+let formImages = {}, formCaptions = {};
+let editImages = {}, editCaptions = {};
+window.formDirty = false;
+
+// ══ UTILS ══
 function fmtDate(ts) {
   const d = new Date(ts);
-  const dd = String(d.getDate()).padStart(2,"0");
-  const mm = String(d.getMonth()+1).padStart(2,"0");
-  const yyyy = d.getFullYear();
-  const hh = String(d.getHours()).padStart(2,"0");
-  const min = String(d.getMinutes()).padStart(2,"0");
-  return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
+  return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
 }
-let trades = [];
-let currentTrade = null;
-let currentTF = "D1";
-let formImages = {};
-let formCaptions = {};
-let editImages = {};
-let editCaptions = {};
-let currentFolder = "all";
-let currentSort = "desc";
-let folders = ["all"];
+function showToast(msg) {
+  let t = document.querySelector(".toast");
+  if (!t) { t = document.createElement("div"); t.className="toast"; document.body.appendChild(t); }
+  t.textContent=msg; t.style.opacity="1";
+  clearTimeout(t._t); t._t=setTimeout(()=>t.style.opacity="0", 2400);
+}
+function compressImage(dataUrl, maxW=1200) {
+  return new Promise((res, rej) => {
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement("canvas");
+      const r=Math.min(1,maxW/img.width); c.width=img.width*r; c.height=img.height*r;
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+      res(c.toDataURL("image/jpeg",0.70));
+    };
+    img.onerror=()=>rej(new Error("Không thể đọc ảnh"));
+    img.src=dataUrl;
+  });
+}
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function estimateKB(obj) { return Math.round(JSON.stringify(obj).length/1024); }
 
-// Expose to window
-window.db = db;
-window.collection = collection;
-window.addDoc = addDoc;
-window.getDocs = getDocs;
-window.deleteDoc = deleteDoc;
-window.doc = doc;
-window.query = query;
-window.orderBy = orderBy;
-window.TFS = TFS;
-window.trades = trades;
-window.currentTrade = currentTrade;
-window.currentTF = currentTF;
-window.formImages = formImages;
+window.showScreen = function(name) {
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  const el=document.getElementById("screen-"+name);
+  if(el){el.classList.add("active");el.scrollTop=0;}
+  if(name==="stats") renderStats();
+  if(name==="settings") syncSettingsUI(themeSettings);
+  // FAB: show only on list screen
+  const fab=document.getElementById("fab-btn");
+  if(fab) fab.classList.toggle("visible", name==="list");
+};
+window.confirmBack = function(target) {
+  if(window.formDirty && !confirm("Bạn chưa lưu. Thoát không?")) return;
+  window.formDirty=false; showScreen(target);
+};
+window.toggleSelect = function(btn) {
+  document.querySelectorAll(`[data-group="${btn.dataset.group}"]`).forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active"); window.formDirty=true;
+};
+window.setSort = function(dir) {
+  currentSort=dir;
+  document.getElementById("sort-desc").classList.toggle("active",dir==="desc");
+  document.getElementById("sort-asc").classList.toggle("active",dir==="asc");
+  renderList();
+};
+window.setNow = function() {
+  const n=new Date();
+  document.getElementById("f-date").value=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-${String(n.getDate()).padStart(2,"0")}`;
+  document.getElementById("f-hour").value=n.getHours(); document.getElementById("f-minute").value=n.getMinutes();
+};
+window.setEditNow = function() {
+  const n=new Date();
+  document.getElementById("e-date").value=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-${String(n.getDate()).padStart(2,"0")}`;
+  document.getElementById("e-hour").value=n.getHours(); document.getElementById("e-minute").value=n.getMinutes();
+};
 
-// LOAD TRADES
+// ══ LOAD TRADES ══
 async function loadTrades() {
-  document.getElementById("trade-list").innerHTML = '<div class="loading">Đang tải...</div>';
+  document.getElementById("trade-list").innerHTML='<div class="loading">Đang tải...</div>';
   try {
-    const q = query(collection(db, "trades"), orderBy("createdAt", "desc"));
-    const snap = await getDocs(q);
-    trades.splice(0, trades.length);
-    snap.forEach(d => trades.push({ id: d.id, ...d.data() }));
-    window.trades = trades;
+    const snap=await getDocs(query(collection(db,"trades"),orderBy("createdAt","desc")));
+    trades.splice(0,trades.length);
+    snap.forEach(d=>trades.push({id:d.id,...d.data()}));
     renderList();
   } catch(e) {
-    document.getElementById("trade-list").innerHTML = '<div class="loading">Lỗi tải dữ liệu</div>';
+    document.getElementById("trade-list").innerHTML='<div class="loading">Lỗi tải dữ liệu</div>';
   }
 }
 
-function renderList() {
-  // Sort
-  const getTs = t => t.tradeDate || t.createdAt || 0;
-  const sorted = [...trades].sort((a, b) =>
-    currentSort === "desc" ? getTs(b) - getTs(a) : getTs(a) - getTs(b)
-  );
-
-  // Filter folder
-  const filtered = currentFolder === "all"
-    ? sorted
-    : sorted.filter(t => (t.folder || "Chưa phân loại") === currentFolder);
-
-  // Stats (always from all trades)
-  const wins = trades.filter(t => t.result === "Win").length;
-  const losses = trades.filter(t => t.result === "Loss").length;
-  const wr = trades.length ? Math.round(wins / trades.length * 100) : 0;
-  document.getElementById("stat-total").textContent = trades.length;
-  document.getElementById("stat-win").textContent = wins;
-  document.getElementById("stat-loss").textContent = losses;
-  document.getElementById("stat-wr").textContent = wr + "%";
-
-  const el = document.getElementById("trade-list");
-  if (!filtered.length) {
-    el.innerHTML = `<div class="empty"><div class="empty-icon">${currentFolder === "all" ? "📒" : "🗂"}</div><div class="empty-text">${currentFolder === "all" ? "Chưa có giao dịch nào<br>Nhấn + để thêm lệnh mới" : `Thư mục "${currentFolder}"<br>chưa có lệnh nào`}</div></div>`;
-    return;
+// ══ FOLDERS ══
+async function loadFolders() {
+  try {
+    const snap=await getDoc(doc(db,"app_config","folders"));
+    if(snap.exists()&&Array.isArray(snap.data().list)) folders=snap.data().list;
+    else {
+      const local=JSON.parse(localStorage.getItem("tl_folders")||"null");
+      if(Array.isArray(local)&&local.length>1){folders=local;await saveFolders();}
+    }
+  } catch(e) {
+    const local=JSON.parse(localStorage.getItem("tl_folders")||"null");
+    if(Array.isArray(local)) folders=local;
   }
-  el.innerHTML = filtered.map(t => {
-    const cls = t.result === "Win" ? "win" : t.result === "Loss" ? "loss" : "be";
-    const tags = Array.isArray(t.tags) ? t.tags.join(" · ") : (t.tags || "");
-    const date = t.tradeDate ? fmtDate(t.tradeDate) : (t.createdAt ? fmtDate(t.createdAt) : "");
-    const folderLabel = t.folder && t.folder !== "all" ? `<span style="font-size:10px;color:var(--gold-dim);background:var(--gold-faint);border-radius:4px;padding:1px 6px;margin-left:4px;">🗂 ${t.folder}</span>` : "";
+  if(!folders.includes("all")) folders.unshift("all");
+}
+async function saveFolders() {
+  try { await setDoc(doc(db,"app_config","folders"),{list:folders}); } catch(e){}
+  localStorage.setItem("tl_folders",JSON.stringify(folders));
+}
+function renderFolderBar() {
+  const emojis={all:"📂",Win:"✅",Loss:"❌",BE:"➖"};
+  document.getElementById("folder-bar").innerHTML=
+    folders.map(f=>{
+      const safe=f.replace(/'/g,"\\'");
+      return `<button class="folder-chip${currentFolder===f?" active":""}" onclick="selectFolder('${safe}')">${emojis[f]||"🗂"} ${esc(f==="all"?"Tất cả":f)}${f!=="all"?`<span onclick="event.stopPropagation();deleteFolder('${safe}')" style="margin-left:6px;opacity:0.55;font-size:11px;padding:2px 3px;border-radius:3px;" title="Xóa thư mục">✕</span>`:""}</button>`;
+    }).join("")+
+    `<button class="folder-chip add-folder" onclick="addFolder()">＋ Thêm</button>`;
+}
+function populateFolderSelects(selected="") {
+  ["f-folder","e-folder"].forEach(id=>{
+    const sel=document.getElementById(id); if(!sel) return;
+    const cur=sel.value||selected;
+    sel.innerHTML=`<option value="">— Không phân loại —</option>`+
+      folders.filter(f=>f!=="all").map(f=>`<option value="${f}"${f===cur?" selected":""}>${f}</option>`).join("");
+  });
+}
+window.selectFolder=function(f){currentFolder=f;renderFolderBar();renderList();};
+window.addFolder=async function(){
+  const name=prompt("Tên thư mục mới:"); if(!name?.trim()) return;
+  const t=name.trim();
+  if(folders.includes(t)){alert("Thư mục đã tồn tại!");return;}
+  folders.push(t); await saveFolders(); renderFolderBar(); populateFolderSelects();
+  showToast("✅ Đã tạo: "+t);
+};
+window.deleteFolder=async function(f){
+  if(!confirm(`Xóa thư mục "${f}"? Lệnh trong đó thành "Chưa phân loại".`)) return;
+  const idx=folders.indexOf(f); if(idx>-1) folders.splice(idx,1);
+  await saveFolders();
+  const toUpdate=trades.filter(t=>t.folder===f);
+  for(const t of toUpdate){try{await updateDoc(doc(db,"trades",t.id),{folder:""});}catch(e){}}
+  if(currentFolder===f) currentFolder="all";
+  renderFolderBar(); populateFolderSelects(); await loadTrades();
+  showToast("🗑 Đã xóa thư mục: "+f);
+};
+
+// ══ MOVE FOLDER MODAL ══
+window.openMoveFolder=function(){
+  if(!currentTrade) return;
+  const list=document.getElementById("modal-folder-list");
+  const all=["", ...folders.filter(f=>f!=="all")];
+  list.innerHTML=all.map(f=>{
+    const isCur=(currentTrade.folder||"")===f;
+    const safe=f.replace(/'/g,"\\'");
+    return `<div class="modal-option${isCur?" selected":""}" onclick="moveTradeToFolder('${safe}')">${f?"🗂 "+f:"📂 Không phân loại"}${isCur?" ✓":""}</div>`;
+  }).join("");
+  document.getElementById("modal-move").style.display="flex";
+};
+window.closeMoveFolder=function(e){if(e.target===document.getElementById("modal-move"))document.getElementById("modal-move").style.display="none";};
+window.moveTradeToFolder=async function(folder){
+  document.getElementById("modal-move").style.display="none";
+  if(!currentTrade) return;
+  try{
+    await updateDoc(doc(db,"trades",currentTrade.id),{folder});
+    currentTrade.folder=folder;
+    // update in local trades array too
+    const idx=trades.findIndex(t=>t.id===currentTrade.id);
+    if(idx>=0) trades[idx].folder=folder;
+    showToast("✅ Đã chuyển thư mục");
+    renderList();
+    // refresh banner
+    const displayDate=currentTrade.tradeDate?fmtDate(currentTrade.tradeDate):(currentTrade.createdAt?fmtDate(currentTrade.createdAt):"");
+    const cls=currentTrade.result==="Win"?"win":currentTrade.result==="Loss"?"loss":"be";
+    document.getElementById("detail-banner").innerHTML=`
+      <span style="font-size:13px;color:var(--gold);opacity:0.55;font-style:italic;">${displayDate}${folder?" · 🗂 "+folder:""}</span>
+      <span class="${cls}" style="font-family:'Cinzel',serif;font-size:15px;font-weight:600;">${currentTrade.result||""} ${currentTrade.pnl||""}</span>`;
+  }catch(e){alert("Lỗi: "+e.message);}
+};
+
+// ══ RENDER LIST ══
+function renderList() {
+  const search=(document.getElementById("search-input")?.value||"").toLowerCase().trim();
+  const getTs=t=>t.tradeDate||t.createdAt||0;
+  let list=[...trades].sort((a,b)=>currentSort==="desc"?getTs(b)-getTs(a):getTs(a)-getTs(b));
+  if(currentFolder!=="all") list=list.filter(t=>(t.folder||"")===currentFolder);
+  if(search) list=list.filter(t=>
+    (t.title||"").toLowerCase().includes(search)||
+    (t.symbol||"").toLowerCase().includes(search)||
+    (Array.isArray(t.tags)?t.tags:[t.tags||""]).join(" ").toLowerCase().includes(search)
+  );
+  const wins=trades.filter(t=>t.result==="Win").length, losses=trades.filter(t=>t.result==="Loss").length;
+  document.getElementById("stat-total").textContent=trades.length;
+  document.getElementById("stat-win").textContent=wins;
+  document.getElementById("stat-loss").textContent=losses;
+  document.getElementById("stat-wr").textContent=(trades.length?Math.round(wins/trades.length*100):0)+"%";
+  const el=document.getElementById("trade-list");
+  if(!list.length){el.innerHTML=`<div class="empty"><div class="empty-icon">${search?"🔍":"📒"}</div><div class="empty-text">${search?`Không tìm thấy<br>"${search}"`:"Chưa có giao dịch nào<br>Nhấn + để thêm"}</div></div>`;return;}
+  el.innerHTML=list.map(t=>{
+    const cls=t.result==="Win"?"win":t.result==="Loss"?"loss":"be";
+    const tags=Array.isArray(t.tags)?t.tags.join(" · "):(t.tags||"");
+    const date=t.tradeDate?fmtDate(t.tradeDate):(t.createdAt?fmtDate(t.createdAt):"");
+    const fb=t.folder?`<span style="font-size:10px;color:var(--gold);opacity:0.7;background:var(--gold-faint);border-radius:4px;padding:1px 6px;margin-left:6px;">🗂 ${esc(t.folder)}</span>`:"";
     return `<div class="trade-item" onclick="openDetail('${t.id}')">
-      <div>
-        <div class="trade-title">${t.title || "—"}${folderLabel}</div>
-        <div class="trade-tags">${tags}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="trade-title">${esc(t.title)||"—"}${fb}</div>
+        ${tags?`<div class="trade-tags">${esc(tags)}</div>`:""}
         <div class="trade-date">${date}</div>
       </div>
-      <div class="trade-right">
-        <div class="trade-pnl ${cls}">${t.pnl || "—"}</div>
-        <div style="font-size:12px;color:#c9a84caa;margin-top:4px;">${t.symbol || ""}</div>
+      <div style="text-align:right;flex-shrink:0;margin-left:10px;">
+        <div class="trade-pnl ${cls}">${esc(t.pnl)||"—"}</div>
+        <div style="font-size:12px;color:var(--gold);opacity:0.5;margin-top:4px;">${esc(t.symbol)||""}</div>
       </div>
     </div>`;
   }).join("");
 }
 
-window.openDetail = function(id) {
-  currentTrade = trades.find(t => t.id === id);
-  window.currentTrade = currentTrade;
-  if (!currentTrade) return;
-  currentTF = "D1";
-
-  const cls = currentTrade.result === "Win" ? "win" : currentTrade.result === "Loss" ? "loss" : "be";
-  document.getElementById("detail-header-title").textContent = (currentTrade.title || "").substring(0, 20);
-  const displayDate = currentTrade.tradeDate ? fmtDate(currentTrade.tradeDate) : (currentTrade.createdAt ? fmtDate(currentTrade.createdAt) : "");
-  document.getElementById("detail-banner").innerHTML = `
-    <span style="font-size:13px;color:#c9a84caa;font-style:italic">${displayDate}</span>
-    <span class="${cls}" style="font-family:'Cinzel',serif;font-size:15px;font-weight:600">${currentTrade.result || ""} ${currentTrade.pnl || ""}</span>
-  `;
-
-  const items = [
-    ["Symbol", currentTrade.symbol || "—"],
-    ["P&L", currentTrade.pnl || "—"],
-    ["Theo plan", currentTrade.onplan || "—"],
-  ];
-  document.getElementById("detail-grid").innerHTML = items.map(([l,v]) =>
-    `<div class="stats-cell"><div class="lbl">${l}</div><div class="val">${v}</div></div>`
-  ).join("");
-
-  document.getElementById("detail-note").textContent = currentTrade.note || "Không có ghi chú.";
-
-  // TF tabs — highlight those with images
-  const imgs = currentTrade.images || {};
-  document.getElementById("detail-tf-tabs").innerHTML = TFS.map(tf => {
-    const tfImgs = imgs[tf];
-    const hasImg = Array.isArray(tfImgs) ? tfImgs.length > 0 : !!tfImgs;
-    return `<button class="tf-tab ${tf === currentTF ? 'active':''} ${hasImg ? 'has-img':''}" onclick="switchTF('${tf}')" id="tab-${tf}">${tf}</button>`;
+// ══ DETAIL ══
+window.openDetail=function(id){
+  currentTrade=trades.find(t=>t.id===id); if(!currentTrade) return;
+  currentTF="D1";
+  const cls=currentTrade.result==="Win"?"win":currentTrade.result==="Loss"?"loss":"be";
+  document.getElementById("detail-header-title").textContent=(currentTrade.title||"").substring(0,20);
+  const dd=currentTrade.tradeDate?fmtDate(currentTrade.tradeDate):(currentTrade.createdAt?fmtDate(currentTrade.createdAt):"");
+  document.getElementById("detail-banner").innerHTML=`
+    <span style="font-size:13px;color:var(--gold);opacity:0.55;font-style:italic;">${dd}${currentTrade.folder?" · 🗂 "+esc(currentTrade.folder):""}</span>
+    <span class="${cls}" style="font-family:'Cinzel',serif;font-size:15px;font-weight:600;">${esc(currentTrade.result)||""} ${esc(currentTrade.pnl)||""}</span>`;
+  document.getElementById("detail-grid").innerHTML=[["Symbol",currentTrade.symbol||"—"],["P&L",currentTrade.pnl||"—"],["Theo plan",currentTrade.onplan||"—"]].map(([l,v])=>`<div class="stats-cell"><div class="lbl">${l}</div><div class="val" style="word-break:break-word;font-size:13px;">${v}</div></div>`).join("");
+  document.getElementById("detail-note").textContent=currentTrade.note||"Không có ghi chú.";
+  const imgs=currentTrade.images||{};
+  document.getElementById("detail-tf-tabs").innerHTML=TFS.map(tf=>{
+    const v=imgs[tf]; const hi=Array.isArray(v)?v.length>0:!!v;
+    return `<button class="tf-tab${tf===currentTF?" active":""}${hi?" has-img":""}" onclick="switchTF('${tf}')" id="tab-${tf}">${tf}</button>`;
   }).join("");
   renderTFPreview();
-
-  document.getElementById("ai-result").style.display = "none";
-  document.getElementById("ai-btn").disabled = false;
-  document.getElementById("ai-btn").textContent = "🤖 PHÂN TÍCH AI";
+  document.getElementById("ai-result").style.display="none";
+  const ab=document.getElementById("ai-btn"); ab.disabled=false; ab.textContent="🤖 PHÂN TÍCH AI";
   showScreen("detail");
 };
-
-window.switchTF = function(tf) {
-  currentTF = tf;
-  window.currentTF = tf;
-  const imgs = (currentTrade && currentTrade.images) ? currentTrade.images : {};
-  TFS.forEach(t => {
-    const el = document.getElementById("tab-" + t);
-    if (!el) return;
-    const tfImgs = imgs[t];
-    const hasImg = Array.isArray(tfImgs) ? tfImgs.length > 0 : !!tfImgs;
-    el.className = "tf-tab" + (t === tf ? " active" : "") + (hasImg ? " has-img" : "");
-  });
+window.switchTF=function(tf){
+  currentTF=tf;
+  const imgs=currentTrade?.images||{};
+  TFS.forEach(t=>{const el=document.getElementById("tab-"+t);if(!el)return;const v=imgs[t];const hi=Array.isArray(v)?v.length>0:!!v;el.className="tf-tab"+(t===tf?" active":"")+(hi?" has-img":"");});
   renderTFPreview();
 };
-
-function renderTFPreview() {
-  const imgs = (currentTrade && currentTrade.images) ? currentTrade.images : {};
-  const captions = (currentTrade && currentTrade.captions) ? currentTrade.captions : {};
-  const tfImgs = imgs[currentTF];
-  const caption = captions[currentTF];
-  const el = document.getElementById("detail-tf-preview");
-  el.style.height = "auto";
-
-  // Support both old single image (string) and new multiple images (array)
-  const imgList = Array.isArray(tfImgs) ? tfImgs : (tfImgs ? [tfImgs] : []);
-
-  if (imgList.length > 0) {
-    el.innerHTML = `
-      <div style="width:100%;">
-        <div style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;">
-          ${imgList.map((src, i) => `
-            <img src="${src}" onclick="openDetailImgFull('${currentTF}',${i})" 
-              style="width:${imgList.length === 1 ? '100%' : 'calc(50% - 4px)'};border-radius:8px;object-fit:cover;cursor:pointer;display:block;"/>
-          `).join("")}
-        </div>
-        ${caption ? `<div style="padding:8px 12px 12px;font-size:16px;color:var(--text-dim);font-style:italic;line-height:1.6;border-top:1px solid var(--gold-faint);">💬 ${caption}</div>` : ""}
-      </div>`;
-  } else {
-    el.style.height = "160px";
-    el.innerHTML = `<div class="no-img">📊<br><br>Chưa có ảnh ${currentTF}</div>`;
-  }
+function renderTFPreview(){
+  const imgs=currentTrade?.images||{}, caps=currentTrade?.captions||{};
+  const v=imgs[currentTF], cap=caps[currentTF];
+  const el=document.getElementById("detail-tf-preview"); el.style.height="auto";
+  const list=Array.isArray(v)?v:(v?[v]:[]);
+  if(list.length){
+    el.innerHTML=`<div style="width:100%;"><div style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;">${list.map((src,i)=>`<img src="${src}" onclick="openImgFull('${currentTF}',${i})" style="width:${list.length===1?"100%":"calc(50% - 4px)"};border-radius:8px;object-fit:cover;cursor:pointer;display:block;"/>`).join("")}</div>${cap?`<div style="padding:8px 12px 12px;font-size:16px;color:var(--text);font-style:italic;line-height:1.6;border-top:1px solid var(--gold-faint);">💬 ${cap}</div>`:""}</div>`;
+  } else { el.style.height="160px"; el.innerHTML=`<div class="no-img">📊<br><br>Chưa có ảnh ${currentTF}</div>`; }
 }
-
-window.openDetailImgFull = function(tf, idx) {
-  const imgs = (currentTrade && currentTrade.images) ? currentTrade.images : {};
-  const tfImgs = imgs[tf];
-  const imgList = Array.isArray(tfImgs) ? tfImgs : (tfImgs ? [tfImgs] : []);
-  const src = imgList[idx];
-  if (!src) return;
-  const overlay = document.createElement("div");
-  overlay.style.cssText = "position:fixed;inset:0;background:#000000ee;z-index:999;display:flex;align-items:center;justify-content:center;cursor:pointer;";
-  overlay.innerHTML = `<img src="${src}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px;"/>`;
-  overlay.onclick = () => document.body.removeChild(overlay);
-  document.body.appendChild(overlay);
+window.openImgFull=function(tf,idx){
+  const v=currentTrade?.images?.[tf]; const list=Array.isArray(v)?v:(v?[v]:[]); const src=list[idx]; if(!src) return;
+  const o=document.createElement("div"); o.style.cssText="position:fixed;inset:0;background:#000000ee;z-index:999;display:flex;align-items:center;justify-content:center;cursor:pointer;";
+  o.innerHTML=`<img src="${src}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px;"/>`;
+  o.onclick=()=>document.body.removeChild(o); document.body.appendChild(o);
 };
 
-// SAVE TRADE
-window.saveTrade = async function() {
-  const title = document.getElementById("f-title").value.trim();
-  if (!title) { alert("Vui lòng nhập tên lệnh!"); return; }
-
-  const result = document.querySelector('[data-group="result"].active')?.dataset.val || "Win";
-  const onplan = document.querySelector('[data-group="onplan"].active')?.dataset.val || "";
-  const tags = document.getElementById("f-tags").value.split(",").map(t=>t.trim()).filter(Boolean);
-
-  // Collect captions
-  TFS.forEach(tf => {
-    const cap = document.getElementById("tf-caption-" + tf)?.value.trim();
-    if (cap) formCaptions[tf] = cap;
-  });
-
-  const dateVal = document.getElementById("f-date").value;
-  const hour = document.getElementById("f-hour").value || "0";
-  const minute = document.getElementById("f-minute").value || "0";
-  let tradeDate = null;
-  if (dateVal) {
-    const d = new Date(dateVal);
-    d.setHours(parseInt(hour), parseInt(minute), 0);
-    tradeDate = d.getTime();
-  }
-  const trade = {
-    title,
-    symbol: document.getElementById("f-symbol").value.trim(),
-    pnl: document.getElementById("f-pnl").value.trim(),
-    note: document.getElementById("f-note").value.trim(),
-    folder: document.getElementById("f-folder").value.trim() || "",
-    result, onplan, tags,
-    images: { ...formImages },
-    captions: { ...formCaptions },
-    tradeDate,
-    createdAt: Date.now(),
-  };
-
-  try {
-    await addDoc(collection(db, "trades"), trade);
-    await loadTrades();
-    showScreen("list");
-  } catch(e) {
-    alert("Lỗi lưu: " + e.message);
-  }
+// ══ SAVE ══
+window.saveTrade=async function(){
+  const title=document.getElementById("f-title").value.trim();
+  if(!title){alert("Vui lòng nhập tên lệnh!");return;}
+  const btn=document.getElementById("save-btn"); btn.disabled=true; btn.textContent="Đang lưu...";
+  TFS.forEach(tf=>{const c=document.getElementById("tf-caption-"+tf)?.value.trim();if(c) formCaptions[tf]=c;});
+  const dateVal=document.getElementById("f-date").value, hour=document.getElementById("f-hour").value||"0", min=document.getElementById("f-minute").value||"0";
+  let tradeDate=null; if(dateVal){const d=new Date(dateVal);d.setHours(+hour,+min,0);tradeDate=d.getTime();}
+  const trade={title,symbol:document.getElementById("f-symbol").value.trim(),pnl:document.getElementById("f-pnl").value.trim(),note:document.getElementById("f-note").value.trim(),folder:document.getElementById("f-folder").value||"",result:document.querySelector('[data-group="result"].active')?.dataset.val||"Win",onplan:document.querySelector('[data-group="onplan"].active')?.dataset.val||"",tags:document.getElementById("f-tags").value.split(",").map(t=>t.trim()).filter(Boolean),images:{...formImages},captions:{...formCaptions},tradeDate,createdAt:Date.now()};
+  if(estimateKB(trade)>900){alert(`⚠️ Dữ liệu quá lớn. Xóa bớt ảnh trước.`);btn.disabled=false;btn.textContent="LƯU LỆNH";return;}
+  try{await addDoc(collection(db,"trades"),trade);window.formDirty=false;showToast("✅ Đã lưu lệnh");await loadTrades();showScreen("list");}catch(e){alert("Lỗi lưu: "+e.message);}
+  btn.disabled=false; btn.textContent="LƯU LỆNH";
 };
 
-// DELETE
-window.deleteTrade = async function() {
-  if (!currentTrade) return;
-  if (!confirm("Xóa lệnh này?")) return;
-  try {
-    await deleteDoc(doc(db, "trades", currentTrade.id));
-    await loadTrades();
-    showScreen("list");
-  } catch(e) { alert("Lỗi xóa: " + e.message); }
+// ══ DELETE ══
+window.deleteTrade=async function(){
+  if(!currentTrade||!confirm("Xóa lệnh này? Không thể hoàn tác.")) return;
+  try{await deleteDoc(doc(db,"trades",currentTrade.id));showToast("🗑 Đã xóa lệnh");await loadTrades();showScreen("list");}catch(e){alert("Lỗi xóa: "+e.message);}
 };
 
-// AI ANALYSIS
-window.analyzeAI = async function() {
-  if (!currentTrade) return;
-  const btn = document.getElementById("ai-btn");
-  btn.disabled = true;
-  btn.textContent = "⚙️ Đang phân tích...";
-  const resultEl = document.getElementById("ai-result");
-  resultEl.style.display = "block";
-  resultEl.textContent = "Đang kết nối AI...";
-
-  const imgs = currentTrade.images || {};
-  const tfList = TFS.filter(tf => {
-    const v = imgs[tf];
-    return Array.isArray(v) ? v.length > 0 : !!v;
-  }).join(", ") || "Chưa có";
-
-  const prompt = `Bạn là ICT trader chuyên nghiệp. Phân tích giao dịch:
-
-Tên lệnh: ${currentTrade.title}
-Symbol: ${currentTrade.symbol || "N/A"}
-Kết quả: ${currentTrade.result} | P&L: ${currentTrade.pnl || "N/A"}
-Theo plan: ${currentTrade.onplan || "N/A"}
-Ghi chú của trader: ${currentTrade.note || "Không có"}
-Timeframes có ảnh: ${tfList}
-Tags: ${Array.isArray(currentTrade.tags) ? currentTrade.tags.join(", ") : (currentTrade.tags || "Không có")}
-
-Dựa trên thông tin trên, phân tích ngắn gọn bằng tiếng Việt:
-1. **Nhận xét tổng quan** — Lệnh này có tốt không?
-2. **Execution** — Vào đúng plan không, có điểm nào cần cải thiện?
-3. **Bài học rút ra** — Điều quan trọng nhất cần ghi nhớ?
-4. **Điểm mạnh** — Điều trader đã làm tốt?`;
-
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        messages: [{ role: "user", content: prompt }]
-      })
-    });
-    const data = await res.json();
-    const text = data.content?.map(i => i.text || "").join("\n") || "Không thể phân tích.";
-    resultEl.textContent = text;
-  } catch {
-    resultEl.textContent = "❌ Lỗi kết nối. Thử lại sau.";
-  }
-  btn.disabled = false;
-  btn.textContent = "🔄 Phân Tích Lại";
+// ══ DUPLICATE ══
+window.duplicateTrade=async function(){
+  if(!currentTrade||!confirm("Nhân bản lệnh này?")) return;
+  const {id,...data}=currentTrade;
+  try{await addDoc(collection(db,"trades"),{...data,title:"[Copy] "+data.title,createdAt:Date.now(),tradeDate:null});showToast("📋 Đã nhân bản");await loadTrades();showScreen("list");}catch(e){alert("Lỗi: "+e.message);}
 };
 
-// SCREEN NAV
-window.showScreen = function(name) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  document.getElementById("screen-" + name).classList.add("active");
-  document.getElementById("screen-" + name).scrollTop = 0;
+// ══ AI ══
+window.analyzeAI=async function(){
+  if(!currentTrade) return;
+  const btn=document.getElementById("ai-btn"); btn.disabled=true; btn.textContent="⚙️ Đang phân tích...";
+  const res=document.getElementById("ai-result"); res.style.display="block"; res.textContent="Đang kết nối AI...";
+  const imgs=currentTrade.images||{};
+  const tfList=TFS.filter(tf=>{const v=imgs[tf];return Array.isArray(v)?v.length>0:!!v;}).join(", ")||"Chưa có";
+  const prompt=`Bạn là ICT trader chuyên nghiệp. Phân tích giao dịch:\nTên lệnh: ${currentTrade.title}\nSymbol: ${currentTrade.symbol||"N/A"}\nKết quả: ${currentTrade.result} | P&L: ${currentTrade.pnl||"N/A"}\nTheo plan: ${currentTrade.onplan||"N/A"}\nGhi chú: ${currentTrade.note||"Không có"}\nTimeframes có ảnh: ${tfList}\nTags: ${Array.isArray(currentTrade.tags)?currentTrade.tags.join(", "):(currentTrade.tags||"Không có")}\n\nPhân tích ngắn gọn bằng tiếng Việt:\n1. **Nhận xét tổng quan**\n2. **Execution**\n3. **Bài học rút ra**\n4. **Điểm mạnh**`;
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+    const data=await r.json();
+    res.textContent=data.content?.map(i=>i.text||"").join("\n")||"Không thể phân tích.";
+  }catch{res.textContent="❌ Lỗi kết nối. Thử lại sau.";}
+  btn.disabled=false; btn.textContent="🔄 Phân Tích Lại";
 };
 
-window.openNew = function() {
-  // reset form
-  ["f-title","f-symbol","f-tags","f-note","f-pnl","f-date","f-hour","f-minute"].forEach(id => {
-    document.getElementById(id).value = "";
-  });
-  document.querySelectorAll('[data-group="result"]').forEach((b,i) => b.classList.toggle("active", i===0));
-  document.querySelectorAll('[data-group="onplan"]').forEach((b,i) => b.classList.toggle("active", i===0));
-  Object.keys(formImages).forEach(k => delete formImages[k]);
-  Object.keys(formCaptions).forEach(k => delete formCaptions[k]);
-  populateFolderSelect("f-folder", "");
-  buildTFUploadRow();
-  TFS.forEach(tf => renderTFImages(tf));
-  showScreen("new");
+// ══ OPEN NEW ══
+window.openNew=function(){
+  ["f-title","f-symbol","f-tags","f-note","f-pnl","f-date","f-hour","f-minute"].forEach(id=>{const el=document.getElementById(id);if(el) el.value="";});
+  document.querySelectorAll('[data-group="result"]').forEach(b=>b.classList.toggle("active", b.dataset.val==="Win"));
+  document.querySelectorAll('[data-group="onplan"]').forEach(b=>b.classList.toggle("active", b.dataset.val==="Đúng plan"));
+  Object.keys(formImages).forEach(k=>delete formImages[k]);
+  Object.keys(formCaptions).forEach(k=>delete formCaptions[k]);
+  populateFolderSelects(); buildTFUploadRow(); TFS.forEach(tf=>renderTFImages(tf));
+  window.formDirty=false; showScreen("new");
 };
 
-window.setNow = function() {
-  const now = new Date();
-  const yyyy = now.getFullYear();
-  const mm = String(now.getMonth()+1).padStart(2,"0");
-  const dd = String(now.getDate()).padStart(2,"0");
-  document.getElementById("f-date").value = `${yyyy}-${mm}-${dd}`;
-  document.getElementById("f-hour").value = now.getHours();
-  document.getElementById("f-minute").value = now.getMinutes();
-};
-
-window.toggleSelect = function(btn) {
-  const group = btn.dataset.group;
-  document.querySelectorAll(`[data-group="${group}"]`).forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
-};
-
-function buildTFUploadRow() {
-  const row = document.getElementById("tf-upload-row");
-  row.innerHTML = TFS.map(tf => `
+// ══ IMAGE UPLOAD (NEW) ══
+function buildTFUploadRow(){
+  document.getElementById("tf-upload-row").innerHTML=TFS.map(tf=>`
     <div style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:10px;padding:12px;">
-      <!-- Header -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold);letter-spacing:2px;">${tf}</div>
-        <button onclick="addTFImage('${tf}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:4px 10px;color:var(--gold);font-size:11px;cursor:pointer;font-family:'Cinzel',serif;">+ Thêm ảnh</button>
+        <button onclick="addTFImg('${tf}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:4px 10px;color:var(--gold);font-size:11px;cursor:pointer;font-family:'Cinzel',serif;">+ Thêm ảnh</button>
       </div>
-      <!-- Images grid -->
       <div id="tf-images-${tf}" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;min-height:60px;"></div>
-      <!-- Caption -->
-      <div style="font-size:9px;letter-spacing:2px;color:var(--gold-dim);font-family:'Cinzel',serif;margin-bottom:5px;">CHÚ THÍCH</div>
-      <textarea id="tf-caption-${tf}" placeholder="Ghi chú cho khung ${tf}..." 
-        style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:16px;font-family:'Crimson Pro',serif;outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;"
-        onpaste="handlePasteCaption('${tf}', event)"></textarea>
-      <div style="font-size:10px;color:var(--gold-dim);opacity:0.6;margin-top:4px;">💡 Ctrl+V trong ô chú thích để dán ảnh nhanh</div>
-      <input type="file" accept="image/*" multiple style="display:none" id="tf-input-${tf}" onchange="handleImgMulti('${tf}', this)"/>
-    </div>
-  `).join("");
+      <div style="font-size:10px;letter-spacing:2px;color:var(--gold);opacity:0.65;font-family:'Cinzel',serif;margin-bottom:5px;">CHÚ THÍCH</div>
+      <textarea id="tf-caption-${tf}" placeholder="Ghi chú cho khung ${tf}..." style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:16px;font-family:'Crimson Pro',serif;outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;" onpaste="handlePaste('${tf}',event)"></textarea>
+      <input type="file" accept="image/*" multiple style="display:none" id="tf-input-${tf}" onchange="handleImgMulti('${tf}',this)"/>
+    </div>`).join("");
 }
-
-window.addTFImage = function(tf) {
-  document.getElementById("tf-input-" + tf).click();
-};
-
-window.clearTFImage = function(tf, idx) {
-  if (!formImages[tf]) return;
-  formImages[tf].splice(idx, 1);
-  renderTFImages(tf);
-};
-
-function renderTFImages(tf) {
-  const imgs = formImages[tf] || [];
-  const container = document.getElementById("tf-images-" + tf);
-  if (!container) return;
-  if (imgs.length === 0) {
-    container.innerHTML = `<div style="color:var(--gold-faint);font-size:12px;padding:10px;">Chưa có ảnh — nhấn "+ Thêm ảnh" hoặc Ctrl+V</div>`;
-    return;
-  }
-  container.innerHTML = imgs.map((src, i) => `
-    <div style="position:relative;flex:0 0 auto;">
-      <img src="${src}" style="width:90px;height:68px;object-fit:cover;border-radius:7px;border:1px solid var(--gold-dim);display:block;cursor:pointer;" onclick="openImgFull('${tf}',${i})"/>
-      <button onclick="clearTFImage('${tf}',${i})" style="position:absolute;top:2px;right:2px;background:#000000aa;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:10px;cursor:pointer;line-height:1;">✕</button>
-    </div>
-  `).join("");
+window.addTFImg=tf=>document.getElementById("tf-input-"+tf).click();
+window.clearTFImg=function(tf,i){if(!formImages[tf]) return;formImages[tf].splice(i,1);renderTFImages(tf);};
+function renderTFImages(tf){
+  const imgs=formImages[tf]||[]; const c=document.getElementById("tf-images-"+tf); if(!c) return;
+  if(!imgs.length){c.innerHTML=`<div style="color:var(--gold);opacity:0.35;font-size:12px;padding:10px;">Chưa có ảnh</div>`;return;}
+  c.innerHTML=imgs.map((src,i)=>`<div style="position:relative;flex:0 0 auto;"><img src="${src}" style="width:90px;height:68px;object-fit:cover;border-radius:7px;border:1px solid var(--gold-dim);display:block;cursor:pointer;" onclick="viewImg(this.parentElement.querySelector('img').src)"/><button onclick="clearTFImg('${tf}',${i})" style="position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:10px;cursor:pointer;line-height:1;">✕</button></div>`).join("");
 }
-
-window.openImgFull = function(tf, idx) {
-  const src = (formImages[tf] || [])[idx];
-  if (!src) return;
-  const overlay = document.createElement("div");
-  overlay.style.cssText = "position:fixed;inset:0;background:#000000ee;z-index:999;display:flex;align-items:center;justify-content:center;cursor:pointer;";
-  overlay.innerHTML = `<img src="${src}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px;"/>`;
-  overlay.onclick = () => document.body.removeChild(overlay);
-  document.body.appendChild(overlay);
+window.viewImg=function(src){const o=document.createElement("div");o.style.cssText="position:fixed;inset:0;background:#000e;z-index:999;display:flex;align-items:center;justify-content:center;cursor:pointer;";o.innerHTML=`<img src="${src}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px;"/>`;o.onclick=()=>document.body.removeChild(o);document.body.appendChild(o);};
+window.handlePaste=function(tf,event){
+  const items=event.clipboardData?.items; if(!items) return;
+  for(const item of items){if(item.type.startsWith("image/")){event.preventDefault();const reader=new FileReader();reader.onload=async e=>{try{const c=await compressImage(e.target.result);if(!formImages[tf])formImages[tf]=[];formImages[tf].push(c);window.formDirty=true;renderTFImages(tf);}catch(err){showToast("⚠️ Không thể đọc ảnh");}};reader.readAsDataURL(item.getAsFile());return;}}
+};
+window.handleImgMulti=function(tf,input){
+  const files=Array.from(input.files); if(!files.length) return;
+  if(!formImages[tf]) formImages[tf]=[];
+  let loaded=0;
+  files.forEach(file=>{const r=new FileReader();r.onload=async e=>{try{const c=await compressImage(e.target.result);formImages[tf].push(c);}catch(err){showToast("⚠️ Không thể đọc ảnh");}loaded++;window.formDirty=true;if(loaded===files.length)renderTFImages(tf);};r.readAsDataURL(file);});
+  input.value="";
 };
 
-function compressImage(dataUrl, maxWidth = 1600) {
-  return new Promise(resolve => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      const ratio = Math.min(1, maxWidth / img.width);
-      canvas.width = img.width * ratio;
-      canvas.height = img.height * ratio;
-      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
-      resolve(canvas.toDataURL("image/jpeg", 0.90));
-    };
-    img.src = dataUrl;
-  });
-}
-
-window.handlePasteCaption = function(tf, event) {
-  const items = event.clipboardData?.items;
-  if (!items) return;
-  for (const item of items) {
-    if (item.type.startsWith("image/")) {
-      event.preventDefault();
-      const file = item.getAsFile();
-      const reader = new FileReader();
-      reader.onload = async e => {
-        const compressed = await compressImage(e.target.result);
-        if (!formImages[tf]) formImages[tf] = [];
-        formImages[tf].push(compressed);
-        window.formImages = formImages;
-        renderTFImages(tf);
-      };
-      reader.readAsDataURL(file);
-      return;
-    }
-  }
+// ══ EDIT ══
+window.openEdit=function(){
+  if(!currentTrade) return; const t=currentTrade;
+  document.getElementById("e-title").value=t.title||""; document.getElementById("e-symbol").value=t.symbol||""; document.getElementById("e-pnl").value=t.pnl||""; document.getElementById("e-note").value=t.note||""; document.getElementById("e-tags").value=Array.isArray(t.tags)?t.tags.join(", "):(t.tags||"");
+  populateFolderSelects(t.folder||""); document.getElementById("e-folder").value=t.folder||"";
+  if(t.tradeDate){const d=new Date(t.tradeDate);document.getElementById("e-date").value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;document.getElementById("e-hour").value=d.getHours();document.getElementById("e-minute").value=d.getMinutes();}
+  else{["e-date","e-hour","e-minute"].forEach(id=>document.getElementById(id).value="");}
+  document.querySelectorAll('[data-group="e-result"]').forEach(b=>b.classList.toggle("active",b.dataset.val===(t.result||"Win")));
+  document.querySelectorAll('[data-group="e-onplan"]').forEach(b=>b.classList.toggle("active",b.dataset.val===(t.onplan||"Đúng plan")));
+  Object.keys(editImages).forEach(k=>delete editImages[k]); Object.keys(editCaptions).forEach(k=>delete editCaptions[k]);
+  const si=t.images||{}, sc=t.captions||{};
+  TFS.forEach(tf=>{const v=si[tf];editImages[tf]=Array.isArray(v)?[...v]:(v?[v]:[]);editCaptions[tf]=sc[tf]||"";});
+  buildEditTFUploadRow(); TFS.forEach(tf=>{renderEditTFImages(tf);const c=document.getElementById("e-tf-caption-"+tf);if(c) c.value=editCaptions[tf]||"";});
+  window.formDirty=false; showScreen("edit");
 };
-
-window.handleImgMulti = function(tf, input) {
-  const files = Array.from(input.files);
-  if (!files.length) return;
-  if (!formImages[tf]) formImages[tf] = [];
-  let loaded = 0;
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = async e => {
-      const compressed = await compressImage(e.target.result);
-      formImages[tf].push(compressed);
-      loaded++;
-      if (loaded === files.length) {
-        window.formImages = formImages;
-        renderTFImages(tf);
-      }
-    };
-    reader.readAsDataURL(file);
-  });
-  input.value = "";
-};
-
-window.clearTF = function(tf) {
-  formImages[tf] = [];
-  delete formCaptions[tf];
-  renderTFImages(tf);
-  const cap = document.getElementById("tf-caption-" + tf);
-  if (cap) cap.value = "";
-};
-
-function populateFolderSelect(selectId, selectedVal) {
-  const sel = document.getElementById(selectId);
-  if (!sel) return;
-  sel.innerHTML = `<option value="">— Không phân loại —</option>` +
-    folders.filter(f => f !== "all").map(f =>
-      `<option value="${f}" ${f === selectedVal ? 'selected' : ''}>${f}</option>`
-    ).join("");
-}
-
-// FOLDERS
-const FOLDER_STORAGE_KEY = "tradelog_folders";
-
-function saveFolders() {
-  localStorage.setItem(FOLDER_STORAGE_KEY, JSON.stringify(folders));
-}
-
-function loadFolders() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(FOLDER_STORAGE_KEY) || "null");
-    if (Array.isArray(saved) && saved.length) {
-      folders = saved;
-      if (!folders.includes("all")) folders.unshift("all");
-    }
-  } catch(e) {}
-}
-
-function renderFolderBar() {
-  const bar = document.getElementById("folder-bar");
-  const folderEmojis = { "all": "📂", "Win": "✅", "Loss": "❌", "BE": "➖" };
-  bar.innerHTML = folders.map(f => {
-    const emoji = folderEmojis[f] || "🗂";
-    const label = f === "all" ? "Tất cả" : f;
-    return `<button class="folder-chip ${currentFolder === f ? 'active' : ''}" data-folder="${f}" onclick="selectFolder('${f}')">${emoji} ${label}</button>`;
-  }).join("") +
-  `<button class="folder-chip add-folder" onclick="addFolder()">＋ Thêm</button>`;
-}
-
-window.selectFolder = function(f) {
-  currentFolder = f;
-  renderFolderBar();
-  renderList();
-};
-
-window.addFolder = function() {
-  const name = prompt("Tên thư mục mới:");
-  if (!name || !name.trim()) return;
-  const trimmed = name.trim();
-  if (folders.includes(trimmed)) { alert("Thư mục đã tồn tại!"); return; }
-  folders.push(trimmed);
-  saveFolders();
-  renderFolderBar();
-};
-
-window.setSort = function(dir) {
-  currentSort = dir;
-  document.getElementById("sort-desc").classList.toggle("active", dir === "desc");
-  document.getElementById("sort-asc").classList.toggle("active", dir === "asc");
-  renderList();
-};
-
-// EDIT FORM
-window.editImages = editImages;
-window.editCaptions = editCaptions;
-
-function buildEditTFUploadRow() {
-  const row = document.getElementById("e-tf-upload-row");
-  row.innerHTML = TFS.map(tf => `
+function buildEditTFUploadRow(){
+  document.getElementById("e-tf-upload-row").innerHTML=TFS.map(tf=>`
     <div style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:10px;padding:12px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold);letter-spacing:2px;">${tf}</div>
-        <button onclick="addEditTFImage('${tf}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:4px 10px;color:var(--gold);font-size:11px;cursor:pointer;font-family:'Cinzel',serif;">+ Thêm ảnh</button>
+        <button onclick="addEditTFImg('${tf}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:4px 10px;color:var(--gold);font-size:11px;cursor:pointer;font-family:'Cinzel',serif;">+ Thêm ảnh</button>
       </div>
       <div id="e-tf-images-${tf}" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;min-height:60px;"></div>
-      <div style="font-size:9px;letter-spacing:2px;color:var(--gold-dim);font-family:'Cinzel',serif;margin-bottom:5px;">CHÚ THÍCH</div>
-      <textarea id="e-tf-caption-${tf}" placeholder="Ghi chú cho khung ${tf}..."
-        style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:16px;font-family:'Crimson Pro',serif;outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;"
-        onpaste="handleEditPasteCaption('${tf}', event)"></textarea>
-      <input type="file" accept="image/*" multiple style="display:none" id="e-tf-input-${tf}" onchange="handleEditImgMulti('${tf}', this)"/>
-    </div>
-  `).join("");
+      <div style="font-size:10px;letter-spacing:2px;color:var(--gold);opacity:0.65;font-family:'Cinzel',serif;margin-bottom:5px;">CHÚ THÍCH</div>
+      <textarea id="e-tf-caption-${tf}" placeholder="Ghi chú cho khung ${tf}..." style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:16px;font-family:'Crimson Pro',serif;outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;" onpaste="handleEditPaste('${tf}',event)"></textarea>
+      <input type="file" accept="image/*" multiple style="display:none" id="e-tf-input-${tf}" onchange="handleEditImgMulti('${tf}',this)"/>
+    </div>`).join("");
 }
-
-window.addEditTFImage = function(tf) {
-  document.getElementById("e-tf-input-" + tf).click();
-};
-
-function renderEditTFImages(tf) {
-  const imgs = editImages[tf] || [];
-  const container = document.getElementById("e-tf-images-" + tf);
-  if (!container) return;
-  if (imgs.length === 0) {
-    container.innerHTML = `<div style="color:var(--gold-faint);font-size:12px;padding:10px;">Chưa có ảnh — nhấn "+ Thêm ảnh" hoặc Ctrl+V</div>`;
-    return;
-  }
-  container.innerHTML = imgs.map((src, i) => `
-    <div style="position:relative;flex:0 0 auto;">
-      <img src="${src}" style="width:90px;height:68px;object-fit:cover;border-radius:7px;border:1px solid var(--gold-dim);display:block;"/>
-      <button onclick="clearEditTFImage('${tf}',${i})" style="position:absolute;top:2px;right:2px;background:#000000aa;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:10px;cursor:pointer;line-height:1;">✕</button>
-    </div>
-  `).join("");
+window.addEditTFImg=tf=>document.getElementById("e-tf-input-"+tf).click();
+window.clearEditTFImg=function(tf,i){if(!editImages[tf]) return;editImages[tf].splice(i,1);renderEditTFImages(tf);};
+function renderEditTFImages(tf){
+  const imgs=editImages[tf]||[]; const c=document.getElementById("e-tf-images-"+tf); if(!c) return;
+  if(!imgs.length){c.innerHTML=`<div style="color:var(--gold);opacity:0.35;font-size:12px;padding:10px;">Chưa có ảnh</div>`;return;}
+  c.innerHTML=imgs.map((src,i)=>`<div style="position:relative;flex:0 0 auto;"><img src="${src}" style="width:90px;height:68px;object-fit:cover;border-radius:7px;border:1px solid var(--gold-dim);display:block;"/><button onclick="clearEditTFImg('${tf}',${i})" style="position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:10px;cursor:pointer;line-height:1;">✕</button></div>`).join("");
 }
-
-window.clearEditTFImage = function(tf, idx) {
-  if (!editImages[tf]) return;
-  editImages[tf].splice(idx, 1);
-  renderEditTFImages(tf);
+window.handleEditPaste=function(tf,event){
+  const items=event.clipboardData?.items; if(!items) return;
+  for(const item of items){if(item.type.startsWith("image/")){event.preventDefault();const reader=new FileReader();reader.onload=async e=>{try{const c=await compressImage(e.target.result);if(!editImages[tf])editImages[tf]=[];editImages[tf].push(c);window.formDirty=true;renderEditTFImages(tf);}catch(err){showToast("⚠️ Không thể đọc ảnh");}};reader.readAsDataURL(item.getAsFile());return;}}
 };
-
-window.handleEditPasteCaption = function(tf, event) {
-  const items = event.clipboardData?.items;
-  if (!items) return;
-  for (const item of items) {
-    if (item.type.startsWith("image/")) {
-      event.preventDefault();
-      const file = item.getAsFile();
-      const reader = new FileReader();
-      reader.onload = async e => {
-        const compressed = await compressImage(e.target.result);
-        if (!editImages[tf]) editImages[tf] = [];
-        editImages[tf].push(compressed);
-        renderEditTFImages(tf);
-      };
-      reader.readAsDataURL(file);
-      return;
-    }
-  }
+window.handleEditImgMulti=function(tf,input){
+  const files=Array.from(input.files); if(!files.length) return;
+  if(!editImages[tf]) editImages[tf]=[];
+  let loaded=0;
+  files.forEach(file=>{const r=new FileReader();r.onload=async e=>{try{const c=await compressImage(e.target.result);editImages[tf].push(c);}catch(err){showToast("⚠️ Không thể đọc ảnh");}loaded++;window.formDirty=true;if(loaded===files.length)renderEditTFImages(tf);};r.readAsDataURL(file);});
+  input.value="";
 };
-
-window.handleEditImgMulti = function(tf, input) {
-  const files = Array.from(input.files);
-  if (!files.length) return;
-  if (!editImages[tf]) editImages[tf] = [];
-  let loaded = 0;
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = async e => {
-      const compressed = await compressImage(e.target.result);
-      editImages[tf].push(compressed);
-      loaded++;
-      if (loaded === files.length) renderEditTFImages(tf);
-    };
-    reader.readAsDataURL(file);
-  });
-  input.value = "";
-};
-
-window.setEditNow = function() {
-  const now = new Date();
-  const yyyy = now.getFullYear();
-  const mm = String(now.getMonth()+1).padStart(2,"0");
-  const dd = String(now.getDate()).padStart(2,"0");
-  document.getElementById("e-date").value = `${yyyy}-${mm}-${dd}`;
-  document.getElementById("e-hour").value = now.getHours();
-  document.getElementById("e-minute").value = now.getMinutes();
-};
-
-window.openEdit = function() {
-  if (!currentTrade) return;
-  const t = currentTrade;
-
-  // Fill basic fields
-  document.getElementById("e-title").value = t.title || "";
-  document.getElementById("e-symbol").value = t.symbol || "";
-  document.getElementById("e-pnl").value = t.pnl || "";
-  document.getElementById("e-note").value = t.note || "";
-  document.getElementById("e-tags").value = Array.isArray(t.tags) ? t.tags.join(", ") : (t.tags || "");
-  populateFolderSelect("e-folder", t.folder || "");
-
-  // Fill date/time
-  if (t.tradeDate) {
-    const d = new Date(t.tradeDate);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth()+1).padStart(2,"0");
-    const dd = String(d.getDate()).padStart(2,"0");
-    document.getElementById("e-date").value = `${yyyy}-${mm}-${dd}`;
-    document.getElementById("e-hour").value = d.getHours();
-    document.getElementById("e-minute").value = d.getMinutes();
-  } else {
-    document.getElementById("e-date").value = "";
-    document.getElementById("e-hour").value = "";
-    document.getElementById("e-minute").value = "";
-  }
-
-  // Set result toggle
-  document.querySelectorAll('[data-group="e-result"]').forEach(b => {
-    b.classList.toggle("active", b.dataset.val === (t.result || "Win"));
-  });
-
-  // Set onplan toggle
-  document.querySelectorAll('[data-group="e-onplan"]').forEach(b => {
-    b.classList.toggle("active", b.dataset.val === (t.onplan || "Đúng plan"));
-  });
-
-  // Load images & captions
-  Object.keys(editImages).forEach(k => delete editImages[k]);
-  Object.keys(editCaptions).forEach(k => delete editCaptions[k]);
-  const savedImgs = t.images || {};
-  const savedCaps = t.captions || {};
-  TFS.forEach(tf => {
-    const v = savedImgs[tf];
-    editImages[tf] = Array.isArray(v) ? [...v] : (v ? [v] : []);
-    editCaptions[tf] = savedCaps[tf] || "";
-  });
-  window.editImages = editImages;
-  window.editCaptions = editCaptions;
-
-  buildEditTFUploadRow();
-  TFS.forEach(tf => {
-    renderEditTFImages(tf);
-    const cap = document.getElementById("e-tf-caption-" + tf);
-    if (cap) cap.value = editCaptions[tf] || "";
-  });
-
-  showScreen("edit");
-};
-
-window.updateTrade = async function() {
-  if (!currentTrade) return;
-  const title = document.getElementById("e-title").value.trim();
-  if (!title) { alert("Vui lòng nhập tên lệnh!"); return; }
-
-  const result = document.querySelector('[data-group="e-result"].active')?.dataset.val || "Win";
-  const onplan = document.querySelector('[data-group="e-onplan"].active')?.dataset.val || "";
-  const tags = document.getElementById("e-tags").value.split(",").map(t=>t.trim()).filter(Boolean);
-
-  TFS.forEach(tf => {
-    const cap = document.getElementById("e-tf-caption-" + tf)?.value.trim();
-    if (cap) editCaptions[tf] = cap;
-  });
-
-  const dateVal = document.getElementById("e-date").value;
-  const hour = document.getElementById("e-hour").value || "0";
-  const minute = document.getElementById("e-minute").value || "0";
-  let tradeDate = currentTrade.tradeDate || null;
-  if (dateVal) {
-    const d = new Date(dateVal);
-    d.setHours(parseInt(hour), parseInt(minute), 0);
-    tradeDate = d.getTime();
-  }
-
-  const updatedData = {
-    title,
-    symbol: document.getElementById("e-symbol").value.trim(),
-    pnl: document.getElementById("e-pnl").value.trim(),
-    note: document.getElementById("e-note").value.trim(),
-    folder: document.getElementById("e-folder").value.trim() || "",
-    result, onplan, tags,
-    images: { ...editImages },
-    captions: { ...editCaptions },
-    tradeDate,
-    createdAt: currentTrade.createdAt || Date.now(),
-  };
-
-  try {
-    const { updateDoc } = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js");
-    await updateDoc(doc(db, "trades", currentTrade.id), updatedData);
+window.updateTrade=async function(){
+  if(!currentTrade) return;
+  const title=document.getElementById("e-title").value.trim(); if(!title){alert("Vui lòng nhập tên lệnh!");return;}
+  const btn=document.getElementById("update-btn"); btn.disabled=true; btn.textContent="Đang lưu...";
+  TFS.forEach(tf=>{const c=document.getElementById("e-tf-caption-"+tf)?.value.trim();if(c) editCaptions[tf]=c;});
+  const dateVal=document.getElementById("e-date").value, hour=document.getElementById("e-hour").value||"0", min=document.getElementById("e-minute").value||"0";
+  let tradeDate=currentTrade.tradeDate||null; if(dateVal){const d=new Date(dateVal);d.setHours(+hour,+min,0);tradeDate=d.getTime();}
+  const upd={title,symbol:document.getElementById("e-symbol").value.trim(),pnl:document.getElementById("e-pnl").value.trim(),note:document.getElementById("e-note").value.trim(),folder:document.getElementById("e-folder").value||"",result:document.querySelector('[data-group="e-result"].active')?.dataset.val||"Win",onplan:document.querySelector('[data-group="e-onplan"].active')?.dataset.val||"",tags:document.getElementById("e-tags").value.split(",").map(t=>t.trim()).filter(Boolean),images:{...editImages},captions:{...editCaptions},tradeDate,createdAt:currentTrade.createdAt||Date.now()};
+  if(estimateKB(upd)>900){alert("⚠️ Dữ liệu quá lớn. Xóa bớt ảnh.");btn.disabled=false;btn.textContent="CẬP NHẬT LỆNH";return;}
+  try{
+    await updateDoc(doc(db,"trades",currentTrade.id),upd);
+    window.formDirty=false; showToast("✅ Đã cập nhật");
     await loadTrades();
-    // Update currentTrade reference
-    currentTrade = trades.find(t => t.id === currentTrade.id) || { ...currentTrade, ...updatedData };
-    window.currentTrade = currentTrade;
-    showScreen("detail");
-    window.openDetail(currentTrade.id);
-  } catch(e) {
-    alert("Lỗi cập nhật: " + e.message);
-  }
+    currentTrade=trades.find(t=>t.id===currentTrade.id)||{...currentTrade,...upd};
+    showScreen("detail"); window.openDetail(currentTrade.id);
+  }catch(e){alert("Lỗi cập nhật: "+e.message); btn.disabled=false; btn.textContent="CẬP NHẬT LỆNH"; return;}
+  btn.disabled=false; btn.textContent="CẬP NHẬT LỆNH";
 };
 
-// INIT
-window.formImages = formImages;
-window.formCaptions = formCaptions;
-loadFolders();
+// ══ STATS ══
+function renderStats(){
+  const total=trades.length;
+  if(!total){document.getElementById("stats-body").innerHTML='<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Chưa có dữ liệu</div></div>';return;}
+  const wins=trades.filter(t=>t.result==="Win").length, losses=trades.filter(t=>t.result==="Loss").length, bes=trades.filter(t=>t.result==="BE").length;
+  const wr=Math.round(wins/total*100);
+  const onplanCnt=trades.filter(t=>t.onplan==="Đúng plan").length;
+  const rVals=trades.map(t=>{const m=(t.pnl||"").match(/([+-]?\d+\.?\d*)\s*R/i);return m?parseFloat(m[1]):null;}).filter(v=>v!==null);
+  const totalR=rVals.reduce((a,b)=>a+b,0), avgR=rVals.length?totalR/rVals.length:0;
+  // Symbol map
+  const sym={};
+  trades.forEach(t=>{const s=t.symbol||"N/A";if(!sym[s])sym[s]={w:0,l:0,be:0};if(t.result==="Win")sym[s].w++;else if(t.result==="Loss")sym[s].l++;else sym[s].be++;});
+  const topSym=Object.entries(sym).sort((a,b)=>(b[1].w+b[1].l+b[1].be)-(a[1].w+a[1].l+a[1].be)).slice(0,6);
+  // Month map
+  const mo={};
+  trades.forEach(t=>{const ts=t.tradeDate||t.createdAt;if(!ts)return;const d=new Date(ts);const k=`${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;if(!mo[k])mo[k]={w:0,l:0,be:0};if(t.result==="Win")mo[k].w++;else if(t.result==="Loss")mo[k].l++;else mo[k].be++;});
+  const months=Object.entries(mo).sort((a,b)=>{
+    const [ma,ya]=a[0].split("/").map(Number); const [mb,yb]=b[0].split("/").map(Number);
+    return (yb*12+mb)-(ya*12+ma);
+  }).slice(0,6);
+
+  document.getElementById("stats-body").innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px;">
+      ${[["Tổng lệnh",total,""],["Win Rate",wr+"%","win"],["Đúng plan",Math.round(onplanCnt/total*100)+"%",""],["Tổng R",(totalR>=0?"+":"")+totalR.toFixed(1)+"R",totalR>=0?"win":"loss"],["Avg/lệnh",(avgR>=0?"+":"")+avgR.toFixed(2)+"R",avgR>=0?"win":"loss"],["BE",bes,"be"]].map(([l,v,c])=>`<div class="stats-cell"><div class="lbl">${l}</div><div class="val ${c}">${v}</div></div>`).join("")}
+    </div>
+    <div class="section-label">Kết Quả</div>
+    <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:20px;">
+      ${[["Win",wins,"#4caf50"],["Loss",losses,"#ef5350"],["BE",bes,"#90a4ae"]].map(([l,v,c])=>`<div class="chart-bar-row"><div class="chart-bar-label">${l}</div><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${total?Math.round(v/total*100):0}%;background:${c};"><span class="chart-bar-val">${v}</span></div></div><div style="font-size:11px;color:var(--gold);opacity:0.65;width:35px;text-align:right;">${total?Math.round(v/total*100):0}%</div></div>`).join("")}
+    </div>
+    <div class="section-label">Theo Symbol</div>
+    <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:20px;">
+      ${topSym.map(([s,v])=>{const t2=v.w+v.l+v.be;return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--gold-faint);"><div style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold);">${s}</div><div style="display:flex;gap:8px;font-size:13px;"><span class="win">✅${v.w}</span><span class="loss">❌${v.l}</span><span style="color:var(--gold);opacity:0.55;">${t2?Math.round(v.w/t2*100):0}%WR</span></div></div>`;}).join("")}
+    </div>
+    <div class="section-label">Theo Tháng</div>
+    <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:20px;">
+      ${months.length?months.map(([m,v])=>{const t2=v.w+v.l+v.be;return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--gold-faint);"><div style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold);">📅 ${m}</div><div style="display:flex;gap:8px;font-size:13px;"><span class="win">✅${v.w}</span><span class="loss">❌${v.l}</span><span style="color:var(--gold);opacity:0.55;">${t2?Math.round(v.w/t2*100):0}%WR</span></div></div>`;}).join(""):"<div style='color:var(--gold);opacity:0.35;padding:10px;text-align:center;'>Chưa có dữ liệu</div>"}
+    </div>
+    <div class="section-label">Xuất Dữ Liệu</div>
+    <div style="display:flex;gap:10px;margin-bottom:20px;">
+      <button onclick="exportCSV()" style="flex:1;padding:13px;border-radius:10px;background:var(--gold-faint);border:1px solid var(--gold-dim);color:var(--gold);font-family:'Cinzel',serif;font-size:12px;letter-spacing:1px;cursor:pointer;">📊 Xuất CSV</button>
+      <button onclick="exportPDF()" style="flex:1;padding:13px;border-radius:10px;background:var(--gold-faint);border:1px solid var(--gold-dim);color:var(--gold);font-family:'Cinzel',serif;font-size:12px;letter-spacing:1px;cursor:pointer;">📄 Xuất PDF</button>
+    </div>`;
+}
+
+// ══ EXPORT CSV ══
+window.exportCSV=function(){
+  if(!trades.length){showToast("Chưa có dữ liệu");return;}
+  const hdr=["Ngày","Tên lệnh","Symbol","Kết quả","P&L","Đúng plan","Thư mục","Tags","Ghi chú"];
+  const rows=trades.map(t=>[t.tradeDate?fmtDate(t.tradeDate):(t.createdAt?fmtDate(t.createdAt):""),t.title||"",t.symbol||"",t.result||"",t.pnl||"",t.onplan||"",t.folder||"",Array.isArray(t.tags)?t.tags.join("|"):(t.tags||""),(t.note||"").replace(/\n/g," ")].map(v=>`"${String(v).replace(/"/g,'""')}"`));
+  const csv="\uFEFF"+[hdr,...rows].map(r=>r.join(",")).join("\n");
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); a.download=`tradelog_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  showToast("📊 Đã xuất CSV");
+};
+
+// ══ EXPORT PDF ══
+window.exportPDF=function(){
+  if(!trades.length){showToast("Chưa có dữ liệu");return;}
+  const wins=trades.filter(t=>t.result==="Win").length, wr=Math.round(wins/trades.length*100);
+  const rows=trades.map(t=>`<tr><td>${t.tradeDate?fmtDate(t.tradeDate):(t.createdAt?fmtDate(t.createdAt):"")}</td><td><b>${t.title||""}</b></td><td>${t.symbol||""}</td><td style="color:${t.result==="Win"?"#4caf50":t.result==="Loss"?"#ef5350":"#90a4ae"}">${t.result||""}</td><td>${t.pnl||""}</td><td>${t.onplan||""}</td><td>${t.folder||""}</td><td style="max-width:180px;word-break:break-word;">${(t.note||"").substring(0,100)}</td></tr>`).join("");
+  const w=window.open("","_blank");
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>TradeLog Export</title><style>body{font-family:serif;padding:20px;color:#222;}h1{font-size:18px;}.sum{display:flex;gap:16px;margin:12px 0 20px;}.s{background:#f5f5f0;border-radius:8px;padding:8px 16px;text-align:center;}.s b{display:block;font-size:20px;}table{width:100%;border-collapse:collapse;font-size:12px;}th{background:#c9a84c;color:#fff;padding:7px;text-align:left;font-size:10px;letter-spacing:1px;}td{padding:6px 7px;border-bottom:1px solid #eee;vertical-align:top;}tr:nth-child(even){background:#fafaf7;}@media print{body{padding:0}}</style></head><body>
+  <h1>📒 TradeLog – Nhật Ký Giao Dịch</h1><div style="font-size:12px;color:#888;">Xuất ngày ${fmtDate(Date.now())}</div>
+  <div class="sum"><div class="s"><b>${trades.length}</b>Tổng</div><div class="s"><b style="color:#4caf50">${wins}</b>Win</div><div class="s"><b style="color:#ef5350">${trades.filter(t=>t.result==="Loss").length}</b>Loss</div><div class="s"><b>${wr}%</b>WR</div></div>
+  <table><thead><tr><th>Ngày</th><th>Tên lệnh</th><th>Symbol</th><th>KQ</th><th>P&L</th><th>Plan</th><th>Thư mục</th><th>Ghi chú</th></tr></thead><tbody>${rows}</tbody></table>
+  <script>window.onload=()=>window.print()<\/script></body></html>`);
+  w.document.close(); showToast("📄 Đang mở PDF...");
+};
+
+// ══ THEME / SETTINGS ══
+const ACCENT_COLORS = [
+  {name:"Vàng",    hex:"#c9a84c", dark:"#c9a84c55", faint:"#c9a84c18"},
+  {name:"Xanh lá", hex:"#4caf50", dark:"#4caf5055", faint:"#4caf5018"},
+  {name:"Xanh dương",hex:"#42a5f5",dark:"#42a5f555",faint:"#42a5f518"},
+  {name:"Tím",     hex:"#ab47bc", dark:"#ab47bc55", faint:"#ab47bc18"},
+  {name:"Đỏ",      hex:"#ef5350", dark:"#ef535055", faint:"#ef535018"},
+  {name:"Cam",     hex:"#ff9800", dark:"#ff980055", faint:"#ff980018"},
+  {name:"Hồng",    hex:"#ec407a", dark:"#ec407a55", faint:"#ec407a18"},
+  {name:"Ngọc",    hex:"#26c6da", dark:"#26c6da55", faint:"#26c6da18"},
+  {name:"Trắng",   hex:"#e8dcc8", dark:"#e8dcc855", faint:"#e8dcc818"},
+  {name:"Bạc",     hex:"#90a4ae", dark:"#90a4ae55", faint:"#90a4ae18"},
+];
+
+let themeSettings = { mode:"dark", color:0, fontSize:"medium" };
+
+function buildColorGrid() {
+  const grid = document.getElementById("color-grid");
+  if (!grid) return;
+  grid.innerHTML = ACCENT_COLORS.map((c,i) =>
+    `<div style="text-align:center;">
+      <div class="color-swatch${themeSettings.color===i?" active":""}" id="swatch-${i}"
+        style="background:${c.hex};border-color:${themeSettings.color===i?"#fff":"transparent"};"
+        onclick="setAccentColor(${i})"></div>
+      <div style="font-size:9px;color:var(--text-dim);margin-top:4px;font-family:'Cinzel',serif;">${c.name}</div>
+    </div>`
+  ).join("");
+}
+
+function applyTheme(t) {
+  const root = document.documentElement;
+  const c = ACCENT_COLORS[t.color] || ACCENT_COLORS[0];
+
+  // Accent color
+  root.style.setProperty("--gold", c.hex);
+  root.style.setProperty("--gold-dim", c.dark);
+  root.style.setProperty("--gold-faint", c.faint);
+
+  // Mode
+  const isLight = t.mode === "light";
+  document.body.classList.toggle("light-mode", isLight);
+
+  // Font size
+  document.body.classList.remove("font-small","font-medium","font-large");
+  document.body.classList.add("font-" + (t.fontSize||"medium"));
+
+  // color-scheme for date inputs & selects
+  const scheme = isLight ? "light" : "dark";
+  document.querySelectorAll("input[type=date], select").forEach(el => {
+    el.style.colorScheme = scheme;
+  });
+}
+
+function syncSettingsUI(t) {
+  // Mode buttons
+  ["dark","light"].forEach(m => {
+    const b = document.getElementById("mode-"+m);
+    if (b) b.classList.toggle("active", t.mode===m);
+  });
+  // Font size buttons
+  ["small","medium","large"].forEach(s => {
+    const b = document.getElementById("size-"+s);
+    if (b) b.classList.toggle("active", t.fontSize===s);
+  });
+  // Color swatches
+  buildColorGrid();
+}
+
+window.setMode = async function(mode) {
+  themeSettings.mode = mode;
+  applyTheme(themeSettings);
+  syncSettingsUI(themeSettings);
+  await saveTheme();
+};
+
+window.setAccentColor = async function(idx) {
+  themeSettings.color = idx;
+  applyTheme(themeSettings);
+  syncSettingsUI(themeSettings);
+  await saveTheme();
+};
+
+window.setFontSize = async function(size) {
+  themeSettings.fontSize = size;
+  applyTheme(themeSettings);
+  syncSettingsUI(themeSettings);
+  await saveTheme();
+};
+
+window.resetTheme = async function() {
+  themeSettings = { mode:"dark", color:0, fontSize:"medium" };
+  applyTheme(themeSettings);
+  syncSettingsUI(themeSettings);
+  await saveTheme();
+  showToast("↺ Đã đặt lại giao diện");
+};
+
+async function saveTheme() {
+  try { await setDoc(doc(db,"app_config","theme"), themeSettings); } catch(e){}
+  localStorage.setItem("tl_theme", JSON.stringify(themeSettings));
+}
+
+async function loadTheme() {
+  try {
+    const snap = await getDoc(doc(db,"app_config","theme"));
+    if (snap.exists()) themeSettings = { ...themeSettings, ...snap.data() };
+    else {
+      const local = JSON.parse(localStorage.getItem("tl_theme")||"null");
+      if (local) themeSettings = { ...themeSettings, ...local };
+    }
+  } catch(e) {
+    const local = JSON.parse(localStorage.getItem("tl_theme")||"null");
+    if (local) themeSettings = { ...themeSettings, ...local };
+  }
+  applyTheme(themeSettings);
+  syncSettingsUI(themeSettings);
+}
+
+// ══ INIT ══
+await loadTheme();
+await loadFolders();
 renderFolderBar();
+populateFolderSelects();
 buildTFUploadRow();
-TFS.forEach(tf => renderTFImages(tf));
-loadTrades();
+TFS.forEach(tf=>renderTFImages(tf));
+await loadTrades();
+// Show FAB on initial list screen
+const _fab=document.getElementById("fab-btn");
+if(_fab) _fab.classList.add("visible");
 </script>
 </body>
 </html>
