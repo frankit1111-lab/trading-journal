@@ -9,217 +9,471 @@
 <meta name="theme-color" content="#080808"/>
 <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;TradeLog&quot;,&quot;short_name&quot;:&quot;TradeLog&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%23080808&quot;,&quot;theme_color&quot;:&quot;%23080808&quot;,&quot;start_url&quot;:&quot;.&quot;}"/>
 <title>TradeLog – Nhật Ký Giao Dịch</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
 <style>
   :root {
-    --gold:#c9a84c; --gold-dim:#c9a84c55; --gold-faint:#c9a84c18;
-    --bg:#080808; --bg2:#111108; --bg3:#1a1a10;
-    --text:#e8dcc8; --text-dim:#e8dcc888;
-    --win:#4caf50; --loss:#ef5350; --be:#90a4ae;
+    --gold:#c9a84c; --gold-dim:#c9a84c66; --gold-faint:#c9a84c14;
+    --bg:#060606; --bg2:#0d0d0a; --bg3:#141410; --bg4:#1c1c16;
+    --text:#ede8da; --text-dim:#ede8da66;
+    --win:#3ddc84; --loss:#ff453a; --be:#8e9bae;
+    --border:#c9a84c22;
+    --radius:12px;
+    --shadow:0 8px 32px #00000088;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-  html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Crimson Pro',serif;overflow:hidden;}
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Crimson Pro',serif;overflow:hidden;font-size:15px;}
   .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;}
   .screen.active{display:flex;}
   ::-webkit-scrollbar{display:none;}
 
-  .header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d0d08 0%,#080808ee 100%);backdrop-filter:blur(12px);border-bottom:1px solid var(--gold-dim);padding:12px 18px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+  /* ── HEADER ── */
+  .header{
+    position:sticky;top:0;z-index:100;
+    background:linear-gradient(180deg,rgba(6,6,6,0.98) 0%,rgba(6,6,6,0.85) 100%);
+    backdrop-filter:blur(20px) saturate(180%);
+    border-bottom:1px solid var(--border);
+    padding:14px 20px 12px;
+    display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+  }
+  .header::before{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(90deg,transparent,var(--gold-faint),transparent);
+    opacity:0.3;pointer-events:none;
+  }
   .header-title{text-align:center;flex:1;}
-  .header-title .label{font-size:9px;letter-spacing:5px;color:var(--gold);opacity:0.6;text-transform:uppercase;font-family:'Cinzel',serif;}
-  .header-title .name{font-family:'Cinzel',serif;font-size:17px;color:var(--gold);letter-spacing:2px;}
-  .header-btn{background:none;border:none;color:var(--gold);font-size:24px;cursor:pointer;width:36px;text-align:center;font-family:'Crimson Pro',serif;}
+  .header-title .label{
+    font-size:8px;letter-spacing:6px;color:var(--gold);
+    text-transform:uppercase;font-family:'Space Mono',monospace;
+    opacity:0.8;display:block;margin-bottom:2px;
+  }
+  .header-title .name{
+    font-family:'Cinzel',serif;font-size:18px;color:var(--gold);
+    letter-spacing:3px;font-weight:600;
+    text-shadow:0 0 30px var(--gold-dim);
+  }
+  .header-btn{
+    background:none;border:none;color:var(--gold);font-size:20px;
+    cursor:pointer;width:40px;height:40px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    transition:background 0.15s;
+  }
+  .header-btn:active{background:var(--gold-faint);}
 
-  .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--gold-faint);background:var(--bg2);flex-shrink:0;}
-  .stat{padding:10px 0;text-align:center;border-right:1px solid var(--gold-faint);}
+  /* ── STATS BAR ── */
+  .stats-bar{
+    display:grid;grid-template-columns:repeat(4,1fr);
+    border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,var(--bg2),var(--bg));
+    flex-shrink:0;
+  }
+  .stat{padding:12px 0;text-align:center;border-right:1px solid var(--border);}
   .stat:last-child{border-right:none;}
-  .stat-val{font-family:'Cinzel',serif;font-size:18px;font-weight:600;color:var(--gold);}
-  .stat-lbl{font-size:10px;letter-spacing:2px;color:var(--gold);opacity:0.65;text-transform:uppercase;margin-top:2px;}
+  .stat-val{font-family:'Cinzel',serif;font-size:20px;font-weight:600;color:var(--gold);}
+  .stat-lbl{font-size:10px;letter-spacing:2px;color:var(--gold);opacity:0.7;text-transform:uppercase;margin-top:2px;font-family:'Space Mono',monospace;}
 
-  .search-bar{padding:8px 14px;border-bottom:1px solid var(--gold-faint);background:var(--bg2);flex-shrink:0;}
-  .search-input{width:100%;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:20px;padding:8px 16px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;transition:border-color 0.2s;}
-  .search-input:focus{border-color:var(--gold-dim);}
-  .search-input::placeholder{color:var(--gold-dim);}
+  /* ── SEARCH ── */
+  .search-bar{padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;}
+  .search-input{
+    width:100%;background:var(--bg3);
+    border:1px solid var(--border);border-radius:24px;
+    padding:10px 18px;color:var(--text);font-size:14px;
+    font-family:'Crimson Pro',serif;outline:none;
+    transition:border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-input:focus{border-color:var(--gold-dim);box-shadow:0 0 0 3px var(--gold-faint);}
+  .search-input::placeholder{color:var(--gold);opacity:0.35;}
 
-  .trade-item{padding:15px 18px;border-bottom:1px solid var(--gold-faint);cursor:pointer;transition:background 0.15s;display:flex;justify-content:space-between;align-items:flex-start;}
+  /* ── TRADE LIST ── */
+  .trade-item{
+    padding:16px 20px;border-bottom:1px solid var(--border);
+    cursor:pointer;transition:background 0.12s;
+    display:flex;justify-content:space-between;align-items:flex-start;
+    position:relative;
+  }
+  .trade-item::before{
+    content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+    background:transparent;transition:background 0.15s;
+  }
   .trade-item:active{background:var(--gold-faint);}
-  .trade-title{font-family:'Cinzel',serif;font-size:14px;color:var(--gold);margin-bottom:3px;font-weight:600;}
-  .trade-tags{font-size:13px;color:var(--gold);opacity:0.7;}
-  .trade-date{font-size:12px;color:var(--gold);opacity:0.5;margin-top:4px;font-style:italic;}
-  .trade-pnl{font-family:'Cinzel',serif;font-size:13px;font-weight:600;}
+  .trade-item:active::before{background:var(--gold);}
+  .trade-title{
+    font-family:'Cinzel',serif;font-size:14px;color:var(--gold);
+    margin-bottom:4px;font-weight:600;letter-spacing:0.5px;
+  }
+  .trade-tags{font-size:12px;color:var(--gold);opacity:0.75;font-family:'Space Mono',monospace;letter-spacing:0.5px;}
+  .trade-date{font-size:11px;color:var(--gold);opacity:0.55;margin-top:5px;font-family:'Space Mono',monospace;}
+  .trade-pnl{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;}
+  .win{color:var(--win);} .loss{color:var(--loss);} .be{color:var(--be);}
   .newly-saved{animation:flashNew 2s ease forwards;}
-  @keyframes flashNew{0%{background:var(--gold-faint);}60%{background:var(--gold-faint);}100%{background:transparent;}}
+  @keyframes flashNew{0%{background:var(--gold-faint);}100%{background:transparent;}}
 
-  .empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--gold);padding:40px;text-align:center;}
-  .empty-icon{font-size:48px;margin-bottom:16px;opacity:0.4;}
-  .empty-text{font-family:'Cinzel',serif;font-size:13px;letter-spacing:2px;line-height:2;opacity:0.55;}
+  /* ── EMPTY ── */
+  .empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;}
+  .empty-icon{font-size:52px;margin-bottom:20px;opacity:0.35;}
+  .empty-text{font-family:'Cinzel',serif;font-size:13px;letter-spacing:2px;line-height:2.2;color:var(--gold);opacity:0.55;}
 
-  .form-body{padding:16px 18px 100px;flex:1;}
-  .field{margin-bottom:16px;}
-  .field-label{font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;font-family:'Cinzel',serif;display:block;margin-bottom:7px;opacity:0.85;}
-  .field input,.field textarea,.field select{width:100%;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 13px;color:var(--text);font-size:15px;font-family:'Crimson Pro',serif;outline:none;transition:border-color 0.2s;}
-  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--gold-dim);}
-  .field textarea{resize:vertical;min-height:80px;}
+  /* ── FORM ── */
+  .form-body{padding:20px 20px 120px;flex:1;}
+  .field{margin-bottom:18px;position:relative;}
+  .field-label{
+    font-size:10px;letter-spacing:3px;color:var(--gold);
+    text-transform:uppercase;font-family:'Space Mono',monospace;
+    display:block;margin-bottom:8px;opacity:1;
+  }
+  .field input,.field textarea,.field select{
+    width:100%;background:var(--bg3);
+    border:1px solid var(--border);border-radius:var(--radius);
+    padding:12px 16px;color:var(--text);font-size:15px;
+    font-family:'Crimson Pro',serif;outline:none;
+    transition:border-color 0.2s, box-shadow 0.2s;
+  }
+  .field input:focus,.field textarea:focus,.field select:focus{
+    border-color:var(--gold-dim);box-shadow:0 0 0 3px var(--gold-faint);
+  }
+  .field textarea{resize:vertical;min-height:90px;line-height:1.6;}
 
+  /* ── TOGGLE ── */
   .toggle-group{display:flex;gap:6px;}
-  .toggle-btn{flex:1;padding:9px 4px;border-radius:8px;cursor:pointer;border:1px solid var(--gold-faint);background:transparent;color:var(--gold);opacity:0.6;font-size:12px;font-family:'Cinzel',serif;letter-spacing:0.5px;transition:all 0.15s;text-align:center;}
-  .toggle-btn.active{border-color:var(--gold);background:var(--gold-faint);color:var(--gold);opacity:1;}
+  .toggle-btn{
+    flex:1;padding:10px 4px;border-radius:10px;cursor:pointer;
+    border:1px solid var(--border);background:var(--bg3);
+    color:var(--gold);opacity:0.8;font-size:12px;
+    font-family:'Space Mono',monospace;letter-spacing:0.5px;
+    transition:all 0.15s;text-align:center;
+  }
+  .toggle-btn.active{
+    border-color:var(--gold);background:var(--gold-faint);
+    color:var(--gold);opacity:1;
+    box-shadow:0 0 12px var(--gold-faint);
+  }
 
-  .detail-banner{padding:12px 18px;border-bottom:1px solid var(--gold-faint);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
-  .detail-body{padding:14px 18px 100px;flex:1;}
-  .section-label{font-size:11px;letter-spacing:4px;color:var(--gold);text-transform:uppercase;font-family:'Cinzel',serif;margin-bottom:10px;opacity:0.9;}
-  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;}
-  .stats-cell{background:var(--bg3);border-radius:8px;padding:12px 8px;text-align:center;border:1px solid var(--gold-faint);}
-  .stats-cell .lbl{font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;font-family:'Cinzel',serif;opacity:1;}
-  .stats-cell .val{font-size:15px;color:var(--text);font-family:'Cinzel',serif;font-weight:600;}
+  /* ── DETAIL ── */
+  .detail-banner{
+    padding:14px 20px;border-bottom:1px solid var(--border);
+    display:flex;justify-content:space-between;align-items:center;flex-shrink:0;
+    background:linear-gradient(135deg,var(--bg2),var(--bg));
+  }
+  .detail-body{padding:16px 20px 120px;flex:1;}
+  .section-label{
+    font-size:10px;letter-spacing:4px;color:var(--gold);
+    text-transform:uppercase;font-family:'Space Mono',monospace;
+    margin-bottom:12px;opacity:1;
+    display:flex;align-items:center;gap:10px;
+  }
+  .section-label::after{
+    content:'';flex:1;height:1px;
+    background:linear-gradient(90deg,var(--gold-dim),transparent);
+  }
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px;}
+  .stats-cell{
+    background:var(--bg3);border-radius:12px;padding:14px 10px;
+    text-align:center;border:1px solid var(--border);
+    transition:border-color 0.2s;
+  }
+  .stats-cell:hover{border-color:var(--gold-dim);}
+  .stats-cell .lbl{
+    font-size:9px;letter-spacing:2px;color:var(--gold);
+    text-transform:uppercase;margin-bottom:8px;
+    font-family:'Space Mono',monospace;display:block;
+  }
+  .stats-cell .val{
+    font-size:16px;color:var(--text);
+    font-family:'Cinzel',serif;font-weight:700;
+  }
   .stats-cell .val.win{color:var(--win);}
   .stats-cell .val.loss{color:var(--loss);}
   .stats-cell .val.be{color:var(--be);}
 
-  .tf-tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px;}
-  .tf-tab{flex:0 0 auto;padding:5px 11px;border-radius:6px;cursor:pointer;border:1px solid var(--gold-faint);background:transparent;color:var(--gold);opacity:0.6;font-size:11px;font-family:'Cinzel',serif;transition:all 0.15s;white-space:nowrap;position:relative;}
-  .tf-tab.active{border-color:var(--gold);background:var(--gold-faint);color:var(--gold);opacity:1;}
-  .tf-tab.has-img{border-color:var(--gold);color:var(--gold);opacity:0.85;}
-  .tf-tab.has-img::after{content:'';position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%;background:#4caf50;box-shadow:0 0 4px #4caf50aa;}
-  .tf-preview{width:100%;height:200px;border-radius:10px;background:var(--bg3);border:1px solid var(--gold-faint);overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
-  .tf-preview .no-img{color:var(--gold);opacity:0.5;text-align:center;font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;line-height:2;}
+  /* ── TF TABS ── */
+  .tf-tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px;}
+  .tf-tab{
+    flex:0 0 auto;padding:7px 14px;border-radius:8px;cursor:pointer;
+    border:1px solid var(--border);background:var(--bg3);
+    color:var(--gold);opacity:0.75;font-size:11px;
+    font-family:'Space Mono',monospace;transition:all 0.15s;
+    white-space:nowrap;position:relative;
+  }
+  .tf-tab.active{
+    border-color:var(--gold);background:var(--gold-faint);
+    color:var(--gold);opacity:1;
+    box-shadow:0 0 16px var(--gold-faint);
+  }
+  .tf-tab.has-img{border-color:var(--gold-dim);opacity:0.9;}
+  .tf-tab.has-img::after{
+    content:'';position:absolute;top:3px;right:3px;
+    width:5px;height:5px;border-radius:50%;
+    background:var(--win);box-shadow:0 0 6px var(--win);
+  }
+  .tf-preview{
+    width:100%;min-height:180px;border-radius:14px;
+    background:var(--bg3);border:1px solid var(--border);
+    overflow:hidden;display:flex;align-items:center;justify-content:center;
+    margin-bottom:24px;transition:border-color 0.2s;
+  }
+  .tf-preview .no-img{color:var(--gold);opacity:0.4;text-align:center;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;line-height:2;}
 
-  .note-box{background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:13px 14px;margin-bottom:20px;font-size:15px;color:var(--text);line-height:1.7;font-style:italic;}
-  .ai-btn{width:100%;padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--gold-faint),transparent);border:1px solid var(--gold-dim);color:var(--gold);font-size:14px;font-family:'Cinzel',serif;letter-spacing:2px;cursor:pointer;transition:all 0.2s;margin-bottom:10px;}
-  .ai-btn:disabled{opacity:0.5;cursor:not-allowed;}
-  .ai-result{background:var(--bg3);border:1px solid var(--gold-faint);border-radius:10px;padding:14px 16px;font-size:14px;color:var(--text);line-height:1.8;white-space:pre-wrap;margin-bottom:14px;}
-  .save-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:linear-gradient(0deg,var(--bg) 80%,transparent);padding:16px 18px 28px;z-index:150;}
-  .save-btn{width:100%;padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--gold-faint),var(--gold-dim));border:1px solid var(--gold);color:var(--gold);font-size:15px;font-family:'Cinzel',serif;letter-spacing:3px;cursor:pointer;transition:all 0.2s;}
-  .save-btn:disabled{opacity:0.5;cursor:not-allowed;}
-  .delete-btn{background:none;border:none;color:#ef535099;font-size:13px;cursor:pointer;font-family:'Cinzel',serif;letter-spacing:1px;width:100%;text-align:center;padding:10px;margin-top:6px;}
+  /* ── NOTE BOX ── */
+  .note-box{
+    background:var(--bg3);border:1px solid var(--border);
+    border-radius:14px;padding:18px;margin-bottom:24px;
+    font-size:16px;color:var(--text);line-height:1.8;
+    font-style:italic;
+  }
 
-  .loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--gold);font-family:'Cinzel',serif;font-size:12px;letter-spacing:3px;animation:pulse 1.5s infinite;}
-  @keyframes pulse{0%,100%{opacity:0.3}50%{opacity:0.8}}
+  /* ── AI ── */
+  .ai-btn{
+    width:100%;padding:16px;border-radius:14px;
+    background:linear-gradient(135deg,var(--gold-faint),transparent);
+    border:1px solid var(--gold-dim);color:var(--gold);
+    font-size:13px;font-family:'Space Mono',monospace;letter-spacing:2px;
+    cursor:pointer;transition:all 0.2s;margin-bottom:12px;
+    position:relative;overflow:hidden;
+  }
+  .ai-btn::before{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(90deg,transparent,var(--gold-faint),transparent);
+    transform:translateX(-100%);transition:transform 0.6s;
+  }
+  .ai-btn:active::before{transform:translateX(100%);}
+  .ai-btn:disabled{opacity:0.45;cursor:not-allowed;}
+  .ai-result{
+    background:var(--bg3);border:1px solid var(--gold-dim);
+    border-radius:14px;padding:18px;font-size:15px;
+    color:var(--text);line-height:1.9;white-space:pre-wrap;margin-bottom:16px;
+  }
 
-  .folder-bar{display:flex;gap:6px;overflow-x:auto;padding:8px 14px;border-bottom:1px solid var(--gold-faint);background:var(--bg2);flex-shrink:0;}
+  /* ── SAVE BAR ── */
+  .save-bar{
+    position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+    width:100%;max-width:480px;
+    background:linear-gradient(0deg,var(--bg) 70%,transparent);
+    padding:16px 20px 28px;z-index:150;
+  }
+  .save-btn{
+    width:100%;padding:16px;border-radius:14px;
+    background:linear-gradient(135deg,var(--gold-faint),var(--gold-dim));
+    border:1px solid var(--gold);color:var(--gold);
+    font-size:13px;font-family:'Space Mono',monospace;letter-spacing:3px;
+    cursor:pointer;transition:all 0.2s;
+    box-shadow:0 4px 20px var(--gold-faint);
+  }
+  .save-btn:hover{box-shadow:0 4px 30px var(--gold-dim);}
+  .save-btn:disabled{opacity:0.45;cursor:not-allowed;box-shadow:none;}
+  .delete-btn{
+    background:none;border:none;color:var(--loss);opacity:0.6;
+    font-size:12px;cursor:pointer;font-family:'Space Mono',monospace;
+    letter-spacing:1px;width:100%;text-align:center;
+    padding:12px;margin-top:6px;transition:opacity 0.15s;
+  }
+  .delete-btn:active{opacity:1;}
+
+  /* ── LOADING ── */
+  .loading{
+    display:flex;align-items:center;justify-content:center;
+    padding:40px;color:var(--gold);font-family:'Space Mono',monospace;
+    font-size:11px;letter-spacing:3px;animation:pulse 1.5s infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:0.3}50%{opacity:1}}
+
+  /* ── FOLDERS & SORT ── */
+  .folder-bar{
+    display:flex;gap:6px;overflow-x:auto;padding:10px 16px;
+    border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;
+  }
   .folder-bar::-webkit-scrollbar{display:none;}
-  .folder-chip{flex:0 0 auto;padding:5px 13px;border-radius:20px;cursor:pointer;border:1px solid var(--gold-faint);background:transparent;color:var(--gold);opacity:0.7;font-size:11px;font-family:'Cinzel',serif;transition:all 0.15s;white-space:nowrap;letter-spacing:1px;}
-  .folder-chip.active{border-color:var(--gold);background:var(--gold-faint);color:var(--gold);opacity:1;}
+  .folder-chip{
+    flex:0 0 auto;padding:6px 14px;border-radius:20px;cursor:pointer;
+    border:1px solid var(--border);background:transparent;
+    color:var(--gold);opacity:0.85;font-size:11px;
+    font-family:'Space Mono',monospace;transition:all 0.15s;
+    white-space:nowrap;letter-spacing:0.5px;
+  }
+  .folder-chip.active{border-color:var(--gold);background:var(--gold-faint);opacity:1;}
   .folder-chip.add-folder{border-style:dashed;}
-  .sort-bar{display:flex;align-items:center;justify-content:flex-end;padding:5px 14px;border-bottom:1px solid var(--gold-faint);background:var(--bg);flex-shrink:0;gap:8px;}
-  .sort-label{font-size:11px;color:var(--gold);opacity:0.65;font-family:'Cinzel',serif;letter-spacing:1px;}
-  .sort-btn{background:none;border:1px solid var(--gold-faint);border-radius:6px;color:var(--gold);opacity:0.65;font-size:11px;font-family:'Cinzel',serif;padding:3px 10px;cursor:pointer;transition:all 0.15s;}
-  .sort-btn.active{border-color:var(--gold);color:var(--gold);opacity:1;background:var(--gold-faint);}
+  .sort-bar{
+    display:flex;align-items:center;justify-content:flex-end;
+    padding:5px 16px;border-bottom:1px solid var(--border);
+    background:var(--bg);flex-shrink:0;gap:8px;
+  }
+  .sort-label{font-size:10px;color:var(--gold);font-family:'Space Mono',monospace;letter-spacing:1px;}
+  .sort-btn{
+    background:none;border:1px solid var(--border);border-radius:6px;
+    color:var(--gold);opacity:0.85;font-size:10px;
+    font-family:'Space Mono',monospace;padding:4px 12px;cursor:pointer;transition:all 0.15s;
+  }
+  .sort-btn.active{border-color:var(--gold);opacity:1;background:var(--gold-faint);}
 
-  .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--gold-dim);border-radius:20px;padding:10px 22px;color:var(--gold);font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;z-index:9999;backdrop-filter:blur(10px);transition:opacity 0.4s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 20px #00000055;}
+  /* ── TOAST ── */
+  .toast{
+    position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+    background:var(--bg3);border:1px solid var(--gold-dim);
+    border-radius:24px;padding:10px 24px;color:var(--gold);
+    font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;
+    z-index:9999;backdrop-filter:blur(20px);
+    transition:opacity 0.4s;pointer-events:none;white-space:nowrap;
+    box-shadow:var(--shadow);
+  }
 
-  .chart-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-  .chart-bar-label{font-family:'Cinzel',serif;font-size:10px;color:var(--gold);opacity:0.65;width:50px;text-align:right;flex-shrink:0;}
-  .chart-bar-bg{flex:1;background:var(--bg);border-radius:4px;height:20px;overflow:hidden;}
-  .chart-bar-fill{height:100%;border-radius:4px;transition:width 0.6s ease;display:flex;align-items:center;padding-left:8px;}
-  .chart-bar-val{font-size:11px;font-family:'Cinzel',serif;color:#fff;font-weight:700;text-shadow:0 1px 2px #0006;}
+  /* ── CHARTS ── */
+  .chart-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .chart-bar-label{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);width:50px;text-align:right;flex-shrink:0;}
+  .chart-bar-bg{flex:1;background:var(--bg);border-radius:6px;height:22px;overflow:hidden;}
+  .chart-bar-fill{height:100%;border-radius:6px;transition:width 0.6s ease;display:flex;align-items:center;padding-left:10px;}
+  .chart-bar-val{font-size:11px;font-family:'Space Mono',monospace;color:#fff;font-weight:700;}
 
+  /* ── MODAL ── */
   .modal-overlay{position:fixed;inset:0;background:#000000cc;z-index:500;display:flex;align-items:flex-end;justify-content:center;}
-  .modal-sheet{background:var(--bg2);border-top:1px solid var(--gold-dim);border-radius:18px 18px 0 0;width:100%;max-width:480px;padding:20px 18px 40px;max-height:80vh;overflow-y:auto;}
-  .modal-title{font-family:'Cinzel',serif;font-size:13px;letter-spacing:3px;color:var(--gold);margin-bottom:16px;text-align:center;}
-  .modal-option{padding:13px 16px;border-radius:8px;margin-bottom:8px;cursor:pointer;border:1px solid var(--gold-faint);font-size:15px;color:var(--text);transition:all 0.15s;}
+  .modal-sheet{
+    background:var(--bg2);border-top:1px solid var(--gold-dim);
+    border-radius:20px 20px 0 0;width:100%;max-width:480px;
+    padding:24px 20px calc(40px + env(safe-area-inset-bottom,0px));
+    max-height:80vh;overflow-y:auto;
+  }
+  .modal-title{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:4px;color:var(--gold);margin-bottom:18px;text-align:center;text-transform:uppercase;}
+  .modal-option{padding:14px 18px;border-radius:12px;margin-bottom:8px;cursor:pointer;border:1px solid var(--border);font-size:15px;color:var(--text);transition:all 0.15s;}
   .modal-option:active{background:var(--gold-faint);}
   .modal-option.selected{border-color:var(--gold);background:var(--gold-faint);color:var(--gold);}
-  .modal-cancel{width:100%;padding:12px;border-radius:8px;border:1px solid #ef535055;background:none;color:#ef535099;font-family:'Cinzel',serif;font-size:13px;cursor:pointer;margin-top:4px;}
+  .modal-cancel{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,67,58,0.3);background:none;color:var(--loss);opacity:0.7;font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;margin-top:4px;}
 
-  /* NEW UX FEATURES */
-  .breadcrumb{display:flex;align-items:center;gap:6px;padding:5px 18px;background:var(--bg2);border-bottom:1px solid var(--gold-faint);font-size:10px;color:var(--gold);opacity:0.55;font-family:'Cinzel',serif;letter-spacing:1px;flex-shrink:0;}
-  .result-filter{display:flex;gap:6px;padding:6px 14px;background:var(--bg2);border-bottom:1px solid var(--gold-faint);flex-shrink:0;}
-  .rf-btn{flex:1;padding:5px 4px;border-radius:6px;border:1px solid var(--gold-faint);background:transparent;color:var(--gold);opacity:0.6;font-size:11px;font-family:'Cinzel',serif;cursor:pointer;text-align:center;transition:all 0.15s;}
+  /* ── NEW UX ── */
+  .breadcrumb{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:6px;padding:8px 20px;background:var(--bg2);
+    border-bottom:1px solid var(--border);
+    font-size:10px;color:var(--gold);font-family:'Space Mono',monospace;
+    letter-spacing:1px;flex-shrink:0;
+  }
+  .result-filter{display:flex;gap:6px;padding:8px 16px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;}
+  .rf-btn{
+    flex:1;padding:7px 4px;border-radius:8px;
+    border:1px solid var(--border);background:transparent;
+    color:var(--gold);opacity:0.85;font-size:11px;
+    font-family:'Space Mono',monospace;cursor:pointer;text-align:center;transition:all 0.15s;
+  }
   .rf-btn.active{opacity:1;background:var(--gold-faint);border-color:var(--gold);}
-  .rf-btn.win-f.active{border-color:var(--win);background:#4caf5018;color:var(--win);}
-  .rf-btn.loss-f.active{border-color:var(--loss);background:#ef535018;color:var(--loss);}
-  .rf-btn.be-f.active{border-color:var(--be);background:#90a4ae18;color:var(--be);}
-  .hl{background:var(--gold-faint);color:var(--gold);border-radius:2px;padding:0 2px;}
-  .trade-thumb{width:44px;height:34px;border-radius:5px;object-fit:cover;border:1px solid var(--gold-faint);flex-shrink:0;margin-left:6px;cursor:pointer;}
-  .undo-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--loss);border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:12px;z-index:9999;box-shadow:0 4px 20px #00000066;pointer-events:all;white-space:nowrap;}
+  .rf-btn.win-f.active{border-color:var(--win);background:#3ddc8418;color:var(--win);}
+  .rf-btn.loss-f.active{border-color:var(--loss);background:#ff453a18;color:var(--loss);}
+  .rf-btn.be-f.active{border-color:var(--be);background:#8e9bae18;color:var(--be);}
+  .hl{background:var(--gold-faint);color:var(--gold);border-radius:3px;padding:0 3px;}
+  .trade-thumb{width:46px;height:36px;border-radius:7px;object-fit:cover;border:1px solid var(--border);flex-shrink:0;margin-left:8px;cursor:pointer;}
+  .undo-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--loss);border-radius:14px;padding:12px 18px;display:flex;align-items:center;gap:14px;z-index:9999;box-shadow:var(--shadow);pointer-events:all;white-space:nowrap;}
   .undo-toast-msg{font-size:13px;color:var(--text);font-family:'Crimson Pro',serif;}
-  .undo-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--gold);background:var(--gold-faint);color:var(--gold);font-family:'Cinzel',serif;font-size:11px;cursor:pointer;letter-spacing:1px;}
-  .copy-btn{background:none;border:none;color:var(--gold);opacity:0.45;cursor:pointer;font-size:13px;padding:2px 5px;border-radius:4px;transition:opacity 0.15s;vertical-align:middle;}
+  .undo-btn{padding:7px 16px;border-radius:10px;border:1px solid var(--gold);background:var(--gold-faint);color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;}
+  .copy-btn{background:none;border:none;color:var(--gold);opacity:0.65;cursor:pointer;font-size:13px;padding:3px 6px;border-radius:6px;transition:opacity 0.15s;vertical-align:middle;}
   .copy-btn:active{opacity:1;}
-  .today-card{background:linear-gradient(135deg,var(--gold-faint),transparent);border:1px solid var(--gold-dim);border-radius:14px;padding:16px;margin-bottom:16px;cursor:pointer;transition:border-color 0.2s;}
-  .today-card:active{border-color:var(--gold);}
-  .today-label{font-size:9px;letter-spacing:3px;color:var(--gold);font-family:'Cinzel',serif;margin-bottom:8px;opacity:0.7;}
-  .quick-save-row{display:flex;gap:8px;padding:8px 18px;background:var(--bg3);border-bottom:1px solid var(--gold-faint);flex-shrink:0;}
-  .quick-save-btn{flex:1;padding:8px;border-radius:8px;border:1px solid var(--gold-faint);background:transparent;color:var(--gold);font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;cursor:pointer;opacity:0.7;transition:all 0.15s;}
-  .quick-save-btn:active{opacity:1;background:var(--gold-faint);}
-  /* THEORY SCREEN */
-  .theory-card{background:var(--bg3);border:1px solid var(--gold-faint);border-radius:14px;margin-bottom:14px;overflow:hidden;transition:border-color 0.2s;}
-  .theory-card.expanded{border-color:var(--gold-dim);}
-  .theory-card-header{padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;}
-  .theory-card-icon{font-size:22px;flex-shrink:0;}
-  .theory-card-title{font-family:'Cinzel',serif;font-size:13px;color:var(--gold);letter-spacing:1px;flex:1;line-height:1.4;}
-  .theory-card-tag{font-size:10px;letter-spacing:1px;font-family:'Cinzel',serif;padding:3px 8px;border-radius:10px;background:var(--gold-faint);color:var(--gold);opacity:0.8;flex-shrink:0;}
-  .theory-card-chevron{font-size:12px;color:var(--gold);opacity:0.5;transition:transform 0.25s;flex-shrink:0;}
+  .today-card{background:linear-gradient(135deg,var(--gold-faint),transparent);border:1px solid var(--gold-dim);border-radius:16px;padding:18px;margin-bottom:16px;cursor:pointer;transition:all 0.2s;}
+  .today-card:active{border-color:var(--gold);transform:scale(0.99);}
+  .today-label{font-size:8px;letter-spacing:4px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:10px;opacity:0.8;text-transform:uppercase;}
+  .quick-save-btn{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;opacity:1;transition:all 0.15s;}
+  .quick-save-btn:active{background:var(--gold-faint);border-color:var(--gold);}
+
+  /* ── THEORY ── */
+  .theory-card{
+    background:var(--bg3);border:1px solid var(--border);
+    border-radius:16px;margin-bottom:14px;overflow:hidden;
+    transition:all 0.2s;
+  }
+  .theory-card.expanded{border-color:var(--gold-dim);box-shadow:0 4px 24px var(--gold-faint);}
+  .theory-card-header{padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;}
+  .theory-card-icon{font-size:24px;flex-shrink:0;}
+  .theory-card-title{font-family:'Cinzel',serif;font-size:14px;color:var(--gold);letter-spacing:0.5px;flex:1;line-height:1.4;font-weight:600;}
+  .theory-card-tag{font-size:9px;letter-spacing:2px;font-family:'Space Mono',monospace;padding:4px 10px;border-radius:20px;background:var(--gold-faint);color:var(--gold);opacity:1;flex-shrink:0;text-transform:uppercase;}
+  .theory-card-chevron{font-size:14px;color:var(--gold);opacity:0.7;transition:transform 0.3s;flex-shrink:0;}
   .theory-card.expanded .theory-card-chevron{transform:rotate(180deg);}
-  .theory-card-body{max-height:0;overflow:hidden;transition:max-height 0.35s ease;}
-  .theory-card.expanded .theory-card-body{max-height:2000px;}
-  .theory-card-content{padding:0 16px 16px;border-top:1px solid var(--gold-faint);}
-  .theory-rule{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--gold-faint);align-items:flex-start;}
+  .theory-card-body{max-height:0;overflow:hidden;transition:max-height 0.4s ease;}
+  .theory-card.expanded .theory-card-body{max-height:3000px;}
+  .theory-card-content{padding:4px 18px 18px;border-top:1px solid var(--border);}
+
+  /* Theory image */
+  .theory-img{width:100%;border-radius:10px;margin:12px 0;object-fit:cover;border:1px solid var(--border);}
+  .theory-img-caption{font-size:11px;color:var(--gold);opacity:0.65;font-family:'Space Mono',monospace;text-align:center;margin:-6px 0 12px;letter-spacing:1px;}
+
+  .theory-rule{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);align-items:flex-start;}
   .theory-rule:last-child{border-bottom:none;}
-  .theory-rule-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:7px;opacity:0.7;}
-  .theory-rule-text{font-size:14px;color:var(--text);line-height:1.6;}
+  .theory-rule-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:9px;}
+  .theory-rule-text{font-size:14px;color:var(--text);line-height:1.7;}
   .theory-rule-text b{color:var(--gold);font-weight:600;}
-  .theory-highlight{background:var(--gold-faint);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:10px 14px;margin:10px 0;font-size:13px;color:var(--text);line-height:1.6;}
-  .theory-highlight.warn{border-left-color:var(--loss);background:#ef535018;}
-  .theory-highlight.info{border-left-color:#42a5f5;background:#42a5f518;}
-  .theory-progress-bar{height:4px;background:var(--bg2);border-radius:2px;margin:12px 0;}
-  .theory-progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold),var(--gold-dim));transition:width 0.4s ease;}
-  .theory-quiz{background:var(--bg);border:1px solid var(--gold-faint);border-radius:10px;padding:14px;margin:12px 0;}
-  .theory-quiz-q{font-size:14px;color:var(--text);margin-bottom:12px;line-height:1.5;}
+  .theory-highlight{
+    background:var(--gold-faint);border-left:3px solid var(--gold);
+    border-radius:0 10px 10px 0;padding:12px 16px;margin:12px 0;
+    font-size:14px;color:var(--text);line-height:1.7;
+  }
+  .theory-highlight.warn{border-left-color:var(--loss);background:rgba(255,67,58,0.08);}
+  .theory-highlight.info{border-left-color:#42a5f5;background:rgba(66,165,245,0.08);}
+  .theory-progress-bar{height:3px;background:var(--bg2);border-radius:2px;margin:12px 0;}
+  .theory-progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold),var(--gold-dim));transition:width 0.5s ease;}
+  .theory-quiz{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin:14px 0;}
+  .theory-quiz-q{font-size:15px;color:var(--text);margin-bottom:14px;line-height:1.5;font-weight:600;}
   .theory-quiz-opts{display:flex;flex-direction:column;gap:8px;}
-  .theory-quiz-opt{padding:10px 14px;border-radius:8px;border:1px solid var(--gold-faint);background:transparent;color:var(--text);font-size:13px;font-family:'Crimson Pro',serif;cursor:pointer;text-align:left;transition:all 0.15s;}
+  .theory-quiz-opt{padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;cursor:pointer;text-align:left;transition:all 0.15s;}
   .theory-quiz-opt:active{background:var(--gold-faint);}
-  .theory-quiz-opt.correct{border-color:var(--win);background:#4caf5018;color:var(--win);}
-  .theory-quiz-opt.wrong{border-color:var(--loss);background:#ef535018;color:var(--loss);}
-  .theory-daily-badge{display:inline-flex;align-items:center;gap:6px;background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:20px;padding:4px 12px;font-size:11px;font-family:'Cinzel',serif;color:var(--gold);letter-spacing:1px;}
-  .theory-search{width:100%;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:20px;padding:8px 16px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;}
-  .theory-search::placeholder{color:var(--gold);opacity:0.4;}
-  .theory-tab-bar{display:flex;gap:8px;padding:10px 18px;border-bottom:1px solid var(--gold-faint);overflow-x:auto;flex-shrink:0;}
-  .theory-tab{flex:0 0 auto;padding:6px 14px;border-radius:20px;border:1px solid var(--gold-faint);background:transparent;color:var(--gold);opacity:0.6;font-size:11px;font-family:'Cinzel',serif;cursor:pointer;white-space:nowrap;transition:all 0.15s;}
+  .theory-quiz-opt.correct{border-color:var(--win);background:rgba(61,220,132,0.1);color:var(--win);}
+  .theory-quiz-opt.wrong{border-color:var(--loss);background:rgba(255,67,58,0.1);color:var(--loss);}
+  .theory-daily-badge{display:inline-flex;align-items:center;gap:6px;background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:20px;padding:5px 14px;font-size:10px;font-family:'Space Mono',monospace;color:var(--gold);letter-spacing:1px;}
+  .theory-search{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:24px;padding:9px 18px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;transition:all 0.2s;}
+  .theory-search:focus{border-color:var(--gold-dim);box-shadow:0 0 0 3px var(--gold-faint);}
+  .theory-search::placeholder{color:var(--gold);opacity:0.35;}
+  .theory-tab-bar{display:flex;gap:8px;padding:10px 18px;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;}
+  .theory-tab{flex:0 0 auto;padding:7px 16px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--gold);opacity:0.8;font-size:10px;font-family:'Space Mono',monospace;cursor:pointer;white-space:nowrap;transition:all 0.15s;text-transform:uppercase;letter-spacing:1px;}
   .theory-tab.active{border-color:var(--gold);background:var(--gold-faint);opacity:1;}
   .theory-mastered{border-color:var(--win) !important;}
-  .theme-mode-btn{padding:16px 8px;border-radius:12px;cursor:pointer;border:2px solid var(--gold-faint);background:var(--bg3);color:var(--text);transition:all 0.2s;text-align:center;width:100%;}
-  .theme-mode-btn.active{border-color:var(--gold);background:var(--gold-faint);}
-  .theme-size-btn{padding:14px 8px;border-radius:12px;cursor:pointer;border:2px solid var(--gold-faint);background:var(--bg3);color:var(--text);transition:all 0.2s;text-align:center;width:100%;}
+
+  /* ── SETTINGS ── */
+  .theme-mode-btn{padding:18px 8px;border-radius:14px;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text);transition:all 0.2s;text-align:center;width:100%;}
+  .theme-mode-btn.active{border-color:var(--gold);background:var(--gold-faint);box-shadow:0 0 20px var(--gold-faint);}
+  .theme-size-btn{padding:16px 8px;border-radius:14px;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text);transition:all 0.2s;text-align:center;width:100%;}
   .theme-size-btn.active{border-color:var(--gold);background:var(--gold-faint);}
   .color-swatch{width:44px;height:44px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all 0.2s;position:relative;margin:0 auto;display:block;}
-  .color-swatch.active{border-color:#fff;box-shadow:0 0 0 2px var(--gold);}
+  .color-swatch.active{border-color:#fff;box-shadow:0 0 0 2px var(--gold),0 0 20px var(--gold-faint);}
   .color-swatch.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#000;font-size:16px;font-weight:700;}
 
-  /* LIGHT MODE overrides */
-  body.light-mode{--bg:#f5f3ee;--bg2:#ede9e0;--bg3:#ddd8cc;--text:#1a1408;--text-dim:#1a140888;}
-  body.light-mode .header{background:linear-gradient(180deg,#ede9e0 0%,#f5f3eeee 100%) !important;}
+  /* ── LIGHT MODE ── */
+  body.light-mode{--bg:#f4f1ea;--bg2:#ebe7dc;--bg3:#ddd9ce;--text:#1a1408;--text-dim:#1a140888;--border:#c9a84c22;}
+  body.light-mode .header{background:linear-gradient(180deg,rgba(235,231,220,0.98),rgba(244,241,234,0.85)) !important;}
   body.light-mode .search-input{color-scheme:light;background:#fff;}
-  body.light-mode .modal-sheet{background:#ede9e0;}
+  body.light-mode .modal-sheet{background:var(--bg2);}
   body.light-mode input[type=date]{color-scheme:light;}
   body.light-mode select{color-scheme:light;}
 
-  /* FONT SIZE scales */
-  body.font-small{font-size:13px;}
-  body.font-medium{font-size:15px;}
-  body.font-large{font-size:18px;}
-  body.font-small .trade-title{font-size:12px;}
-  body.font-large .trade-title{font-size:16px;}
-  body.font-small .note-box,body.font-small .ai-result{font-size:13px;}
-  body.font-large .note-box,body.font-large .ai-result{font-size:17px;}
+  /* ── FONT SIZE ── */
+  body.font-small{font-size:13px;} body.font-medium{font-size:15px;} body.font-large{font-size:18px;}
+  body.font-small .trade-title{font-size:12px;} body.font-large .trade-title{font-size:16px;}
 
-  /* BOTTOM NAV */
-  .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg2);border-top:1px solid var(--gold-faint);display:flex;z-index:200;padding-bottom:env(safe-area-inset-bottom,0);}
-  .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 6px;cursor:pointer;border:none;background:transparent;color:var(--gold);opacity:0.5;transition:all 0.15s;font-family:'Cinzel',serif;}
+  /* ── BOTTOM NAV ── */
+  .bottom-nav{
+    position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+    width:100%;max-width:480px;
+    background:linear-gradient(180deg,transparent,var(--bg2) 20%);
+    border-top:1px solid var(--border);
+    display:flex;z-index:200;
+    padding-bottom:env(safe-area-inset-bottom,0);
+    backdrop-filter:blur(20px);
+  }
+  .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 8px;cursor:pointer;border:none;background:transparent;color:var(--gold);opacity:0.55;transition:all 0.2s;font-family:'Space Mono',monospace;}
   .bn-item.active{opacity:1;}
-  .bn-item .bn-icon{font-size:20px;margin-bottom:2px;}
-  .bn-item .bn-label{font-size:9px;letter-spacing:1px;}
+  .bn-item .bn-icon{font-size:20px;margin-bottom:3px;}
+  .bn-item .bn-label{font-size:9px;letter-spacing:1px;text-transform:uppercase;font-weight:700;}
 
-  /* IMPORT SCREEN */
-  .import-drop{border:2px dashed var(--gold-dim);border-radius:14px;padding:40px 20px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:16px;}
+  /* ── IMPORT ── */
+  .import-drop{border:1px dashed var(--gold-dim);border-radius:16px;padding:44px 20px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:16px;background:var(--bg3);}
   .import-drop:active,.import-drop.drag-over{background:var(--gold-faint);border-color:var(--gold);}
-  .import-preview{background:var(--bg3);border:1px solid var(--gold-faint);border-radius:10px;padding:14px;margin-bottom:12px;}
+  .import-preview{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;}
 
-  /* PATTERN RESULT */
-  .pattern-result{background:var(--bg3);border:1px solid var(--gold-dim);border-radius:10px;padding:14px 16px;font-size:14px;color:var(--text);line-height:1.8;white-space:pre-wrap;margin-bottom:14px;}
-  .fab{position:fixed;bottom:72px;right:20px;width:56px;height:56px;border-radius:50%;background:var(--gold);border:none;color:#fff;font-size:28px;cursor:pointer;z-index:300;box-shadow:0 4px 20px var(--gold-dim);display:none;align-items:center;justify-content:center;font-weight:700;line-height:1;transition:transform 0.15s;}
-  .fab:active{transform:scale(0.92);}
+  /* ── PATTERN RESULT ── */
+  .pattern-result{background:var(--bg3);border:1px solid var(--gold-dim);border-radius:14px;padding:16px;font-size:14px;color:var(--text);line-height:1.9;white-space:pre-wrap;margin-bottom:14px;}
+
+  /* ── FAB ── */
+  .fab{
+    position:fixed;bottom:72px;right:20px;width:58px;height:58px;
+    border-radius:50%;background:var(--gold);border:none;color:#060606;
+    font-size:28px;cursor:pointer;z-index:300;
+    box-shadow:0 4px 24px var(--gold-dim), 0 0 0 0 var(--gold-faint);
+    display:none;align-items:center;justify-content:center;
+    font-weight:700;line-height:1;transition:transform 0.15s, box-shadow 0.2s;
+  }
+  .fab:active{transform:scale(0.93);}
   .fab.visible{display:flex;}
+  .fab:hover{box-shadow:0 6px 30px var(--gold-dim), 0 0 0 8px var(--gold-faint);}
 </style>
 </head>
 <body>
@@ -228,7 +482,7 @@
 <div class="screen active" id="screen-list">
   <div class="header">
     <button class="header-btn" onclick="openNew()" style="font-size:22px;font-weight:700;">+</button>
-    <div class="header-title"><div class="label">GFI Research</div><div class="name">TradeLog</div></div>
+    <div class="header-title"><div class="label">ICT · Nhật Ký</div><div class="name">TradeLog</div></div>
     <div style="width:36px;"></div>
   </div>
   <div class="stats-bar">
@@ -238,9 +492,9 @@
     <div class="stat"><div class="stat-val" id="stat-wr">0%</div><div class="stat-lbl">WR</div></div>
   </div>
   <!-- Fix 7: streak row -->
-  <div id="streak-row" style="display:flex;justify-content:space-between;align-items:center;padding:5px 18px;background:var(--bg2);border-bottom:1px solid var(--gold-faint);flex-shrink:0;">
-    <div id="streak-text" style="font-size:11px;color:var(--gold);opacity:0.65;font-family:'Cinzel',serif;"></div>
-    <div id="last-trade-text" style="font-size:11px;color:var(--gold);opacity:0.65;font-family:'Cinzel',serif;"></div>
+  <div id="streak-row" style="display:flex;justify-content:space-between;align-items:center;padding:5px 18px;background:var(--bg2);border-bottom:1px solid var(--gold-faint);flex-shrink:0;" onclick="toggleSessionInfo()">
+    <div id="streak-text" style="font-size:11px;color:var(--gold);opacity:0.9;font-family:'Cinzel',serif;"></div>
+    <div id="last-trade-text" style="font-size:11px;color:var(--gold);opacity:0.9;font-family:'Cinzel',serif;"></div>
   </div>
   <div class="search-bar">
     <input class="search-input" id="search-input" placeholder="🔍  Tìm tên, symbol, tags..." oninput="renderList()"/>
@@ -298,7 +552,7 @@
     <div class="import-drop" id="import-drop" onclick="document.getElementById('import-file').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleImportDrop(event)">
       <div style="font-size:36px;margin-bottom:10px;">📄</div>
       <div style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold);letter-spacing:2px;margin-bottom:6px;">CHỌN HOẶC KÉO THẢ FILE</div>
-      <div style="font-size:12px;color:var(--text);opacity:0.6;">.docx · .csv · .txt</div>
+      <div style="font-size:12px;color:var(--text);opacity:0.85;">.docx · .csv · .txt</div>
     </div>
     <input type="file" id="import-file" accept=".docx,.csv,.txt,.xlsx" style="display:none" onchange="handleImportFile(this)"/>
 
@@ -353,7 +607,17 @@
         <button class="toggle-btn" data-group="result" data-val="BE" onclick="toggleSelect(this)">➖ BE</button>
       </div>
     </div>
-    <div class="field"><label class="field-label">P&amp;L</label><input id="f-pnl" type="text" placeholder="+2R hoặc -1R" oninput="formDirty=true"/></div>
+    <div class="field">
+      <label class="field-label">P&amp;L <span style="font-size:10px;opacity:0.7;font-family:'Crimson Pro',serif;letter-spacing:0;">(hoặc dùng RR Calculator)</span></label>
+      <input id="f-pnl" type="text" placeholder="+2R hoặc -1R" oninput="formDirty=true"/>
+      <div style="display:flex;gap:6px;margin-top:8px;" id="rr-calc-row">
+        <input id="rr-entry" type="number" step="any" placeholder="Entry" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:'Crimson Pro',serif;outline:none;"/>
+        <input id="rr-sl" type="number" step="any" placeholder="SL" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:'Crimson Pro',serif;outline:none;"/>
+        <input id="rr-tp" type="number" step="any" placeholder="TP" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:'Crimson Pro',serif;outline:none;"/>
+        <button onclick="calcRR()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:7px 10px;color:var(--gold);font-size:12px;font-family:'Cinzel',serif;cursor:pointer;white-space:nowrap;">= R</button>
+      </div>
+      <div id="rr-result" style="font-size:13px;color:var(--gold);margin-top:5px;font-family:'Cinzel',serif;display:none;"></div>
+    </div>
     <div class="field">
       <label class="field-label">Vào đúng plan?</label>
       <div class="toggle-group">
@@ -366,10 +630,13 @@
       <label class="field-label">Thư mục</label>
       <select id="f-folder" onchange="formDirty=true"></select>
     </div>
-    <div class="field"><label class="field-label">Tags (cách nhau bằng dấu phẩy)</label><input id="f-tags" type="text" placeholder="VD: Kiền, Vị Tế, Tỷ" oninput="formDirty=true"/></div>
+    <div class="field"><label class="field-label">Tags (cách nhau bằng dấu phẩy)</label>
+      <input id="f-tags" type="text" placeholder="VD: FVG, OB, BOLO, Kiền..." oninput="formDirty=true;suggestTags(this)" autocomplete="off" list=""/>
+      <div id="tag-suggestions" style="display:none;position:absolute;background:var(--bg2);border:1px solid var(--gold-dim);border-radius:8px;z-index:500;width:calc(100% - 36px);max-height:150px;overflow-y:auto;box-shadow:0 4px 20px #00000055;"></div>
+    </div>
     <div class="field">
       <label class="field-label">Ảnh Biểu Đồ (D1 → M1)</label>
-      <div style="font-size:11px;color:var(--gold);opacity:0.6;margin-bottom:8px;">📋 Nhấn "+ Thêm ảnh" hoặc Ctrl+V để dán ảnh</div>
+      <div style="font-size:11px;color:var(--gold);opacity:0.9;margin-bottom:8px;">📋 Nhấn "+ Thêm ảnh" hoặc Ctrl+V để dán ảnh</div>
       <div id="tf-upload-row" style="display:flex;flex-direction:column;gap:12px;"></div>
     </div>
     <div class="field"><label class="field-label">Ghi chú / Bài học</label><textarea id="f-note" placeholder="Mô tả setup, lý do vào lệnh, bài học rút ra..." oninput="formDirty=true"></textarea></div>
@@ -393,7 +660,13 @@
     <button class="header-btn" onclick="openMoveFolder()" title="Chuyển thư mục" style="font-size:18px;">🗂</button>
   </div>
   <!-- Fix 5: Breadcrumb -->
-  <div class="breadcrumb">📋 Danh sách <span>›</span> Chi tiết lệnh</div>
+  <div class="breadcrumb" style="justify-content:space-between;">
+    <span>📋 Danh sách <span style="opacity:0.5;">›</span> Chi tiết lệnh</span>
+    <div style="display:flex;gap:4px;">
+      <button onclick="navTrade(-1)" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:3px 10px;color:var(--gold);font-size:14px;cursor:pointer;" title="Lệnh trước">‹</button>
+      <button onclick="navTrade(1)" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:3px 10px;color:var(--gold);font-size:14px;cursor:pointer;" title="Lệnh sau">›</button>
+    </div>
+  </div>
   <div class="detail-banner" id="detail-banner"></div>
   <div class="detail-body">
     <div class="section-label">Thông Tin Lệnh</div>
@@ -402,9 +675,9 @@
     <div class="note-box" id="detail-note"></div>
     <div class="section-label">Biểu Đồ Phân Tích</div>
     <!-- Fix 6: Swipe hint -->
-    <div style="font-size:10px;color:var(--gold);opacity:0.4;font-family:'Cinzel',serif;letter-spacing:1px;margin-bottom:6px;">← vuốt để chuyển khung →</div>
+    <div style="font-size:10px;color:var(--gold);opacity:0.75;font-family:'Cinzel',serif;letter-spacing:1px;margin-bottom:6px;">← vuốt để chuyển khung →</div>
     <div class="tf-tabs" id="detail-tf-tabs"></div>
-    <div class="tf-preview" id="detail-tf-preview" id="tf-swipe"></div>
+    <div class="tf-preview" id="detail-tf-preview"></div>
     <div class="section-label">Phân Tích AI</div>
     <button class="ai-btn" id="ai-btn" onclick="analyzeAI()">🤖 PHÂN TÍCH AI</button>
     <div class="ai-result" id="ai-result" style="display:none;"></div>
@@ -453,11 +726,14 @@
       </div>
     </div>
     <div class="field"><label class="field-label">Thư mục</label><select id="e-folder" onchange="formDirty=true"></select></div>
-    <div class="field"><label class="field-label">Tags (cách nhau bằng dấu phẩy)</label><input id="e-tags" type="text" oninput="formDirty=true"/></div>
+    <div class="field"><label class="field-label">Tags (cách nhau bằng dấu phẩy)</label>
+      <input id="e-tags" type="text" placeholder="VD: FVG, OB, BOLO..." oninput="formDirty=true;suggestTags(this)" autocomplete="off"/>
+      <div id="e-tag-suggestions" style="display:none;position:absolute;background:var(--bg2);border:1px solid var(--gold-dim);border-radius:8px;z-index:500;width:calc(100% - 36px);max-height:150px;overflow-y:auto;box-shadow:0 4px 20px #00000055;"></div>
+    </div>
     <div class="field"><label class="field-label">Ghi chú / Bài học</label><textarea id="e-note" oninput="formDirty=true"></textarea></div>
     <div class="field">
       <label class="field-label">Ảnh Biểu Đồ (D1 → M1)</label>
-      <div style="font-size:11px;color:var(--gold);opacity:0.6;margin-bottom:8px;">📋 Nhấn "+ Thêm ảnh" hoặc Ctrl+V để dán ảnh</div>
+      <div style="font-size:11px;color:var(--gold);opacity:0.9;margin-bottom:8px;">📋 Nhấn "+ Thêm ảnh" hoặc Ctrl+V để dán ảnh</div>
       <div id="e-tf-upload-row" style="display:flex;flex-direction:column;gap:12px;"></div>
     </div>
   </div>
@@ -485,7 +761,7 @@
   <div style="padding:12px 18px;background:var(--bg2);border-bottom:1px solid var(--gold-faint);flex-shrink:0;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
       <div id="theory-daily-badge" class="theory-daily-badge">📅 Hôm nay: 0/0 đã ôn</div>
-      <div id="theory-streak" style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold);opacity:0.7;">🔥 0 ngày liên tiếp</div>
+      <div id="theory-streak" style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold);opacity:1;font-weight:600;">🔥 0 ngày liên tiếp</div>
     </div>
     <div class="theory-progress-bar"><div class="theory-progress-fill" id="theory-progress" style="width:0%"></div></div>
   </div>
@@ -628,6 +904,7 @@ function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").
 function estimateKB(obj) { return Math.round(JSON.stringify(obj).length/1024); }
 
 window.showScreen = function(name) {
+  if(name !== 'import') { window._importParsed = null; } // clear stale import data
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   const el=document.getElementById("screen-"+name);
   if(el){el.classList.add("active");el.scrollTop=0;}
@@ -781,7 +1058,7 @@ window.moveTradeToFolder=async function(folder){
     const displayDate=currentTrade.tradeDate?fmtDate(currentTrade.tradeDate):(currentTrade.createdAt?fmtDate(currentTrade.createdAt):"");
     const cls=currentTrade.result==="Win"?"win":currentTrade.result==="Loss"?"loss":"be";
     document.getElementById("detail-banner").innerHTML=`
-      <span style="font-size:13px;color:var(--gold);opacity:0.55;font-style:italic;">${displayDate}${folder?" · 🗂 "+folder:""}</span>
+      <span style="font-size:13px;color:var(--gold);opacity:0.85;font-style:italic;">${displayDate}${folder?" · 🗂 "+folder:""}</span>
       <span class="${cls}" style="font-family:'Cinzel',serif;font-size:15px;font-weight:600;">${currentTrade.result||""} ${currentTrade.pnl||""}</span>`;
   }catch(e){alert("Lỗi: "+e.message);}
 };
@@ -806,12 +1083,22 @@ function hlText(text, search) {
 // update streak row separately (perf: not inside renderList loop)
 function updateStreakRow() {
   const sorted=[...trades].sort((a,b)=>(b.tradeDate||b.createdAt||0)-(a.tradeDate||a.createdAt||0));
-  let streak=0;
-  for(const t of sorted){ if(t.result==="Win") streak++; else break; }
+  // Win streak
+  let winStreak=0;
+  for(const t of sorted){ if(t.result==="Win") winStreak++; else break; }
+  // Plan discipline streak
+  let planStreak=0;
+  for(const t of sorted){ if(t.onplan==="Đúng plan") planStreak++; else break; }
+  // streak vars set above
   const last=sorted[0];
   const streakEl=document.getElementById("streak-text");
   const lastEl=document.getElementById("last-trade-text");
-  if(streakEl) streakEl.textContent=streak>1?`🔥 Win streak: ${streak} lệnh`:"";
+  if(streakEl){
+    const parts=[];
+    if(winStreak>1) parts.push(`🔥 Win: ${winStreak} lệnh`);
+    if(planStreak>1) parts.push(`🎯 Plan: ${planStreak} lệnh`);
+    streakEl.textContent=parts.join(" · ");
+  }
   if(lastEl&&last){
     const cls2=last.result==="Win"?"win":last.result==="Loss"?"loss":"be";
     lastEl.innerHTML=`Gần nhất: <span class="${cls2}" style="font-weight:600;">${esc(last.result)} ${esc(last.pnl||"")}</span>`;
@@ -848,7 +1135,7 @@ function renderList() {
     const cls=t.result==="Win"?"win":t.result==="Loss"?"loss":"be";
     const tags=Array.isArray(t.tags)?t.tags.join(" · "):(t.tags||"");
     const date=t.tradeDate?fmtDate(t.tradeDate):(t.createdAt?fmtDate(t.createdAt):"");
-    const fb=t.folder?`<span style="font-size:10px;color:var(--gold);opacity:0.7;background:var(--gold-faint);border-radius:4px;padding:1px 6px;margin-left:6px;">🗂 ${esc(t.folder)}</span>`:"";
+    const fb=t.folder?`<span style="font-size:10px;color:var(--gold);opacity:1;background:var(--gold-faint);border-radius:4px;padding:2px 8px;margin-left:6px;">🗂 ${esc(t.folder)}</span>`:"";
     const isNew = t.id === lastSavedId;
     // Fix XSS: store thumbSrc in data attr, use event delegation instead of inline onclick
     let thumbSrc = "";
@@ -865,7 +1152,7 @@ function renderList() {
         ${thumbSrc?`<img class="trade-thumb" src="${thumbSrc}" onclick="event.stopPropagation();viewImg(this.src)" loading="lazy"/>`:""}
         <div style="text-align:right;">
           <div class="trade-pnl ${cls}">${esc(t.pnl)||"—"}</div>
-          <div style="font-size:12px;color:var(--gold);opacity:0.5;margin-top:4px;">${symHl}</div>
+          <div style="font-size:12px;color:var(--gold);opacity:0.85;margin-top:4px;font-weight:500;">${symHl}</div>
         </div>
       </div>
     </div>`;
@@ -893,7 +1180,7 @@ window.openDetail=function(id){
   document.getElementById("detail-header-title").textContent=(currentTrade.title||"").substring(0,20);
   const dd=currentTrade.tradeDate?fmtDate(currentTrade.tradeDate):(currentTrade.createdAt?fmtDate(currentTrade.createdAt):"");
   document.getElementById("detail-banner").innerHTML=`
-    <span style="font-size:13px;color:var(--gold);opacity:0.55;font-style:italic;">${dd}${currentTrade.folder?" · 🗂 "+esc(currentTrade.folder):""}</span>
+    <span style="font-size:13px;color:var(--gold);opacity:0.85;font-style:italic;">${dd}${currentTrade.folder?" · 🗂 "+esc(currentTrade.folder):""}</span>
     <span class="${cls}" style="font-family:'Cinzel',serif;font-size:15px;font-weight:600;">${esc(currentTrade.result)||""} ${esc(currentTrade.pnl)||""}</span>`;
   document.getElementById("detail-grid").innerHTML=[
     ["Symbol", `${esc(currentTrade.symbol||"—")} ${currentTrade.symbol?`<button class="copy-btn" onclick="copySymbol('${esc(currentTrade.symbol)}')" title="Copy">📋</button>`:""}`,],
@@ -1169,7 +1456,7 @@ function buildTFUploadRow(){
         <button onclick="addTFImg('${tf}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:4px 10px;color:var(--gold);font-size:11px;cursor:pointer;font-family:'Cinzel',serif;">+ Thêm ảnh</button>
       </div>
       <div id="tf-images-${tf}" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;min-height:60px;"></div>
-      <div style="font-size:10px;letter-spacing:2px;color:var(--gold);opacity:0.65;font-family:'Cinzel',serif;margin-bottom:5px;">CHÚ THÍCH</div>
+      <div style="font-size:10px;letter-spacing:2px;color:var(--gold);opacity:0.9;font-family:'Cinzel',serif;margin-bottom:5px;">CHÚ THÍCH</div>
       <textarea id="tf-caption-${tf}" placeholder="Ghi chú cho khung ${tf}..." style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:16px;font-family:'Crimson Pro',serif;outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;" onpaste="handlePaste('${tf}',event)"></textarea>
       <input type="file" accept="image/*" multiple style="display:none" id="tf-input-${tf}" onchange="handleImgMulti('${tf}',this)"/>
     </div>`).join("");
@@ -1190,8 +1477,16 @@ window.handlePaste=function(tf,event){
 window.handleImgMulti=function(tf,input){
   const files=Array.from(input.files); if(!files.length) return;
   if(!formImages[tf]) formImages[tf]=[];
-  let loaded=0;
-  files.forEach(file=>{const r=new FileReader();r.onload=async e=>{try{const c=await compressImage(e.target.result);formImages[tf].push(c);}catch(err){showToast("⚠️ Không thể đọc ảnh");}loaded++;window.formDirty=true;if(loaded===files.length)renderTFImages(tf);};r.readAsDataURL(file);});
+  // parallel compression
+  const readers=files.map(file=>new Promise(res=>{
+    const r=new FileReader();
+    r.onload=async e=>{try{res(await compressImage(e.target.result));}catch{showToast("⚠️ Không thể đọc ảnh");res(null);}};
+    r.readAsDataURL(file);
+  }));
+  Promise.all(readers).then(results=>{
+    results.filter(Boolean).forEach(c=>formImages[tf].push(c));
+    window.formDirty=true; renderTFImages(tf);
+  });
   input.value="";
 };
 
@@ -1218,7 +1513,7 @@ function buildEditTFUploadRow(){
         <button onclick="addEditTFImg('${tf}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:4px 10px;color:var(--gold);font-size:11px;cursor:pointer;font-family:'Cinzel',serif;">+ Thêm ảnh</button>
       </div>
       <div id="e-tf-images-${tf}" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;min-height:60px;"></div>
-      <div style="font-size:10px;letter-spacing:2px;color:var(--gold);opacity:0.65;font-family:'Cinzel',serif;margin-bottom:5px;">CHÚ THÍCH</div>
+      <div style="font-size:10px;letter-spacing:2px;color:var(--gold);opacity:0.9;font-family:'Cinzel',serif;margin-bottom:5px;">CHÚ THÍCH</div>
       <textarea id="e-tf-caption-${tf}" placeholder="Ghi chú cho khung ${tf}..." style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:16px;font-family:'Crimson Pro',serif;outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;" onpaste="handleEditPaste('${tf}',event)"></textarea>
       <input type="file" accept="image/*" multiple style="display:none" id="e-tf-input-${tf}" onchange="handleEditImgMulti('${tf}',this)"/>
     </div>`).join("");
@@ -1237,8 +1532,15 @@ window.handleEditPaste=function(tf,event){
 window.handleEditImgMulti=function(tf,input){
   const files=Array.from(input.files); if(!files.length) return;
   if(!editImages[tf]) editImages[tf]=[];
-  let loaded=0;
-  files.forEach(file=>{const r=new FileReader();r.onload=async e=>{try{const c=await compressImage(e.target.result);editImages[tf].push(c);}catch(err){showToast("⚠️ Không thể đọc ảnh");}loaded++;window.formDirty=true;if(loaded===files.length)renderEditTFImages(tf);};r.readAsDataURL(file);});
+  const readers=files.map(file=>new Promise(res=>{
+    const r=new FileReader();
+    r.onload=async e=>{try{res(await compressImage(e.target.result));}catch{showToast("⚠️ Không thể đọc ảnh");res(null);}};
+    r.readAsDataURL(file);
+  }));
+  Promise.all(readers).then(results=>{
+    results.filter(Boolean).forEach(c=>editImages[tf].push(c));
+    window.formDirty=true; renderEditTFImages(tf);
+  });
   input.value="";
 };
 window.updateTrade=async function(){
@@ -1262,6 +1564,7 @@ window.updateTrade=async function(){
 
 // ══ STATS ══
 function renderStats(){
+  try {
   const total=trades.length;
   if(!total){document.getElementById("stats-body").innerHTML='<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Chưa có dữ liệu</div></div>';return;}
   const wins=trades.filter(t=>t.result==="Win").length, losses=trades.filter(t=>t.result==="Loss").length, bes=trades.filter(t=>t.result==="BE").length;
@@ -1305,6 +1608,7 @@ function renderStats(){
     <div class="section-label">Phân Tích AI Tổng Hợp</div>
     <button id="pattern-btn" onclick="analyzePattern()" style="width:100%;padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--gold-faint),transparent);border:1px solid var(--gold-dim);color:var(--gold);font-size:14px;font-family:'Cinzel',serif;letter-spacing:2px;cursor:pointer;margin-bottom:12px;">🔬 PHÂN TÍCH PATTERN 15 LỆNH GẦN NHẤT</button>
     <div id="pattern-result" class="pattern-result" style="display:none;"></div>`;
+  } catch(err) { console.error('renderStats:',err); document.getElementById('stats-body').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Lỗi hiển thị thống kê</div></div>'; }
 }
 
 // ══ EXPORT CSV ══
@@ -1455,7 +1759,15 @@ async function loadTheme() {
 const THEORY_DATA = [
   // ─── CƠ BẢN ───
   {
-    id:"t001", cat:"basic", icon:"⚖️",
+    id:"t001", img:`ERL (Bên ngoài)          IRL (Bên trong)
+─────────────────────────────────────
+EQH ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔    ←  BSL
+                              FVG ░░░░
+PDH ──────────────────    ←  IFVG ▓▓
+                              BPR ████
+PDL ══════════════════    ←  SSL
+EQL ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁    
+Giá: ERL → IRL → ERL (chu kỳ liên tục)`, cat:"basic", icon:"⚖️",
     title:"ERL vs IRL — Thanh Khoản Ngoài & Trong",
     tag:"Thanh khoản",
     rules:[
@@ -1468,7 +1780,13 @@ const THEORY_DATA = [
     quiz:{q:"EQL là viết tắt của?", opts:["Equal Lows","External Liquidity","Entry Level","Equal Level"], ans:0}
   },
   {
-    id:"t002", cat:"basic", icon:"📊",
+    id:"t002", img:`Độ mạnh PDA (yếu → mạnh):
+━━━━━━━━━━━━━━━━━━━━━━━━━
+FVG     ░░░  — Cơ bản, phải đục PDA khác
+IFVG    ▒▒▒  — FVG bị đảo, mạnh hơn
+BPR     ███  — Mạnh nhất, cân bằng 2 FVG
+━━━━━━━━━━━━━━━━━━━━━━━━━
+FVG A+ = MSS + đóng qua TK (HTF+LTF)`, cat:"basic", icon:"📊",
     title:"FVG < IFVG < BPR — Thứ tự ưu tiên PDA",
     tag:"Cấu trúc",
     rules:[
@@ -1481,7 +1799,14 @@ const THEORY_DATA = [
     quiz:{q:"Thứ tự ưu tiên PDA từ yếu đến mạnh là?", opts:["BPR < IFVG < FVG","FVG < IFVG < BPR","IFVG < FVG < BPR","FVG < BPR < IFVG"], ans:1}
   },
   {
-    id:"t003", cat:"basic", icon:"🕯️",
+    id:"t003", img:`   Deathmark Examples:
+   ┌──┐  ← Chỉ râu trên
+   │  │    Body đóng thấp
+   └──┘    → TT sẽ lấy TK dưới
+   
+   ┌──┐    Body đóng cao  
+   │  │  ← Chỉ râu dưới
+   └──┘    → TT sẽ lấy TK trên`, cat:"basic", icon:"🕯️",
     title:"Deathmark — Nến Thiếu Thanh Khoản",
     tag:"Nến học",
     rules:[
@@ -1494,7 +1819,17 @@ const THEORY_DATA = [
     quiz:{q:"Deathmark báo hiệu điều gì?", opts:["Xu hướng đảo chiều","TT sẽ quay lấy thanh khoản phía không có râu","Nến mạnh nhất trong chuỗi","Không có ý nghĩa"], ans:1}
   },
   {
-    id:"t004", cat:"basic", icon:"🏔️",
+    id:"t004", img:`ITH Formation:
+  ┌─────────────┐
+  │  Quét BSL   │→ FVG + MSS↓ = ITH
+  └─────────────┘
+         ↓ MSS
+  
+ITL Formation:  
+         ↑ Hồi
+  ┌─────────────┐
+  │  Quét SSL   │→ Cấu trúc hồi = ITL
+  └─────────────┘`, cat:"basic", icon:"🏔️",
     title:"ITH / ITL — Đỉnh & Đáy Trung Hạn",
     tag:"Cấu trúc",
     rules:[
@@ -1507,7 +1842,13 @@ const THEORY_DATA = [
     quiz:{q:"ITH hình thành khi nào?", opts:["Giá chạm kháng cự","Giá quét BSL + tạo FVG + MSS xuống","Giá tạo Higher High","Giá quét SSL"], ans:1}
   },
   {
-    id:"t005", cat:"basic", icon:"🕐",
+    id:"t005", img:`   Macro Time Windows:
+   ┌────────────────────────────┐
+   │ xx:17 ──────────── xx:33  │
+   │ xx:45 ──────────── xx:15  │
+   └────────────────────────────┘
+   Đỉnh/Đáy TRONG window = Uy tín cao
+   Đỉnh 09:55 > Đỉnh 09:37 (09:55 ∈ 45→15)`, cat:"basic", icon:"🕐",
     title:"Macro Time — Khung Giờ Quan Trọng",
     tag:"Time",
     rules:[
@@ -1521,7 +1862,15 @@ const THEORY_DATA = [
   },
   // ─── PDA ───
   {
-    id:"t006", cat:"pda", icon:"🟦",
+    id:"t006", img:`OB = Nến ngược chiều CUỐI CÙNG trước sóng:
+   
+   Sóng tăng:     Sóng giảm:
+   ↑↑↑            ↓↓↓
+   [OB] ← Bear    [OB] ← Bull
+   ↑↑↑            ↓↓↓
+   
+OB A+: Discount (Long) / Premium (Short)
+Chờ 2-3 nến tôn trọng OB → Entry`, cat:"pda", icon:"🟦",
     title:"Order Block (OB) — Xác định & Phân loại",
     tag:"OB",
     rules:[
@@ -1534,7 +1883,14 @@ const THEORY_DATA = [
     quiz:{q:"OB A+ chỉ dùng để đánh?", opts:["Reversal","Tiếp diễn (với DOL cặp chéo)","Scalp ngắn","Bất kỳ hướng nào"], ans:1}
   },
   {
-    id:"t007", cat:"pda", icon:"🟧",
+    id:"t007", img:`BB = Nến cùng chiều CUỐI CÙNG trước đảo:
+   
+   Bearish BB:    Bullish BB:  
+   ↑↑↑  ← [BB]   ↓↓↓  ← [BB]
+   ↓↓↓ Reversal  ↑↑↑ Reversal
+   
+BB: Hợp lưu FVG/IFVG + gần đỉnh/đáy
+OB → Tiếp diễn | BB → Đảo chiều`, cat:"pda", icon:"🟧",
     title:"BB (Breaker Block) — Đánh Ngược Chiều",
     tag:"BB",
     rules:[
@@ -1547,7 +1903,14 @@ const THEORY_DATA = [
     quiz:{q:"BB khác OB ở điểm nào chính?", opts:["BB mạnh hơn OB","BB cùng chiều sóng, dùng reversal","BB dùng tiếp diễn","BB không cần hợp lưu"], ans:1}
   },
   {
-    id:"t008", cat:"pda", icon:"🛡️",
+    id:"t008", img:`BOLO PD Array:
+   ┌─────────────────────┐ ← Rejection Block (cạnh trên)
+   │     BOLO ZONE       │
+   │   (Không trade!)    │
+   └─────────────────────┘ ← Wick C.E. 50% (cạnh dưới)
+   
+   Giá tôn trọng → Bias hợp lệ ✓
+   Giá phá C.E.  → Cảnh báo! Xem lại bias`, cat:"pda", icon:"🛡️",
     title:"BOLO PD Array — Vùng Phòng Thủ",
     tag:"BOLO",
     rules:[
@@ -1560,7 +1923,14 @@ const THEORY_DATA = [
     quiz:{q:"BOLO PD Array dùng để làm gì?", opts:["Entry điểm mua tốt","Chỉ quan sát, đánh giá bias còn hợp lệ không","Exit lệnh","Xác định SL"], ans:1}
   },
   {
-    id:"t009", cat:"pda", icon:"🎯",
+    id:"t009", img:`PDA A+ = 5 điều kiện:
+   ① Quét TK HTF + LTF ────── Bias + Entry
+   ② SMT hợp lưu PDA ─────── Xác nhận
+   ③ OB / BB đủ tiêu chuẩn ── Vùng entry
+   ④ Manipulation + MSS ───── Tín hiệu
+   ⑤ MSS phải có FVG đi kèm ─ Bắt buộc!
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MSS không FVG = KHÔNG VÀO LỆNH`, cat:"pda", icon:"🎯",
     title:"Điều Kiện PDA A+ — 5 Tiêu Chí",
     tag:"A+ Setup",
     rules:[
@@ -1575,7 +1945,14 @@ const THEORY_DATA = [
   },
   // ─── VÀO LỆNH ───
   {
-    id:"t010", cat:"entry", icon:"📋",
+    id:"t010", img:`Pre-market Checklist:
+   □ Note BPR, FVG phá Pha A, Deathmark
+   □ Xác định DOL trên H4/H1
+   □ Check đỉnh/đáy + SMT
+   □ TT đi ngang? → Không trade
+   □ Trước Killzone: đã sweep chưa?
+   ─────────────────────────────
+   HRLR → Short | LRLR → Long`, cat:"entry", icon:"📋",
     title:"Checklist Đầu Phiên",
     tag:"Workflow",
     rules:[
@@ -1589,7 +1966,16 @@ const THEORY_DATA = [
     quiz:{q:"Khi TT sideway không trend, nên làm gì?", opts:["Vào 2 chiều","Tránh giao dịch — không có edge","Đánh breakout","Đặt lệnh chờ cả 2 phía"], ans:1}
   },
   {
-    id:"t011", cat:"entry", icon:"🔄",
+    id:"t011", img:`ICT Logic Flow:
+   1. Xác định DOL (mục tiêu TK HTF)
+          ↓
+   2. Thấy quét TK + PDA HTF tôn trọng
+          ↓
+   3. Model rõ ràng ở LTF (FVG/OB/BPR)
+          ↓
+   4. Đợi retrace → Confirm → Entry
+   ─────────────────────────────
+   Muốn biết Manip? → Đợi IFVG hình thành`, cat:"entry", icon:"🔄",
     title:"ICT Logic — Quy Trình Chuẩn",
     tag:"Logic",
     rules:[
@@ -1603,7 +1989,16 @@ const THEORY_DATA = [
     quiz:{q:"Sau khi giá quét thanh khoản, làm sao biết là pha Manipulation?", opts:["Giá tăng mạnh","Đợi IFVG hình thành","Volume tăng","Giá đóng cửa cao"], ans:1}
   },
   {
-    id:"t012", cat:"entry", icon:"🦄",
+    id:"t012", img:`Unicorn Setup:
+   ┌─ Quét BSL ─┐  Không có PDA trên
+   │    Top     │  → Không đẩy giá xuống ✓
+   └────────────┘
+   
+   ┌────────────┐
+   │   Bottom   │  Có PDA dưới
+   └─ Quét SSL ─┘  → Đẩy giá lên ✓
+   
+OB trong FVG = Vùng entry chất lượng nhất`, cat:"entry", icon:"🦄",
     title:"Unicorn Model + OB trong FVG",
     tag:"Setup đặc biệt",
     rules:[
@@ -1616,7 +2011,14 @@ const THEORY_DATA = [
     quiz:{q:"Unicorn Model xảy ra khi?", opts:["Giá chỉ quét 1 phía","Giá quét cả 2 phía, phía dưới có PDA, phía trên không","Volume giảm","FVG bị fill hoàn toàn"], ans:1}
   },
   {
-    id:"t013", cat:"entry", icon:"↩️",
+    id:"t013", img:`Pullback vs Pha D:
+   PULLBACK: New liquidity → Manip → Entry
+   PHA D:    TT chạy mạnh (chưa pullback)
+   ─────────────────────────────────────
+   Bẫy phổ biến:
+   ↑↑↑ Quét minor SSL ← Đây là PHA D!
+   ↓    ← Không phải Pullback
+   (ES chưa sweep → chờ)`, cat:"entry", icon:"↩️",
     title:"Pha Pullback — Điều Kiện & Bẫy",
     tag:"Pullback",
     rules:[
@@ -1630,7 +2032,14 @@ const THEORY_DATA = [
   },
   // ─── DRILL 2026 ───
   {
-    id:"t014", cat:"drill", icon:"🎯",
+    id:"t014", img:`Opening Range Gap (VN time):
+   Settlement hôm qua: 04:14 SA
+   Open hôm nay:       21:30 (9:30 AM ET)
+   CE = (Gap High + Gap Low) / 2
+   ────────────────────────────────
+   Open > Settlement = Premium → SHORT
+   Open < Settlement = Discount → LONG
+   70% xác suất test CE trong ngày`, cat:"drill", icon:"🎯",
     title:"Opening Range Gap (ORG) — La Bàn Hàng Ngày",
     tag:"ORG",
     rules:[
@@ -1643,7 +2052,14 @@ const THEORY_DATA = [
     quiz:{q:"Discount Gap (Open < Settlement) cho bias?", opts:["Bearish — chỉ short","Bullish — chỉ long","Neutral","Không có bias"], ans:1}
   },
   {
-    id:"t015", cat:"drill", icon:"📈",
+    id:"t015", img:`Low Resistance (Trade live ✓):
+   ╔════════╗        ╔════════╗
+   ║ Clean  ║        ║ Clear  ║
+   ╚════════╝        ╚════════╝
+   
+High Resistance (Demo only ✗):
+   ▓▒░▓▒░▓▒░▓▒░▓▒░ ← UPC Barcode
+   Fuzzy, overlap, no acceleration`, cat:"drill", icon:"📈",
     title:"High vs Low Resistance Day — Phân loại ngày",
     tag:"Market Type",
     rules:[
@@ -1656,7 +2072,16 @@ const THEORY_DATA = [
     quiz:{q:"UPC barcode pattern → nên làm gì?", opts:["Trade live với SL rộng","Chỉ drill demo, không trade live","Đánh breakout","Tăng size"], ans:1}
   },
   {
-    id:"t016", cat:"drill", icon:"🏋️",
+    id:"t016", img:`Drill Framework:
+   Goal: 10-15 handles ONLY
+   ─────────────────────────
+   Demo → Drill → Journal → Repeat
+   
+   Muscle of Indifference:
+   Lệnh thắng = Lệnh thua = Chỉ là data
+   Không post SM, không khoe, không tự ti
+   ─────────────────────────
+   Yellow Belt: Đạt target → Next setup`, cat:"drill", icon:"🏋️",
     title:"Drill Methodology — Tâm Lý & Muscle of Indifference",
     tag:"Mindset",
     rules:[
@@ -1669,7 +2094,14 @@ const THEORY_DATA = [
     quiz:{q:"Mục tiêu của Drill là gì?", opts:["Kiếm tiền tối đa","Rèn quy trình, 10-15 handles, thờ ơ kết quả","Thắng liên tiếp","Trade nhiều nhất"], ans:1}
   },
   {
-    id:"t017", cat:"drill", icon:"🔗",
+    id:"t017", img:`Sick Sister (ES vs NQ):
+   NQ ─────────────── HH (Higher High)
+   ES ──────────── ? (Chưa confirm)
+   
+   ES catch up → Trend tiếp tục ↑
+   ES không catch up + Lunchtime → REVERSAL
+   
+   ES không catch + Bearish ORG = SHORT`, cat:"drill", icon:"🔗",
     title:"Sick Sister — Correlation ES/NQ",
     tag:"Correlation",
     rules:[
@@ -1682,7 +2114,15 @@ const THEORY_DATA = [
     quiz:{q:"Sick Sister ES không catch up NQ gần lunchtime báo hiệu?", opts:["Trend tiếp tục","Consolidation","Reversal — tìm short","Tăng volume"], ans:2}
   },
   {
-    id:"t018", cat:"drill", icon:"📋",
+    id:"t018", img:`FVG Body Rule (Core):
+   
+   Bullish FVG:  Body đóng TRÊN CE → Long ✓
+                 Body đóng DƯỚI CE → Fail ✗
+   
+   Bearish FVG:  Body đóng DƯỚI CE → Short ✓
+                 Body đóng TRÊN CE → Fail ✗
+   
+   Wick qua CE được — Body thì KHÔNG!`, cat:"drill", icon:"📋",
     title:"FVG Drill — Quy Tắc Body",
     tag:"FVG Drill",
     rules:[
@@ -1753,7 +2193,7 @@ function renderTheory() {
         <div class="today-label">📅 BÀI HỌC HÔM NAY</div>
         <div style="font-family:'Cinzel',serif;font-size:14px;color:var(--gold);margin-bottom:6px;">${todayCard.icon} ${todayCard.title}</div>
         <div style="font-size:13px;color:var(--text);opacity:0.7;line-height:1.5;">${todayCard.rules[0].t.replace(/<[^>]+>/g,"").slice(0,80)}...</div>
-        <div style="margin-top:10px;font-size:11px;color:var(--gold);opacity:0.6;font-family:'Cinzel',serif;letter-spacing:1px;">Nhấn để ôn bài →</div>
+        <div style="margin-top:10px;font-size:11px;color:var(--gold);opacity:0.85;font-family:'Cinzel',serif;letter-spacing:1px;">Nhấn để ôn bài →</div>
       </div>`;
     }
   }
@@ -1771,6 +2211,7 @@ function renderTheory() {
       <div class="theory-card-body">
         <div class="theory-card-content">
           ${t.rules.map(r=>`<div class="theory-rule"><div class="theory-rule-dot"></div><div class="theory-rule-text">${r.t}</div></div>`).join("")}
+          ${t.img?`<div style="margin:14px 0;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;font-family:'Space Mono',monospace;font-size:11px;color:var(--gold);line-height:1.8;white-space:pre;">${t.img}</div>`:""}
           ${t.highlight?`<div class="theory-highlight ${t.highlight.type==="warn"?"warn":t.highlight.type==="info"?"info":""}">💡 ${t.highlight.text}</div>`:""}
           ${t.quiz?renderQuizCard(t):""}
           <button onclick="toggleMastered('${t.id}')" style="width:100%;margin-top:12px;padding:10px;border-radius:8px;border:1px solid ${mastered?"var(--win)":"var(--gold-faint)"};background:${mastered?"#4caf5018":"transparent"};color:${mastered?"var(--win)":"var(--gold)"};font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;cursor:pointer;">
@@ -2026,8 +2467,10 @@ window.confirmImport=async function(){
         const parts=t.date.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
         if(parts){ const d=new Date(+parts[3],+parts[2]-1,+parts[1],+(parts[4]||0),+(parts[5]||0)); tradeDate=d.getTime(); }
       }
+      // validate result field
+      const validResult = ['Win','Loss','BE'].includes(t.result) ? t.result : 'Win';
       await addDoc(collection(db,"trades"),{
-        title:t.title||"Lệnh import",symbol:t.symbol||"",result:t.result||"Win",
+        title:t.title||"Lệnh import",symbol:t.symbol||"",result:validResult,
         pnl:t.pnl||"",note:t.note||"",tags:Array.isArray(t.tags)?t.tags:[],
         folder:"",onplan:"",images:{},captions:{},tradeDate,createdAt:Date.now()
       });
@@ -2047,7 +2490,229 @@ window.resetImport=function(){
   document.getElementById("import-result").style.display="none";
   document.getElementById("import-text").value="";
   const drop=document.getElementById("import-drop");
-  if(drop) drop.innerHTML='<div style="font-size:36px;margin-bottom:10px;">📄</div><div style="font-family:\'Cinzel\',serif;font-size:12px;color:var(--gold);letter-spacing:2px;margin-bottom:6px;">CHỌN HOẶC KÉO THẢ FILE</div><div style="font-size:12px;color:var(--text);opacity:0.6;">.docx · .csv · .txt</div>';
+  if(drop) drop.innerHTML='<div style="font-size:36px;margin-bottom:10px;">📄</div><div style="font-family:\'Cinzel\',serif;font-size:12px;color:var(--gold);letter-spacing:2px;margin-bottom:6px;">CHỌN HOẶC KÉO THẢ FILE</div><div style="font-size:12px;color:var(--text);opacity:0.85;">.docx · .csv · .txt</div>';
+};
+
+
+// ══ TAGS AUTOCOMPLETE ══
+function getAllUsedTags() {
+  const set = new Set();
+  // ICT common tags always suggested
+  ["FVG","IFVG","BPR","OB","BB","BOLO","MSS","SMT","Unicorn","Deathmark","EQL","EQH","ORG","AMD","Kiền","Vị Tế","Tỷ","A+","HTF","LTF"].forEach(t=>set.add(t));
+  trades.forEach(t=>(Array.isArray(t.tags)?t.tags:[]).forEach(tag=>set.add(tag)));
+  return [...set];
+}
+
+window.suggestTags = function(input) {
+  const sugBoxId = input.id === "f-tags" ? "tag-suggestions" : "e-tag-suggestions";
+  const box = document.getElementById(sugBoxId); if(!box) return;
+  const val = input.value;
+  const lastComma = val.lastIndexOf(",");
+  const typing = val.slice(lastComma+1).trim().toLowerCase();
+  if(!typing){box.style.display="none";return;}
+  const used = val.split(",").map(t=>t.trim().toLowerCase());
+  const all = getAllUsedTags();
+  const matches = all.filter(t=>t.toLowerCase().startsWith(typing) && !used.includes(t.toLowerCase()));
+  if(!matches.length){box.style.display="none";return;}
+  box.style.display="block";
+  box.innerHTML=matches.slice(0,8).map(t=>
+    `<div onclick="pickTag('${input.id}','${sugBoxId}','${t}')" style="padding:8px 14px;cursor:pointer;font-size:13px;color:var(--text);border-bottom:1px solid var(--gold-faint);" onmouseover="this.style.background='var(--gold-faint)'" onmouseout="this.style.background=''">🏷 ${t}</div>`
+  ).join("");
+};
+window.pickTag = function(inputId, boxId, tag) {
+  const input = document.getElementById(inputId);
+  const val = input.value;
+  const lastComma = val.lastIndexOf(",");
+  input.value = (lastComma>=0 ? val.slice(0,lastComma+1)+" " : "") + tag + ", ";
+  document.getElementById(boxId).style.display="none";
+  input.focus();
+};
+// Close tag suggestions on outside click
+document.addEventListener("click", e=>{
+  if(!e.target.closest("#tag-suggestions") && !e.target.closest("#e-tag-suggestions") && e.target.id!=="f-tags" && e.target.id!=="e-tags"){
+    ["tag-suggestions","e-tag-suggestions"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display="none";});
+  }
+});
+
+// ══ PREV/NEXT TRADE NAVIGATION ══
+window.navTrade = function(dir) {
+  if(!currentTrade) return;
+  const sorted=[...trades].sort((a,b)=>(b.tradeDate||b.createdAt||0)-(a.tradeDate||a.createdAt||0));
+  const idx = sorted.findIndex(t=>t.id===currentTrade.id);
+  const next = sorted[idx+dir];
+  if(next) openDetail(next.id);
+  else showToast(dir>0?"Đây là lệnh cuối cùng":"Đây là lệnh mới nhất");
+};
+
+// ══ RR CALCULATOR ══
+window.calcRR = function() {
+  const entry=parseFloat(document.getElementById("rr-entry")?.value);
+  const sl=parseFloat(document.getElementById("rr-sl")?.value);
+  const tp=parseFloat(document.getElementById("rr-tp")?.value);
+  const res=document.getElementById("rr-result");
+  if(!res) return;
+  if(isNaN(entry)||isNaN(sl)||isNaN(tp)||sl===entry){res.style.display="none";return;}
+  const risk=Math.abs(entry-sl);
+  const reward=Math.abs(tp-entry);
+  const rr=(reward/risk);
+  const clsDir=tp>entry?"win":"loss";
+  res.style.display="block";
+  res.innerHTML=`<span class="${clsDir}">RR = ${rr.toFixed(2)}R</span> <span style="opacity:0.65;">| Risk: ${risk.toFixed(2)} pts | Reward: ${reward.toFixed(2)} pts</span>`;
+  // Auto-fill P&L field
+  const pnlInput=document.getElementById("f-pnl");
+  if(pnlInput && !pnlInput.value) pnlInput.value=`+${rr.toFixed(1)}R`;
+};
+
+// ══ SESSION INDICATOR ══
+function updateSessionBadge() {
+  const now = new Date();
+  const h = now.getHours(), m = now.getMinutes();
+  const total = h*60+m;
+  // Vietnam time (UTC+7)
+  const sessions = [
+    {name:"🌏 Asian",    start:20*60,  end:3*60+60*24, color:"#42a5f5"},
+    {name:"🇬🇧 London", start:14*60,  end:17*60,       color:"#ec407a"},
+    {name:"🗽 NY",       start:19*60+30,end:22*60,      color:"#4caf50"},
+  ];
+  // wrap midnight for Asian
+  const active = sessions.filter(s=>{
+    if(s.start>s.end) return total>=s.start || total<(s.end-24*60+24*60);
+    return total>=s.start && total<s.end;
+  });
+  const badge = document.getElementById("session-badge");
+  if(!badge) return;
+  if(active.length){
+    badge.textContent=active.map(s=>s.name).join(" · ");
+    badge.style.background=active[0].color+"33";
+    badge.style.color=active[0].color;
+    badge.style.border="1px solid "+active[0].color+"66";
+  } else {
+    badge.textContent="💤 Off-Session";
+    badge.style.background="var(--gold-faint)";
+    badge.style.color="var(--gold)";
+    badge.style.border="1px solid var(--gold-dim)";
+  }
+  // Highlight active sessions in detail panel
+  [["asian",20*60,3*60+24*60],["london",14*60,17*60],["ny",19*60+30,22*60]].forEach(([id,s,e])=>{
+    const el=document.getElementById("sess-"+id); if(!el) return;
+    const isActive=s>e?(total>=s||total<e):(total>=s&&total<e);
+    el.style.borderColor=isActive?"var(--win)":"var(--gold-faint)";
+    el.style.background=isActive?"#4caf5018":"transparent";
+  });
+}
+window.toggleSessionInfo = function() {
+  const el=document.getElementById("session-detail");
+  if(el) el.style.display=el.style.display==="none"?"block":"none";
+};
+
+// ══ IMPROVED AI WITH ICT CONTEXT ══
+// Override analyzeAI with ICT-aware version
+const _origAnalyzeAI = window.analyzeAI;
+window.analyzeAI = async function() {
+  if(!currentTrade) return;
+  // Check cache
+  if(currentTrade.aiResult && currentTrade.aiResultTs && (Date.now()-currentTrade.aiResultTs < 86400000)) {
+    const res=document.getElementById("ai-result");
+    res.style.display="block"; res.textContent=currentTrade.aiResult;
+    const btn=document.getElementById("ai-btn");
+    btn.textContent="🔄 Phân Tích Lại"; showToast("📋 Kết quả AI đã lưu"); return;
+  }
+  const btn=document.getElementById("ai-btn"); btn.disabled=true;
+  const imgs=currentTrade.images||{};
+  const imgContents=[];
+  for(const tf of TFS){
+    const v=imgs[tf]; const list=Array.isArray(v)?v:(v?[v]:[]);
+    for(const src of list.slice(0,1)){
+      if(src&&src.startsWith("data:image")){
+        const [meta,b64]=src.split(","); const mime=meta.match(/:(.*?);/)?.[1]||"image/jpeg";
+        imgContents.push({type:"text",text:`[Biểu đồ ${tf}]:`});
+        imgContents.push({type:"image",source:{type:"base64",media_type:mime,data:b64}});
+      }
+    }
+  }
+  btn.textContent=imgContents.length>0?"⚙️ Đang đọc chart...":"⚙️ Đang phân tích...";
+  const res=document.getElementById("ai-result"); res.style.display="block"; res.textContent="Đang kết nối AI...";
+
+  // Get recent trades for context
+  const recentContext=trades.slice(0,5).filter(t=>t.id!==currentTrade.id)
+    .map(t=>`- ${t.result} | ${t.pnl||"?"} | Plan: ${t.onplan||"?"} | ${Array.isArray(t.tags)?t.tags.join(","):""}`)
+    .join("
+")||"(chưa có lệnh trước)";
+
+  const textPrompt=`Bạn là ICT trading coach chuyên nghiệp, am hiểu sâu về ICT methodology (Smart Money Concepts).
+
+THÔNG TIN LỆNH CẦN PHÂN TÍCH:
+- Tên: ${currentTrade.title}
+- Symbol: ${currentTrade.symbol||"N/A"} 
+- Kết quả: ${currentTrade.result} | P&L: ${currentTrade.pnl||"N/A"}
+- Vào đúng plan: ${currentTrade.onplan||"N/A"}
+- Tags/Setup: ${Array.isArray(currentTrade.tags)?currentTrade.tags.join(", "):(currentTrade.tags||"Không có")}
+- Ghi chú: ${currentTrade.note||"Không có"}
+
+5 LỆNH GẦN NHẤT (context):
+${recentContext}
+
+${imgContents.length>0?"Phân tích dựa trên ảnh biểu đồ đính kèm + thông tin trên.":""}
+
+Phân tích theo ICT framework bằng tiếng Việt:
+1. **Setup Quality** — FVG/OB/BPR/MSS có đủ điều kiện A+ không? Confluence?
+2. **Execution** — Entry đúng model không? Có quét liquidity trước không?
+3. **Risk Management** — SL/TP hợp lý? RR tốt không?
+4. **Điểm cải thiện** — Cụ thể 1-2 điều cần sửa theo ICT rules
+5. **Confidence Score** — [X/10] và lý do ngắn
+6. **Câu hỏi tự vấn** — 1 câu hỏi để trader tự reflect về lệnh này`;
+
+  const userContent=imgContents.length>0?[...imgContents,{type:"text",text:textPrompt}]:textPrompt;
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1400,messages:[{role:"user",content:userContent}]})});
+    const data=await r.json();
+    const aiText=data.content?.map(i=>i.text||"").join("
+")||"Không thể phân tích.";
+    res.textContent=aiText;
+    try{
+      await updateDoc(doc(db,"trades",currentTrade.id),{aiResult:aiText,aiResultTs:Date.now()});
+      currentTrade.aiResult=aiText; currentTrade.aiResultTs=Date.now();
+    }catch(e2){}
+  }catch{res.textContent="❌ Lỗi kết nối.";}
+  btn.disabled=false; btn.textContent="🔄 Phân Tích Lại";
+};
+
+// ══ IMPROVED PATTERN ANALYSIS ══
+const _origAnalyzePattern = window.analyzePattern;
+window.analyzePattern = async function() {
+  const recent=trades.slice(0,15);
+  if(recent.length<3){showToast("Cần ít nhất 3 lệnh");return;}
+  const btn=document.getElementById("pattern-btn");
+  if(btn){btn.disabled=true;btn.textContent="⚙️ Đang phân tích...";}
+  const res=document.getElementById("pattern-result");
+  if(res){res.style.display="block";res.textContent="Đang phân tích...";}
+  const summary=recent.map((t,i)=>{
+    const d=t.tradeDate||t.createdAt;
+    const dateStr=d?fmtDate(d):"?";
+    const dow=d?["CN","T2","T3","T4","T5","T6","T7"][new Date(d).getDay()]:"?";
+    return `${i+1}. [${dateStr} ${dow}] ${t.title} | ${t.result} | ${t.pnl||"?"} | Plan: ${t.onplan||"?"} | Tags: ${Array.isArray(t.tags)?t.tags.join(","):(t.tags||"")}`;
+  }).join("
+");
+  const wins=recent.filter(t=>t.result==="Win").length;
+  const onplan=recent.filter(t=>t.onplan==="Đúng plan").length;
+  const prompt=`Bạn là ICT trading coach. Phân tích ${recent.length} lệnh của trader (WR: ${Math.round(wins/recent.length*100)}%, Đúng plan: ${Math.round(onplan/recent.length*100)}%):
+
+${summary}
+
+Phân tích ICT-specific bằng tiếng Việt:
+1. **Pattern lỗi ICT** — Hay vào trước MSS? Bỏ qua IFVG? Không chờ sweep? Setup thiếu confluence?
+2. **Ngày/Giờ pattern** — Lệnh tốt/xấu có theo session hay ngày tuần không?
+3. **Discipline score** — Đánh giá việc theo plan [X/10]
+4. **1 thói quen cần bỏ ngay** — Cụ thể nhất có thể
+5. **1 điểm mạnh cần giữ** — Trader đang làm đúng điều gì?
+6. **Mục tiêu tuần tới** — Đề xuất 1 mục tiêu cụ thể và đo lường được`;
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+    const data=await r.json();
+    if(res)res.textContent=data.content?.map(i=>i.text||"").join("
+")||"Không thể phân tích.";
+  }catch{if(res)res.textContent="❌ Lỗi kết nối.";}
+  if(btn){btn.disabled=false;btn.textContent="🔄 Phân Tích Lại";}
 };
 
 // ══ INIT ══
@@ -2063,6 +2728,9 @@ await loadTrades();
 // Show FAB on initial list screen
 const _fab=document.getElementById("fab-btn");
 if(_fab) _fab.classList.add("visible");
+// Session indicator
+updateSessionBadge();
+setInterval(updateSessionBadge, 60000);
 </script>
 </body>
 </html>
