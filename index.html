@@ -2978,8 +2978,7 @@ window.analyzeAI = async function() {
   // Get recent trades for context
   const recentContext=trades.slice(0,5).filter(t=>t.id!==currentTrade.id)
     .map(t=>`- ${t.result} | ${t.pnl||"?"} | Plan: ${t.onplan||"?"} | ${Array.isArray(t.tags)?t.tags.join(","):""}`)
-    .join("
-")||"(chưa có lệnh trước)";
+    .join("\n")||"(chưa có lệnh trước)";
 
   const textPrompt=`Bạn là ICT trading coach cấp chuyên gia, am hiểu sâu ICT methodology của Michael J. Huddleston (Inner Circle Trader). Bạn biết rõ: Smart Money Concepts, PDA hierarchy (FVG/IFVG/BPR/OB), liquidity theory (ERL/IRL), Macro Time windows, session analysis, AMD model, MSS/BOS, SMT divergence, Sick Sister, ORG, Deathmark, Drill methodology.
 
@@ -3047,8 +3046,7 @@ window.analyzePattern = async function() {
     const dateStr=d?fmtDate(d):"?";
     const dow=d?["CN","T2","T3","T4","T5","T6","T7"][new Date(d).getDay()]:"?";
     return `${i+1}. [${dateStr} ${dow}] ${t.title} | ${t.result} | ${t.pnl||"?"} | Plan: ${t.onplan||"?"} | Tags: ${Array.isArray(t.tags)?t.tags.join(","):(t.tags||"")}`;
-  }).join("
-");
+  }).join("\n");
   const rValsRecent=recent.map(t=>{const m=(t.pnl||"").match(/([+-]?\d+\.?\d*)\s*R/i);return m?parseFloat(m[1]):null;}).filter(v=>v!==null);
   const totalRRecent=rValsRecent.reduce((a,b)=>a+b,0);
   const equityCurve=rValsRecent.length?`Equity curve (${rValsRecent.length} lệnh có R): ${rValsRecent.join(" → ")} = ${totalRRecent>=0?"+":""}${totalRRecent.toFixed(1)}R tổng`:"Không có dữ liệu R";
