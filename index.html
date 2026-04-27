@@ -474,6 +474,177 @@
   .fab:active{transform:scale(0.93);}
   .fab.visible{display:flex;}
   .fab:hover{box-shadow:0 6px 30px var(--gold-dim), 0 0 0 8px var(--gold-faint);}
+
+  /* ── PREMIUM UPGRADES ── */
+
+  /* Header glow line */
+  .header::after{
+    content:'';position:absolute;bottom:0;left:10%;right:10%;height:1px;
+    background:linear-gradient(90deg,transparent,var(--gold-dim),transparent);
+  }
+
+  /* Stats bar shimmer */
+  .stat-val{
+    font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:var(--gold);
+    text-shadow:0 0 20px var(--gold-dim);letter-spacing:1px;
+  }
+
+  /* Trade items — premium card style */
+  .trade-item{
+    padding:14px 18px 14px 20px;border-bottom:1px solid var(--border);
+    cursor:pointer;transition:background 0.12s,transform 0.1s;
+    display:flex;justify-content:space-between;align-items:center;
+    position:relative;
+  }
+  .trade-item:active{background:var(--gold-faint);transform:scale(0.995);}
+  .trade-item::before{
+    content:'';position:absolute;left:0;top:10%;bottom:10%;width:3px;
+    background:transparent;border-radius:0 3px 3px 0;transition:background 0.15s;
+  }
+  .trade-item:active::before,.trade-item.win-item::before{background:var(--win);}
+  .trade-item.loss-item::before{background:var(--loss);}
+  .trade-item.be-item::before{background:var(--be);}
+
+  /* Session pill */
+  .session-pill{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:4px 12px;border-radius:20px;font-size:10px;
+    font-family:'Space Mono',monospace;letter-spacing:1px;
+    border:1px solid var(--gold-dim);background:var(--gold-faint);
+    color:var(--gold);white-space:nowrap;
+  }
+
+  /* Section label upgrade */
+  .section-label{
+    font-size:9px;letter-spacing:5px;color:var(--gold);
+    text-transform:uppercase;font-family:'Space Mono',monospace;
+    margin-bottom:14px;opacity:1;font-weight:700;
+    display:flex;align-items:center;gap:10px;
+  }
+  .section-label::after{
+    content:'';flex:1;height:1px;
+    background:linear-gradient(90deg,var(--gold-dim),transparent);
+  }
+
+  /* Stats cells upgrade */
+  .stats-cell{
+    background:linear-gradient(135deg,var(--bg3),var(--bg2));
+    border-radius:14px;padding:14px 10px;
+    text-align:center;border:1px solid var(--border);
+    transition:border-color 0.2s,transform 0.15s,box-shadow 0.15s;
+  }
+  .stats-cell:active{border-color:var(--gold-dim);transform:scale(0.97);box-shadow:0 4px 20px var(--gold-faint);}
+
+  /* Bottom nav premium */
+  .bn-item.active .bn-icon{filter:drop-shadow(0 0 6px var(--gold));}
+  .bn-item.active .bn-label{color:var(--gold);}
+
+  /* Note box */
+  .note-box{
+    background:linear-gradient(135deg,var(--bg3),var(--bg2));
+    border:1px solid var(--border);
+    border-left:3px solid var(--gold-dim);
+    border-radius:0 14px 14px 0;padding:18px;margin-bottom:24px;
+    font-size:16px;color:var(--text);line-height:1.9;
+    font-style:italic;
+  }
+
+  /* Theory image from URL */
+  .theory-diagram{
+    width:100%;border-radius:12px;margin:14px 0;
+    border:1px solid var(--border);object-fit:contain;
+    background:var(--bg);max-height:240px;display:block;
+  }
+  .theory-diagram-caption{
+    font-size:10px;color:var(--gold);opacity:0.6;
+    font-family:'Space Mono',monospace;text-align:center;
+    margin:-8px 0 14px;letter-spacing:1.5px;
+  }
+
+  /* AI result prettier */
+  .ai-result{
+    background:linear-gradient(135deg,var(--bg3),var(--bg2));
+    border:1px solid var(--gold-dim);border-radius:14px;
+    padding:18px;font-size:14px;color:var(--text);
+    line-height:2;white-space:pre-wrap;margin-bottom:16px;
+    box-shadow:inset 0 1px 0 var(--gold-faint);
+  }
+
+  /* Save button glow */
+  .save-btn{
+    width:100%;padding:16px;border-radius:14px;
+    background:linear-gradient(135deg,var(--gold-faint),var(--gold-dim));
+    border:1px solid var(--gold);color:var(--gold);
+    font-size:12px;font-family:'Space Mono',monospace;letter-spacing:4px;
+    cursor:pointer;transition:all 0.2s;
+    box-shadow:0 4px 24px var(--gold-faint),inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  .save-btn:hover{box-shadow:0 6px 32px var(--gold-dim);}
+  .save-btn:active{transform:scale(0.98);}
+  .save-btn:disabled{opacity:0.4;cursor:not-allowed;box-shadow:none;transform:none;}
+
+  /* FAB pulse */
+  @keyframes fabPulse{0%,100%{box-shadow:0 4px 24px var(--gold-dim),0 0 0 0 var(--gold-faint);}50%{box-shadow:0 4px 24px var(--gold-dim),0 0 0 10px transparent;}}
+  .fab.visible{animation:fabPulse 3s ease infinite;}
+
+  /* Streak row premium */
+  #streak-row{
+    background:linear-gradient(90deg,var(--bg2),var(--bg3),var(--bg2));
+    border-bottom:1px solid var(--gold-faint) !important;
+  }
+
+  /* Field input premium */
+  .field input,.field textarea,.field select{
+    width:100%;background:var(--bg3);
+    border:1px solid var(--border);border-radius:var(--radius);
+    padding:13px 16px;color:var(--text);font-size:15px;
+    font-family:'Crimson Pro',serif;outline:none;
+    transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;
+  }
+  .field input:focus,.field textarea:focus,.field select:focus{
+    border-color:var(--gold-dim);box-shadow:0 0 0 3px var(--gold-faint);
+    background:var(--bg2);
+  }
+
+  /* Toggle btn upgrade */
+  .toggle-btn{
+    flex:1;padding:11px 4px;border-radius:10px;cursor:pointer;
+    border:1px solid var(--border);background:var(--bg3);
+    color:var(--gold);opacity:0.75;font-size:12px;
+    font-family:'Space Mono',monospace;letter-spacing:0.5px;
+    transition:all 0.15s;text-align:center;
+  }
+  .toggle-btn.active{
+    border-color:var(--gold);background:var(--gold-faint);
+    color:var(--gold);opacity:1;
+    box-shadow:0 0 16px var(--gold-faint),inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  /* AI btn upgrade */
+  .ai-btn{
+    width:100%;padding:16px;border-radius:14px;
+    background:linear-gradient(135deg,var(--gold-faint),transparent);
+    border:1px solid var(--gold-dim);color:var(--gold);
+    font-size:12px;font-family:'Space Mono',monospace;letter-spacing:2px;
+    cursor:pointer;transition:all 0.2s;margin-bottom:10px;
+    position:relative;overflow:hidden;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .ai-btn:hover{border-color:var(--gold);box-shadow:0 0 20px var(--gold-faint),inset 0 1px 0 rgba(255,255,255,0.05);}
+  .ai-btn:active{transform:scale(0.98);}
+  .ai-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+  /* Search premium */
+  .search-input{
+    width:100%;background:var(--bg3);
+    border:1px solid var(--border);border-radius:24px;
+    padding:11px 20px;color:var(--text);font-size:14px;
+    font-family:'Crimson Pro',serif;outline:none;
+    transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;
+  }
+  .search-input:focus{border-color:var(--gold-dim);box-shadow:0 0 0 3px var(--gold-faint);background:var(--bg2);}
+  .search-input::placeholder{color:var(--gold);opacity:0.4;}
+
 </style>
 </head>
 <body>
@@ -481,9 +652,12 @@
 <!-- LIST -->
 <div class="screen active" id="screen-list">
   <div class="header">
-    <button class="header-btn" onclick="openNew()" style="font-size:22px;font-weight:700;">+</button>
-    <div class="header-title"><div class="label">ICT · Nhật Ký</div><div class="name">TradeLog</div></div>
-    <div style="width:36px;"></div>
+    <button class="header-btn" onclick="openNew()" style="font-size:24px;font-weight:300;letter-spacing:-1px;" title="Thêm lệnh mới">+</button>
+    <div class="header-title">
+      <div class="label">NHẬT KÝ GIAO DỊCH · ICT</div>
+      <div class="name">TradeLog</div>
+    </div>
+    <button class="header-btn" onclick="showScreen('settings')" style="font-size:16px;opacity:0.7;" title="Cài đặt">⚙️</button>
   </div>
   <div class="stats-bar">
     <div class="stat"><div class="stat-val" id="stat-total">0</div><div class="stat-lbl">Tổng</div></div>
@@ -492,9 +666,30 @@
     <div class="stat"><div class="stat-val" id="stat-wr">0%</div><div class="stat-lbl">WR</div></div>
   </div>
   <!-- Fix 7: streak row -->
-  <div id="streak-row" style="display:flex;justify-content:space-between;align-items:center;padding:5px 18px;background:var(--bg2);border-bottom:1px solid var(--gold-faint);flex-shrink:0;" onclick="toggleSessionInfo()">
-    <div id="streak-text" style="font-size:11px;color:var(--gold);opacity:0.9;font-family:'Cinzel',serif;"></div>
-    <div id="last-trade-text" style="font-size:11px;color:var(--gold);opacity:0.9;font-family:'Cinzel',serif;"></div>
+  <div id="streak-row" style="display:flex;justify-content:space-between;align-items:center;padding:7px 18px;background:var(--bg2);border-bottom:1px solid var(--gold-faint);flex-shrink:0;cursor:pointer;gap:8px;" onclick="toggleSessionInfo()">
+    <div id="streak-text" style="font-size:11px;color:var(--gold);opacity:0.9;font-family:'Cinzel',serif;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+    <div id="session-badge" class="session-pill">⏳ Loading...</div>
+    <div id="last-trade-text" style="font-size:11px;color:var(--gold);opacity:0.9;font-family:'Cinzel',serif;flex-shrink:0;"></div>
+  </div>
+  <!-- Session detail panel -->
+  <div id="session-detail" style="display:none;background:var(--bg2);border-bottom:1px solid var(--gold-faint);padding:10px 18px;flex-shrink:0;">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+      <div id="sess-asian" style="border:1px solid var(--gold-faint);border-radius:10px;padding:10px 8px;text-align:center;transition:all 0.3s;">
+        <div style="font-size:16px;margin-bottom:3px;">🌏</div>
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:1px;">ASIAN</div>
+        <div style="font-size:10px;color:var(--text);opacity:0.7;margin-top:3px;">20:00–03:00</div>
+      </div>
+      <div id="sess-london" style="border:1px solid var(--gold-faint);border-radius:10px;padding:10px 8px;text-align:center;transition:all 0.3s;">
+        <div style="font-size:16px;margin-bottom:3px;">🇬🇧</div>
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:1px;">LONDON</div>
+        <div style="font-size:10px;color:var(--text);opacity:0.7;margin-top:3px;">14:00–17:00</div>
+      </div>
+      <div id="sess-ny" style="border:1px solid var(--gold-faint);border-radius:10px;padding:10px 8px;text-align:center;transition:all 0.3s;">
+        <div style="font-size:16px;margin-bottom:3px;">🗽</div>
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:1px;">NEW YORK</div>
+        <div style="font-size:10px;color:var(--text);opacity:0.7;margin-top:3px;">19:30–22:00</div>
+      </div>
+    </div>
   </div>
   <div class="search-bar">
     <input class="search-input" id="search-input" placeholder="🔍  Tìm tên, symbol, tags..." oninput="renderList()"/>
@@ -1142,7 +1337,7 @@ function renderList() {
     if(t.images){ for(const tf of TFS){ const v=t.images[tf]; const src=Array.isArray(v)?v[0]:v; if(src){thumbSrc=src;break;} } }
     const titleHl = search ? hlText(t.title||"—", search) : esc(t.title)||"—";
     const symHl = search ? hlText(t.symbol||"", search) : esc(t.symbol)||"";
-    return `<div class="trade-item${isNew?" newly-saved":""}" id="ti-${t.id}" onclick="openDetail('${t.id}')">
+    return `<div class="trade-item ${cls}-item${isNew?" newly-saved":""}" id="ti-${t.id}" onclick="openDetail('${t.id}')">
       <div style="flex:1;min-width:0;">
         <div class="trade-title">${titleHl}${fb}</div>
         ${tags?`<div class="trade-tags">${esc(tags)}</div>`:""}
@@ -1393,7 +1588,7 @@ Phân tích chi tiết bằng tiếng Việt:
   try{
     const r=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
-      headers:{"Content-Type":"application/json"},
+      headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-iab":"true"},
       body:JSON.stringify({
         model:"claude-sonnet-4-20250514",
         max_tokens:1200,
@@ -1429,7 +1624,7 @@ window.analyzePattern=async function(){
   }).join("\n");
   const prompt=`Bạn là ICT trading coach. Phân tích ${recent.length} lệnh gần nhất của trader:\n\n${summary}\n\nTìm ra (bằng tiếng Việt, ngắn gọn):\n1. **Pattern lặp lại** — Lỗi nào hay gặp nhất?\n2. **Điểm mạnh nhất quán** — Trader đang làm tốt gì?\n3. **1 điều cần cải thiện ngay** — Khuyến nghị cụ thể nhất\n4. **Tỷ lệ đúng plan** — Nhận xét về discipline`;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,messages:[{role:"user",content:prompt}]})});
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-iab":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,messages:[{role:"user",content:prompt}]})});
     const data=await r.json();
     if(res) res.textContent=data.content?.map(i=>i.text||"").join("\n")||"Không thể phân tích.";
   }catch{if(res) res.textContent="❌ Lỗi kết nối.";}
@@ -1584,29 +1779,55 @@ function renderStats(){
     return (yb*12+mb)-(ya*12+ma);
   }).slice(0,6);
 
+  // Equity curve data
+  const allRVals=[...trades].sort((a,b)=>(a.tradeDate||a.createdAt||0)-(b.tradeDate||b.createdAt||0)).map(t=>{const m=(t.pnl||"").match(/([+-]?\d+\.?\d*)\s*R/i);return m?parseFloat(m[1]):null;}).filter(v=>v!==null);
+  const equityPoints=allRVals.reduce((acc,r)=>{acc.push((acc[acc.length-1]||0)+r);return acc;},[]);
+  const eqMin=equityPoints.length?Math.min(...equityPoints,0):0, eqMax=equityPoints.length?Math.max(...equityPoints,0.1):1;
+  const eqRange=eqMax-eqMin||1;
+  const svgW=300, svgH=80, eqPath=equityPoints.length>=2?equityPoints.map((v,i)=>{
+    const x=14+i*(svgW-28)/(equityPoints.length-1||1); const y=svgH-10-(v-eqMin)/eqRange*(svgH-20);
+    return (i===0?"M":"L")+x.toFixed(1)+","+y.toFixed(1);
+  }).join(" "):"";
+  const lastR=equityPoints[equityPoints.length-1]||0;
+
   document.getElementById("stats-body").innerHTML=`
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px;">
       ${[["Tổng lệnh",total,""],["Win Rate",wr+"%","win"],["Đúng plan",Math.round(onplanCnt/total*100)+"%",""],["Tổng R",(totalR>=0?"+":"")+totalR.toFixed(1)+"R",totalR>=0?"win":"loss"],["Avg/lệnh",(avgR>=0?"+":"")+avgR.toFixed(2)+"R",avgR>=0?"win":"loss"],["BE",bes,"be"]].map(([l,v,c])=>`<div class="stats-cell"><div class="lbl">${l}</div><div class="val ${c}">${v}</div></div>`).join("")}
     </div>
+    ${equityPoints.length>=2?`
+    <div class="section-label">Equity Curve (R)</div>
+    <div style="background:var(--bg3);border-radius:14px;padding:14px 14px 10px;margin-bottom:20px;border:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:1px;">${equityPoints.length} LỆNH CÓ R DATA</div>
+        <div style="font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:${lastR>=0?"var(--win)":"var(--loss)"};">${lastR>=0?"+":""}${lastR.toFixed(1)}R</div>
+      </div>
+      <svg viewBox="0 0 ${svgW} ${svgH}" style="width:100%;height:80px;">
+        <line x1="14" y1="${(svgH-10-(0-eqMin)/eqRange*(svgH-20)).toFixed(1)}" x2="${svgW-14}" y2="${(svgH-10-(0-eqMin)/eqRange*(svgH-20)).toFixed(1)}" stroke="var(--gold)" stroke-width="0.5" stroke-opacity="0.3" stroke-dasharray="3,3"/>
+        <defs><linearGradient id="eqGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${lastR>=0?"#3ddc84":"#ef5350"}" stop-opacity="0.3"/><stop offset="100%" stop-color="${lastR>=0?"#3ddc84":"#ef5350"}" stop-opacity="0"/></linearGradient></defs>
+        <path d="${eqPath} L${(14+(equityPoints.length-1)*(svgW-28)/(equityPoints.length-1||1)).toFixed(1)},${svgH-10} L14,${svgH-10} Z" fill="url(#eqGrad)"/>
+        <path d="${eqPath}" stroke="${lastR>=0?"#3ddc84":"#ef5350"}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="${(14+(equityPoints.length-1)*(svgW-28)/(equityPoints.length-1||1)).toFixed(1)}" cy="${(svgH-10-(lastR-eqMin)/eqRange*(svgH-20)).toFixed(1)}" r="4" fill="${lastR>=0?"#3ddc84":"#ef5350"}"/>
+      </svg>
+    </div>`:``}
     <div class="section-label">Kết Quả</div>
-    <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:20px;">
+    <div style="background:var(--bg3);border-radius:14px;padding:14px;margin-bottom:20px;border:1px solid var(--border);">
       ${[["Win",wins,"#4caf50"],["Loss",losses,"#ef5350"],["BE",bes,"#90a4ae"]].map(([l,v,c])=>`<div class="chart-bar-row"><div class="chart-bar-label">${l}</div><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${total?Math.round(v/total*100):0}%;background:${c};"><span class="chart-bar-val">${v}</span></div></div><div style="font-size:11px;color:var(--gold);opacity:0.65;width:35px;text-align:right;">${total?Math.round(v/total*100):0}%</div></div>`).join("")}
     </div>
     <div class="section-label">Theo Symbol</div>
-    <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:20px;">
+    <div style="background:var(--bg3);border-radius:14px;padding:14px;margin-bottom:20px;border:1px solid var(--border);">
       ${topSym.map(([s,v])=>{const t2=v.w+v.l+v.be;return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--gold-faint);"><div style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold);">${s}</div><div style="display:flex;gap:8px;font-size:13px;"><span class="win">✅${v.w}</span><span class="loss">❌${v.l}</span><span style="color:var(--gold);opacity:0.55;">${t2?Math.round(v.w/t2*100):0}%WR</span></div></div>`;}).join("")}
     </div>
     <div class="section-label">Theo Tháng</div>
-    <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:20px;">
+    <div style="background:var(--bg3);border-radius:14px;padding:14px;margin-bottom:20px;border:1px solid var(--border);">
       ${months.length?months.map(([m,v])=>{const t2=v.w+v.l+v.be;return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--gold-faint);"><div style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold);">📅 ${m}</div><div style="display:flex;gap:8px;font-size:13px;"><span class="win">✅${v.w}</span><span class="loss">❌${v.l}</span><span style="color:var(--gold);opacity:0.55;">${t2?Math.round(v.w/t2*100):0}%WR</span></div></div>`;}).join(""):"<div style='color:var(--gold);opacity:0.5;padding:10px;text-align:center;'>Chưa có dữ liệu</div>"}
     </div>
     <div class="section-label">Xuất Dữ Liệu</div>
     <div style="display:flex;gap:10px;margin-bottom:20px;">
-      <button onclick="exportCSV()" style="flex:1;padding:13px;border-radius:10px;background:var(--gold-faint);border:1px solid var(--gold-dim);color:var(--gold);font-family:'Cinzel',serif;font-size:12px;letter-spacing:1px;cursor:pointer;">📊 Xuất CSV</button>
-      <button onclick="exportPDF()" style="flex:1;padding:13px;border-radius:10px;background:var(--gold-faint);border:1px solid var(--gold-dim);color:var(--gold);font-family:'Cinzel',serif;font-size:12px;letter-spacing:1px;cursor:pointer;">📄 Xuất PDF</button>
+      <button onclick="exportCSV()" style="flex:1;padding:14px;border-radius:12px;background:var(--gold-faint);border:1px solid var(--gold-dim);color:var(--gold);font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;cursor:pointer;transition:all 0.2s;">📊 XUẤT CSV</button>
+      <button onclick="exportPDF()" style="flex:1;padding:14px;border-radius:12px;background:var(--gold-faint);border:1px solid var(--gold-dim);color:var(--gold);font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;cursor:pointer;transition:all 0.2s;">📄 XUẤT PDF</button>
     </div>
     <div class="section-label">Phân Tích AI Tổng Hợp</div>
-    <button id="pattern-btn" onclick="analyzePattern()" style="width:100%;padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--gold-faint),transparent);border:1px solid var(--gold-dim);color:var(--gold);font-size:14px;font-family:'Cinzel',serif;letter-spacing:2px;cursor:pointer;margin-bottom:12px;">🔬 PHÂN TÍCH PATTERN 15 LỆNH GẦN NHẤT</button>
+    <button id="pattern-btn" onclick="analyzePattern()" style="width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--gold-faint),transparent);border:1px solid var(--gold-dim);color:var(--gold);font-size:11px;font-family:'Space Mono',monospace;letter-spacing:3px;cursor:pointer;margin-bottom:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);">🔬 PHÂN TÍCH PATTERN AI CHUYÊN SÂU</button>
     <div id="pattern-result" class="pattern-result" style="display:none;"></div>`;
   } catch(err) { console.error('renderStats:',err); document.getElementById('stats-body').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Lỗi hiển thị thống kê</div></div>'; }
 }
@@ -2161,6 +2382,126 @@ async function saveTheoryData() {
   localStorage.setItem("tl_theory", JSON.stringify(data));
 }
 
+// ══ SVG THEORY DIAGRAMS ══
+function getTheoryDiagramSVG(id) {
+  const gold = "var(--gold)", win = "var(--win)", loss = "var(--loss)", text = "var(--text)", bg3 = "var(--bg3)", border = "var(--border)";
+  const diagrams = {
+    t001: `<svg viewBox="0 0 340 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:10px;background:#080808;border:1px solid #c9a84c22;">
+      <text x="30" y="22" fill="#c9a84c" font-size="9" font-family="monospace" opacity="0.7">ERL (Ngoài)</text>
+      <text x="220" y="22" fill="#c9a84c" font-size="9" font-family="monospace" opacity="0.7">IRL (Trong)</text>
+      <line x1="30" y1="40" x2="160" y2="40" stroke="#c9a84c" stroke-width="1.5" opacity="0.9"/>
+      <text x="30" y="36" fill="#c9a84c" font-size="8" font-family="monospace">EQH/BSL</text>
+      <rect x="190" y="55" width="70" height="14" fill="#c9a84c" opacity="0.15" rx="2"/>
+      <text x="192" y="65" fill="#c9a84c" font-size="9" font-family="monospace">FVG ░░░░</text>
+      <line x1="30" y1="90" x2="160" y2="90" stroke="#c9a84c" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>
+      <text x="30" y="86" fill="#c9a84c" font-size="8" font-family="monospace">PDH</text>
+      <rect x="190" y="83" width="70" height="14" fill="#c9a84c" opacity="0.25" rx="2"/>
+      <text x="192" y="93" fill="#c9a84c" font-size="9" font-family="monospace">IFVG ▓▓▓</text>
+      <rect x="190" y="105" width="70" height="14" fill="#c9a84c" opacity="0.4" rx="2"/>
+      <text x="192" y="115" fill="#c9a84c" font-size="9" font-family="monospace">BPR ████</text>
+      <line x1="30" y1="135" x2="160" y2="135" stroke="#c9a84c" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>
+      <text x="30" y="131" fill="#c9a84c" font-size="8" font-family="monospace">PDL</text>
+      <line x1="30" y1="158" x2="160" y2="158" stroke="#c9a84c" stroke-width="1.5" opacity="0.9"/>
+      <text x="30" y="154" fill="#c9a84c" font-size="8" font-family="monospace">EQL/SSL</text>
+      <path d="M165 40 Q175 99 165 158" stroke="#3ddc84" stroke-width="1.5" fill="none" stroke-dasharray="3,3"/>
+      <text x="140" y="99" fill="#3ddc84" font-size="8" font-family="monospace">→</text>
+      <text x="30" y="175" fill="#c9a84c" font-size="8" font-family="monospace" opacity="0.6">Giá: ERL → IRL → ERL (chu kỳ liên tục)</text>
+    </svg>`,
+    t002: `<svg viewBox="0 0 340 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:10px;background:#080808;border:1px solid #c9a84c22;">
+      <text x="14" y="22" fill="#c9a84c" font-size="10" font-family="monospace" font-weight="bold">Thứ tự ưu tiên PDA</text>
+      <rect x="14" y="35" width="220" height="28" fill="#c9a84c" opacity="0.08" rx="6"/>
+      <text x="20" y="53" fill="#c9a84c" font-size="11" font-family="monospace">FVG</text>
+      <text x="70" y="53" fill="#c9a84c" font-size="9" font-family="monospace" opacity="0.6">░░░  yếu nhất</text>
+      <text x="220" y="53" fill="#ef5350" font-size="9" font-family="monospace">⚠️ Cần filter</text>
+      <rect x="14" y="72" width="240" height="28" fill="#c9a84c" opacity="0.18" rx="6"/>
+      <text x="20" y="90" fill="#c9a84c" font-size="11" font-family="monospace">IFVG</text>
+      <text x="70" y="90" fill="#c9a84c" font-size="9" font-family="monospace" opacity="0.7">▒▒▒  mạnh hơn</text>
+      <rect x="14" y="109" width="260" height="28" fill="#c9a84c" opacity="0.3" rx="6"/>
+      <text x="20" y="127" fill="#c9a84c" font-size="11" font-family="monospace" font-weight="bold">BPR</text>
+      <text x="70" y="127" fill="#c9a84c" font-size="9" font-family="monospace">███  mạnh nhất</text>
+      <text x="185" y="127" fill="#3ddc84" font-size="9" font-family="monospace">✓ Ưu tiên</text>
+      <text x="14" y="153" fill="#c9a84c" font-size="8" font-family="monospace" opacity="0.5">FVG A+ = MSS + đóng qua TK (HTF+LTF confluence)</text>
+    </svg>`,
+    t005: `<svg viewBox="0 0 340 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:10px;background:#080808;border:1px solid #c9a84c22;">
+      <text x="14" y="22" fill="#c9a84c" font-size="10" font-family="monospace" font-weight="bold">Macro Time Windows (giờ VN)</text>
+      <rect x="14" y="35" width="310" height="42" fill="#42a5f5" opacity="0.08" rx="8" stroke="#42a5f5" stroke-width="1" stroke-opacity="0.3"/>
+      <text x="24" y="52" fill="#42a5f5" font-size="9" font-family="monospace">xx:17</text>
+      <line x1="60" y1="54" x2="258" y2="54" stroke="#42a5f5" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.7"/>
+      <text x="262" y="52" fill="#42a5f5" font-size="9" font-family="monospace">xx:33</text>
+      <text x="14" y="72" fill="#42a5f5" font-size="9" font-family="monospace" opacity="0.6">  Window 1: xx:17 → xx:33</text>
+      <rect x="14" y="90" width="310" height="42" fill="#c9a84c" opacity="0.08" rx="8" stroke="#c9a84c" stroke-width="1" stroke-opacity="0.3"/>
+      <text x="24" y="107" fill="#c9a84c" font-size="9" font-family="monospace">xx:45</text>
+      <line x1="60" y1="109" x2="258" y2="109" stroke="#c9a84c" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.7"/>
+      <text x="262" y="107" fill="#c9a84c" font-size="9" font-family="monospace">xx:15</text>
+      <text x="14" y="127" fill="#c9a84c" font-size="9" font-family="monospace" opacity="0.6">  Window 2: xx:45 → (next)xx:15</text>
+      <text x="14" y="152" fill="#3ddc84" font-size="9" font-family="monospace">✓ Đỉnh/đáy TRONG window → uy tín cao hơn</text>
+      <text x="14" y="165" fill="#c9a84c" font-size="8" font-family="monospace" opacity="0.5">VD: Đỉnh 9:55 &gt; Đỉnh 9:37 (9:55 ∈ 45→15 window)</text>
+    </svg>`,
+    t006: `<svg viewBox="0 0 340 175" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:10px;background:#080808;border:1px solid #c9a84c22;">
+      <text x="14" y="20" fill="#c9a84c" font-size="9" font-family="monospace" opacity="0.7">Bullish OB (Long)</text>
+      <text x="200" y="20" fill="#c9a84c" font-size="9" font-family="monospace" opacity="0.7">Bearish OB (Short)</text>
+      <rect x="60" y="130" width="16" height="30" fill="#3ddc84" opacity="0.8" rx="1"/>
+      <line x1="68" y1="115" x2="68" y2="130" stroke="#3ddc84" stroke-width="1.5"/>
+      <line x1="68" y1="160" x2="68" y2="170" stroke="#3ddc84" stroke-width="1.5"/>
+      <text x="54" y="112" fill="#3ddc84" font-size="8" font-family="monospace">OB ←</text>
+      <line x1="80" y1="145" x2="145" y2="80" stroke="#3ddc84" stroke-width="2" marker-end="url(#ah)"/>
+      <rect x="30" y="70" width="16" height="35" fill="#c9a84c" opacity="0.4" rx="1"/>
+      <rect x="46" y="62" width="16" height="40" fill="#c9a84c" opacity="0.5" rx="1"/>
+      <rect x="62" y="55" width="16" height="45" fill="#c9a84c" opacity="0.6" rx="1"/>
+      <rect x="230" y="30" width="16" height="30" fill="#ef5350" opacity="0.8" rx="1"/>
+      <line x1="238" y1="60" x2="238" y2="75" stroke="#ef5350" stroke-width="1.5"/>
+      <line x1="238" y1="20" x2="238" y2="30" stroke="#ef5350" stroke-width="1.5"/>
+      <text x="248" y="42" fill="#ef5350" font-size="8" font-family="monospace">← OB</text>
+      <line x1="225" y1="45" x2="165" y2="120" stroke="#ef5350" stroke-width="2"/>
+      <rect x="255" y="85" width="16" height="35" fill="#c9a84c" opacity="0.4" rx="1"/>
+      <rect x="271" y="95" width="16" height="40" fill="#c9a84c" opacity="0.5" rx="1"/>
+      <rect x="287" y="108" width="16" height="45" fill="#c9a84c" opacity="0.6" rx="1"/>
+      <text x="14" y="170" fill="#c9a84c" font-size="8" font-family="monospace" opacity="0.5">OB A+: nến cuối ngược chiều + MSS + discount/premium + tôn trọng 1-2 nến</text>
+    </svg>`,
+    t014: `<svg viewBox="0 0 340 175" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:10px;background:#080808;border:1px solid #c9a84c22;">
+      <text x="14" y="18" fill="#c9a84c" font-size="9" font-family="monospace" font-weight="bold">Opening Range Gap (VN time)</text>
+      <rect x="14" y="28" width="310" height="65" fill="#c9a84c" opacity="0.05" rx="6"/>
+      <line x1="14" y1="38" x2="324" y2="38" stroke="#ef5350" stroke-width="1.5"/>
+      <text x="16" y="35" fill="#ef5350" font-size="8" font-family="monospace">Gap High (Open 21:30 ET)</text>
+      <text x="140" y="60" fill="#c9a84c" font-size="10" font-family="monospace" font-weight="bold">GAP</text>
+      <line x1="140" y1="66" x2="200" y2="66" stroke="#c9a84c" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.5"/>
+      <text x="204" y="70" fill="#c9a84c" font-size="8" font-family="monospace">CE (50%)</text>
+      <line x1="14" y1="88" x2="324" y2="88" stroke="#3ddc84" stroke-width="1.5"/>
+      <text x="16" y="85" fill="#3ddc84" font-size="8" font-family="monospace">Gap Low (Settlement 04:14 SA)</text>
+      <rect x="14" y="105" width="145" height="40" fill="#ef5350" opacity="0.08" rx="6" stroke="#ef5350" stroke-width="1" stroke-opacity="0.3"/>
+      <text x="22" y="122" fill="#ef5350" font-size="9" font-family="monospace" font-weight="bold">Premium Gap</text>
+      <text x="22" y="136" fill="#ef5350" font-size="8" font-family="monospace">Open &gt; Settlement → SHORT</text>
+      <rect x="175" y="105" width="149" height="40" fill="#3ddc84" opacity="0.08" rx="6" stroke="#3ddc84" stroke-width="1" stroke-opacity="0.3"/>
+      <text x="183" y="122" fill="#3ddc84" font-size="9" font-family="monospace" font-weight="bold">Discount Gap</text>
+      <text x="183" y="136" fill="#3ddc84" font-size="8" font-family="monospace">Open &lt; Settlement → LONG</text>
+      <text x="14" y="165" fill="#c9a84c" font-size="8" font-family="monospace" opacity="0.6">70% xác suất test CE trong ngày. Không vào lệnh 30 phút đầu.</text>
+    </svg>`,
+    t018: `<svg viewBox="0 0 340 175" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:10px;background:#080808;border:1px solid #c9a84c22;">
+      <text x="14" y="18" fill="#c9a84c" font-size="9" font-family="monospace" font-weight="bold">FVG Body Rule — Quy Tắc Vàng</text>
+      <text x="50" y="40" fill="#3ddc84" font-size="9" font-family="monospace">Bullish FVG</text>
+      <rect x="30" y="50" width="120" height="60" fill="#3ddc84" opacity="0.06" rx="6" stroke="#3ddc84" stroke-width="1" stroke-opacity="0.3"/>
+      <line x1="30" y1="80" x2="150" y2="80" stroke="#c9a84c" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>
+      <text x="34" y="77" fill="#c9a84c" font-size="8" font-family="monospace">CE</text>
+      <rect x="75" y="58" width="20" height="20" fill="#3ddc84" opacity="0.7" rx="1"/>
+      <text x="100" y="72" fill="#3ddc84" font-size="8" font-family="monospace">✓ Body &gt; CE</text>
+      <rect x="75" y="85" width="20" height="20" fill="#ef5350" opacity="0.5" rx="1"/>
+      <text x="100" y="99" fill="#ef5350" font-size="8" font-family="monospace">✗ Body &lt; CE</text>
+      <text x="205" y="40" fill="#ef5350" font-size="9" font-family="monospace">Bearish FVG</text>
+      <rect x="185" y="50" width="120" height="60" fill="#ef5350" opacity="0.06" rx="6" stroke="#ef5350" stroke-width="1" stroke-opacity="0.3"/>
+      <line x1="185" y1="80" x2="305" y2="80" stroke="#c9a84c" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>
+      <text x="189" y="77" fill="#c9a84c" font-size="8" font-family="monospace">CE</text>
+      <rect x="230" y="85" width="20" height="20" fill="#ef5350" opacity="0.7" rx="1"/>
+      <text x="255" y="99" fill="#ef5350" font-size="8" font-family="monospace">✓ Body &lt; CE</text>
+      <rect x="230" y="58" width="20" height="20" fill="#3ddc84" opacity="0.5" rx="1"/>
+      <text x="255" y="72" fill="#3ddc84" font-size="8" font-family="monospace">✗ Body &gt; CE</text>
+      <rect x="14" y="125" width="310" height="24" fill="#c9a84c" opacity="0.08" rx="6"/>
+      <text x="22" y="140" fill="#c9a84c" font-size="9" font-family="monospace" font-weight="bold">⚡ Wick qua CE được — Body thì KHÔNG!</text>
+      <text x="14" y="165" fill="#c9a84c" font-size="8" font-family="monospace" opacity="0.5">Drill khung 1-phút và 15-giây. Target: 10–15 handles.</text>
+    </svg>`,
+  };
+  return diagrams[id] || null;
+}
+
 function renderTheory() {
   let list = THEORY_DATA;
   if (theoryCategory === "quiz") {
@@ -2210,11 +2551,12 @@ function renderTheory() {
       </div>
       <div class="theory-card-body">
         <div class="theory-card-content">
+          ${(()=>{const svg=getTheoryDiagramSVG(t.id);return svg?`<div style="margin:14px 0;">${svg}<div class="theory-diagram-caption">${t.tag} — Sơ đồ minh họa</div></div>`:"";})()}
           ${t.rules.map(r=>`<div class="theory-rule"><div class="theory-rule-dot"></div><div class="theory-rule-text">${r.t}</div></div>`).join("")}
-          ${t.img?`<div style="margin:14px 0;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;font-family:'Space Mono',monospace;font-size:11px;color:var(--gold);line-height:1.8;white-space:pre;">${t.img}</div>`:""}
+          ${t.img?`<div style="margin:14px 0;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--gold);line-height:1.9;white-space:pre;overflow-x:auto;">${t.img}</div>`:""}
           ${t.highlight?`<div class="theory-highlight ${t.highlight.type==="warn"?"warn":t.highlight.type==="info"?"info":""}">💡 ${t.highlight.text}</div>`:""}
           ${t.quiz?renderQuizCard(t):""}
-          <button onclick="toggleMastered('${t.id}')" style="width:100%;margin-top:12px;padding:10px;border-radius:8px;border:1px solid ${mastered?"var(--win)":"var(--gold-faint)"};background:${mastered?"#4caf5018":"transparent"};color:${mastered?"var(--win)":"var(--gold)"};font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;cursor:pointer;">
+          <button onclick="toggleMastered('${t.id}')" style="width:100%;margin-top:14px;padding:12px;border-radius:10px;border:1px solid ${mastered?"var(--win)":"var(--gold-faint)"};background:${mastered?"#4caf5018":"transparent"};color:${mastered?"var(--win)":"var(--gold)"};font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;cursor:pointer;transition:all 0.2s;">
             ${mastered?"✓ ĐÃ THUỘC":"○ ĐÁNH DẤU ĐÃ THUỘC"}
           </button>
         </div>
@@ -2416,7 +2758,7 @@ Ngày định dạng Việt Nam. Kết quả phải là Win, Loss, hoặc BE.`;
     }
 
     const r=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",headers:{"Content-Type":"application/json"},
+      method:"POST",headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-iab":"true"},
       body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:4000,messages:[{role:"user",content:userContent}]})
     });
     const data=await r.json();
@@ -2639,35 +2981,49 @@ window.analyzeAI = async function() {
     .join("
 ")||"(chưa có lệnh trước)";
 
-  const textPrompt=`Bạn là ICT trading coach chuyên nghiệp, am hiểu sâu về ICT methodology (Smart Money Concepts).
+  const textPrompt=`Bạn là ICT trading coach cấp chuyên gia, am hiểu sâu ICT methodology của Michael J. Huddleston (Inner Circle Trader). Bạn biết rõ: Smart Money Concepts, PDA hierarchy (FVG/IFVG/BPR/OB), liquidity theory (ERL/IRL), Macro Time windows, session analysis, AMD model, MSS/BOS, SMT divergence, Sick Sister, ORG, Deathmark, Drill methodology.
 
-THÔNG TIN LỆNH CẦN PHÂN TÍCH:
-- Tên: ${currentTrade.title}
-- Symbol: ${currentTrade.symbol||"N/A"} 
-- Kết quả: ${currentTrade.result} | P&L: ${currentTrade.pnl||"N/A"}
-- Vào đúng plan: ${currentTrade.onplan||"N/A"}
-- Tags/Setup: ${Array.isArray(currentTrade.tags)?currentTrade.tags.join(", "):(currentTrade.tags||"Không có")}
-- Ghi chú: ${currentTrade.note||"Không có"}
+═══ LỆNH CẦN PHÂN TÍCH ═══
+Symbol: ${currentTrade.symbol||"N/A"} | Kết quả: ${currentTrade.result} | P&L: ${currentTrade.pnl||"N/A"}
+Tên: ${currentTrade.title}
+Vào đúng plan: ${currentTrade.onplan||"N/A"}
+Setup/Tags: ${Array.isArray(currentTrade.tags)?currentTrade.tags.join(", "):(currentTrade.tags||"Không có")}
+Ghi chú trader: ${currentTrade.note||"Không có"}
 
-5 LỆNH GẦN NHẤT (context):
+═══ 5 LỆNH GẦN NHẤT (equity context) ═══
 ${recentContext}
+${imgContents.length>0?"═══ CHART ANALYSIS ═══\nPhân tích dựa trên ảnh biểu đồ đính kèm phía trên.":""}
 
-${imgContents.length>0?"Phân tích dựa trên ảnh biểu đồ đính kèm + thông tin trên.":""}
+Phân tích CHI TIẾT theo ICT framework bằng tiếng Việt (thực tế, không nói chung chung):
 
-Phân tích theo ICT framework bằng tiếng Việt:
-1. **Setup Quality** — FVG/OB/BPR/MSS có đủ điều kiện A+ không? Confluence?
-2. **Execution** — Entry đúng model không? Có quét liquidity trước không?
-3. **Risk Management** — SL/TP hợp lý? RR tốt không?
-4. **Điểm cải thiện** — Cụ thể 1-2 điều cần sửa theo ICT rules
-5. **Confidence Score** — [X/10] và lý do ngắn
-6. **Câu hỏi tự vấn** — 1 câu hỏi để trader tự reflect về lệnh này`;
+1. **Setup Quality [A+/A/B/C]**
+   - PDA nào được dùng? (FVG/IFVG/BPR/OB) Có đúng hierarchy không?
+   - Có quét ERL trước không? IRL được fill không?
+   - Confluence: HTF bias + LTF entry + Macro Time + Session?
+
+2. **Execution Analysis**
+   - Entry trigger là gì? MSS confirm chưa? Có đúng model (Unicorn/BPR/FVG drill)?
+   - SL đặt đúng chỗ chưa? (dưới/trên PDA, không để bị sweep)
+   - Kết quả vs plan: nếu Loss — do setup sai hay execution sai?
+
+3. **Risk & Psychology**
+   - RR có hợp lý không? Size position?
+   - Lệnh này có dấu hiệu FOMO/revenge/overtrade không?
+   - So sánh với 5 lệnh gần nhất: có pattern tâm lý nào đang lặp?
+
+4. **ICT Rules Check** (cụ thể, không chung chung)
+   - Vi phạm rule nào? (VD: vào trong Opening Range 30 phút, bỏ qua Macro Time, OB không tôn trọng 1-2 nến...)
+   - 1 điều CỤ THỂ nhất cần thay đổi
+
+5. **Score & Verdict**
+   - Quality Score: [X/10] — Setup: X | Entry: X | Management: X
+   - Câu hỏi tự vấn: 1 câu trader cần tự trả lời về lệnh này`;
 
   const userContent=imgContents.length>0?[...imgContents,{type:"text",text:textPrompt}]:textPrompt;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1400,messages:[{role:"user",content:userContent}]})});
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-iab":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1600,messages:[{role:"user",content:userContent}]})});
     const data=await r.json();
-    const aiText=data.content?.map(i=>i.text||"").join("
-")||"Không thể phân tích.";
+    const aiText=data.content?.map(i=>i.text||"").join("\n")||"Không thể phân tích.";
     res.textContent=aiText;
     try{
       await updateDoc(doc(db,"trades",currentTrade.id),{aiResult:aiText,aiResultTs:Date.now()});
@@ -2693,24 +3049,41 @@ window.analyzePattern = async function() {
     return `${i+1}. [${dateStr} ${dow}] ${t.title} | ${t.result} | ${t.pnl||"?"} | Plan: ${t.onplan||"?"} | Tags: ${Array.isArray(t.tags)?t.tags.join(","):(t.tags||"")}`;
   }).join("
 ");
-  const wins=recent.filter(t=>t.result==="Win").length;
-  const onplan=recent.filter(t=>t.onplan==="Đúng plan").length;
-  const prompt=`Bạn là ICT trading coach. Phân tích ${recent.length} lệnh của trader (WR: ${Math.round(wins/recent.length*100)}%, Đúng plan: ${Math.round(onplan/recent.length*100)}%):
+  const rValsRecent=recent.map(t=>{const m=(t.pnl||"").match(/([+-]?\d+\.?\d*)\s*R/i);return m?parseFloat(m[1]):null;}).filter(v=>v!==null);
+  const totalRRecent=rValsRecent.reduce((a,b)=>a+b,0);
+  const equityCurve=rValsRecent.length?`Equity curve (${rValsRecent.length} lệnh có R): ${rValsRecent.join(" → ")} = ${totalRRecent>=0?"+":""}${totalRRecent.toFixed(1)}R tổng`:"Không có dữ liệu R";
+  const prompt=`Bạn là ICT trading coach cấp chuyên gia. Phân tích toàn diện ${recent.length} lệnh (WR: ${Math.round(wins/recent.length*100)}%, Đúng plan: ${Math.round(onplan/recent.length*100)}%):
 
 ${summary}
 
-Phân tích ICT-specific bằng tiếng Việt:
-1. **Pattern lỗi ICT** — Hay vào trước MSS? Bỏ qua IFVG? Không chờ sweep? Setup thiếu confluence?
-2. **Ngày/Giờ pattern** — Lệnh tốt/xấu có theo session hay ngày tuần không?
-3. **Discipline score** — Đánh giá việc theo plan [X/10]
-4. **1 thói quen cần bỏ ngay** — Cụ thể nhất có thể
-5. **1 điểm mạnh cần giữ** — Trader đang làm đúng điều gì?
-6. **Mục tiêu tuần tới** — Đề xuất 1 mục tiêu cụ thể và đo lường được`;
+${equityCurve}
+
+Phân tích CHUYÊN SÂU bằng tiếng Việt (thực tế, cụ thể):
+
+1. **Equity & Risk Profile**
+   - Equity curve: đang tăng dần, choppy hay drawdown? Xu hướng?
+   - Có overtrade session nào không? Loss cluster theo ngày/giờ?
+
+2. **ICT Pattern lỗi lặp lại**
+   - Cụ thể: hay vào trước MSS? Bỏ qua IFVG? Entry thiếu Macro Time? Không đợi ERL sweep?
+   - Các tag/setup nào đang có WR thấp nhất?
+
+3. **Session & Timing Analysis**
+   - Lệnh tốt nhất theo ngày trong tuần (T2-CN)?
+   - Session nào đang profitable (Asian/London/NY)?
+
+4. **Discipline Score [X/10]**
+   - Tỷ lệ đúng plan, consistency, so sánh: win khi đúng plan vs sai plan?
+
+5. **1 thói quen cần bỏ NGAY** (cụ thể nhất, không chung chung)
+
+6. **1 điểm mạnh cần DUY TRÌ** (trader đang làm tốt gì)
+
+7. **Mục tiêu tuần tới** — SMART goal: cụ thể, đo được, khả thi`;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-iab":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1400,messages:[{role:"user",content:prompt}]})});
     const data=await r.json();
-    if(res)res.textContent=data.content?.map(i=>i.text||"").join("
-")||"Không thể phân tích.";
+    if(res)res.textContent=data.content?.map(i=>i.text||"").join("\n")||"Không thể phân tích.";
   }catch{if(res)res.textContent="❌ Lỗi kết nối.";}
   if(btn){btn.disabled=false;btn.textContent="🔄 Phân Tích Lại";}
 };
