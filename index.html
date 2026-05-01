@@ -2,7 +2,27 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+
+<link rel="manifest" href="data:application/json;charset=utf-8,{
+  &quot;name&quot;: &quot;TradeLog ICT&quot;,
+  &quot;short_name&quot;: &quot;TradeLog&quot;,
+  &quot;description&quot;: &quot;Nhật ký giao dịch ICT&quot;,
+  &quot;start_url&quot;: &quot;/&quot;,
+  &quot;display&quot;: &quot;standalone&quot;,
+  &quot;background_color&quot;: &quot;#0a0a0a&quot;,
+  &quot;theme_color&quot;: &quot;#c9a84c&quot;,
+  &quot;orientation&quot;: &quot;portrait&quot;,
+  &quot;icons&quot;: [{
+    &quot;src&quot;: &quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='42' fill='%230a0a0a'/%3E%3Ctext x='96' y='130' text-anchor='middle' font-size='110' font-family='serif'%3E📒%3C/text%3E%3C/svg%3E&quot;,
+    &quot;sizes&quot;: &quot;192x192&quot;,
+    &quot;type&quot;: &quot;image/svg+xml&quot;
+  }]
+}">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TradeLog">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover.0, maximum-scale=1.0, user-scalable=no"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="TradeLog"/>
@@ -11,6 +31,64 @@
 <title>TradeLog – Nhật Ký Giao Dịch</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
 <style>
+:root{--sys:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif
+  --color-primary: var(--gold);
+  --color-danger: var(--loss);
+  --color-success: var(--win);
+  --color-surface: var(--bg2);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+}
+
+  /* ═══ MICRO-ANIMATIONS ═══ */
+  @keyframes slideUp {
+    from { opacity:0; transform:translateY(12px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity:0; }
+    to   { opacity:1; }
+  }
+  @keyframes scaleIn {
+    from { opacity:0; transform:scale(0.95); }
+    to   { opacity:1; transform:scale(1); }
+  }
+  @keyframes successPulse {
+    0%   { box-shadow:0 0 0 0 rgba(201,168,76,0.4); }
+    70%  { box-shadow:0 0 0 10px rgba(201,168,76,0); }
+    100% { box-shadow:0 0 0 0 rgba(201,168,76,0); }
+  }
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+  }
+  @keyframes toastIn {
+    from { opacity:0; transform:translateX(-50%) translateY(20px) scale(0.9); }
+    to   { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
+  }
+  .trade-item { animation: slideUp 0.2s ease both; }
+  .trade-item:nth-child(2) { animation-delay: 0.03s; }
+  .trade-item:nth-child(3) { animation-delay: 0.06s; }
+  .trade-item:nth-child(4) { animation-delay: 0.09s; }
+  .trade-item:nth-child(5) { animation-delay: 0.12s; }
+  .theory-card { animation: slideUp 0.2s ease both; }
+  .modal-sheet { animation: scaleIn 0.2s cubic-bezier(0.34,1.56,0.64,1) both; }
+  .screen.active { animation: fadeIn 0.15s ease both; }
+  .newly-saved { animation: successPulse 0.6s ease; }
+  /* Skeleton loading */
+  .skeleton {
+    background: linear-gradient(90deg, var(--bg2) 25%, var(--bg3) 50%, var(--bg2) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 6px;
+    pointer-events: none;
+  }
+  /* Button press feedback */
+  button:active:not(:disabled) { transform: scale(0.97); }
+  .ai-btn:hover { background: var(--gold-faint); }
+
   :root {
     --gold:#c9a84c; --gold-dim:#c9a84c66; --gold-faint:#c9a84c14;
     --bg:#060606; --bg2:#0d0d0a; --bg3:#141410; --bg4:#1c1c16;
@@ -21,7 +99,8 @@
     --shadow:0 8px 32px #00000088;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-  html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Crimson Pro',serif;overflow:hidden;font-size:15px;}
+  html,body{
+  scroll-behavior:smooth;height:100%;background:var(--bg);color:var(--text);font-family:var(--sys);overflow:hidden;font-size:15px;}
   .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;}
   .screen.active{display:flex;}
   ::-webkit-scrollbar{display:none;}
@@ -43,19 +122,19 @@
   .header-title{text-align:center;flex:1;}
   .header-title .label{
     font-size:8px;letter-spacing:6px;color:var(--gold);
-    text-transform:uppercase;font-family:'Space Mono',monospace;
+    text-transform:uppercase;font-family:var(--sys);
     opacity:0.8;display:block;margin-bottom:2px;
   }
   .header-title .name{
-    font-family:'Cinzel',serif;font-size:18px;color:var(--gold);
-    letter-spacing:3px;font-weight:600;
+    font-family:var(--sys);font-size:18px;color:var(--gold);
+    letter-spacing:1px;font-weight:600;
     text-shadow:0 0 30px var(--gold-dim);
   }
   .header-btn{
     background:none;border:none;color:var(--gold);font-size:20px;
-    cursor:pointer;width:40px;height:40px;border-radius:10px;
+    cursor:pointer;width:40px;height:40px;border-radius:var(--radius-md);
     display:flex;align-items:center;justify-content:center;
-    transition:background 0.15s;
+    transition:all 0.15s cubic-bezier(0.4,0,0.2,1);
   }
   .header-btn:active{background:var(--gold-faint);}
 
@@ -68,8 +147,8 @@
   }
   .stat{padding:12px 0;text-align:center;border-right:1px solid var(--border);}
   .stat:last-child{border-right:none;}
-  .stat-val{font-family:'Cinzel',serif;font-size:20px;font-weight:600;color:var(--gold);}
-  .stat-lbl{font-size:10px;letter-spacing:2px;color:var(--gold);opacity:0.7;text-transform:uppercase;margin-top:2px;font-family:'Space Mono',monospace;}
+  .stat-val{font-family:var(--sys);font-size:20px;font-weight:600;color:var(--gold);}
+  .stat-lbl{font-size:12px;letter-spacing:0.5px;color:var(--gold);opacity:0.7;text-transform:uppercase;margin-top:2px;font-family:var(--sys);}
 
   /* ── SEARCH ── */
   .search-bar{padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;}
@@ -77,10 +156,10 @@
     width:100%;background:var(--bg3);
     border:1px solid var(--border);border-radius:24px;
     padding:10px 18px;color:var(--text);font-size:14px;
-    font-family:'Crimson Pro',serif;outline:none;
+    font-family:var(--sys);outline:none;
     transition:border-color 0.2s, box-shadow 0.2s;
   }
-  .search-input:focus{border-color:var(--gold-dim);box-shadow:0 0 0 3px var(--gold-faint);}
+  .search-input:focus{border-color:var(--gold-dim);box-shadow:0 0 0 4px var(--gold-faint);}
   .search-input::placeholder{color:var(--gold);opacity:0.35;}
 
   /* ── TRADE LIST ── */
@@ -92,17 +171,17 @@
   }
   .trade-item::before{
     content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
-    background:transparent;transition:background 0.15s;
+    background:transparent;transition:all 0.15s cubic-bezier(0.4,0,0.2,1);
   }
   .trade-item:active{background:var(--gold-faint);}
   .trade-item:active::before{background:var(--gold);}
   .trade-title{
-    font-family:'Cinzel',serif;font-size:14px;color:var(--gold);
-    margin-bottom:4px;font-weight:600;letter-spacing:0.5px;
+    font-family:var(--sys);font-size:14px;color:var(--gold);
+    margin-bottom:4px;font-weight:600;letter-spacing:0.4px;
   }
-  .trade-tags{font-size:12px;color:var(--gold);opacity:0.75;font-family:'Space Mono',monospace;letter-spacing:0.5px;}
-  .trade-date{font-size:11px;color:var(--gold);opacity:0.55;margin-top:5px;font-family:'Space Mono',monospace;}
-  .trade-pnl{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;}
+  .trade-tags{font-size:12px;color:var(--gold);opacity:0.75;font-family:var(--sys);letter-spacing:0.4px;}
+  .trade-date{font-size:12px;color:var(--gold);opacity:0.55;margin-top:4px;font-family:var(--sys);}
+  .trade-pnl{font-family:var(--sys);font-size:14px;font-weight:700;}
   .win{color:var(--win);} .loss{color:var(--loss);} .be{color:var(--be);}
   .newly-saved{animation:flashNew 2s ease forwards;}
   @keyframes flashNew{0%{background:var(--gold-faint);}100%{background:transparent;}}
@@ -110,35 +189,35 @@
   /* ── EMPTY ── */
   .empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;}
   .empty-icon{font-size:52px;margin-bottom:20px;opacity:0.35;}
-  .empty-text{font-family:'Cinzel',serif;font-size:13px;letter-spacing:2px;line-height:2.2;color:var(--gold);opacity:0.55;}
+  .empty-text{font-family:var(--sys);font-size:13px;letter-spacing:0.5px;line-height:2.2;color:var(--gold);opacity:0.55;}
 
   /* ── FORM ── */
   .form-body{padding:20px 20px 120px;flex:1;}
   .field{margin-bottom:18px;position:relative;}
   .field-label{
-    font-size:10px;letter-spacing:3px;color:var(--gold);
-    text-transform:uppercase;font-family:'Space Mono',monospace;
+    font-size:12px;letter-spacing:1px;color:var(--gold);
+    text-transform:uppercase;font-family:var(--sys);
     display:block;margin-bottom:8px;opacity:1;
   }
   .field input,.field textarea,.field select{
     width:100%;background:var(--bg3);
     border:1px solid var(--border);border-radius:var(--radius);
     padding:12px 16px;color:var(--text);font-size:15px;
-    font-family:'Crimson Pro',serif;outline:none;
+    font-family:var(--sys);outline:none;
     transition:border-color 0.2s, box-shadow 0.2s;
   }
   .field input:focus,.field textarea:focus,.field select:focus{
-    border-color:var(--gold-dim);box-shadow:0 0 0 3px var(--gold-faint);
+    border-color:var(--gold-dim);box-shadow:0 0 0 4px var(--gold-faint);
   }
   .field textarea{resize:vertical;min-height:90px;line-height:1.6;}
 
   /* ── TOGGLE ── */
   .toggle-group{display:flex;gap:6px;}
   .toggle-btn{
-    flex:1;padding:10px 4px;border-radius:10px;cursor:pointer;
+    flex:1;padding:10px 4px;border-radius:var(--radius-md);cursor:pointer;
     border:1px solid var(--border);background:var(--bg3);
     color:var(--gold);opacity:0.8;font-size:12px;
-    font-family:'Space Mono',monospace;letter-spacing:0.5px;
+    font-family:var(--sys);letter-spacing:0.4px;
     transition:all 0.15s;text-align:center;
   }
   .toggle-btn.active{
@@ -155,8 +234,8 @@
   }
   .detail-body{padding:16px 20px 120px;flex:1;}
   .section-label{
-    font-size:10px;letter-spacing:4px;color:var(--gold);
-    text-transform:uppercase;font-family:'Space Mono',monospace;
+    font-size:12px;letter-spacing:1px;color:var(--gold);
+    text-transform:uppercase;font-family:var(--sys);
     margin-bottom:12px;opacity:1;
     display:flex;align-items:center;gap:10px;
   }
@@ -166,19 +245,19 @@
   }
   .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px;}
   .stats-cell{
-    background:var(--bg3);border-radius:12px;padding:14px 10px;
+    background:var(--bg3);border-radius:var(--radius-md);padding:14px 10px;
     text-align:center;border:1px solid var(--border);
     transition:border-color 0.2s;
   }
   .stats-cell:hover{border-color:var(--gold-dim);}
   .stats-cell .lbl{
-    font-size:9px;letter-spacing:2px;color:var(--gold);
+    font-size:12px;letter-spacing:0.5px;color:var(--gold);
     text-transform:uppercase;margin-bottom:8px;
-    font-family:'Space Mono',monospace;display:block;
+    font-family:var(--sys);display:block;
   }
   .stats-cell .val{
     font-size:16px;color:var(--text);
-    font-family:'Cinzel',serif;font-weight:700;
+    font-family:var(--sys);font-weight:700;
   }
   .stats-cell .val.win{color:var(--win);}
   .stats-cell .val.loss{color:var(--loss);}
@@ -187,10 +266,10 @@
   /* ── TF TABS ── */
   .tf-tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px;}
   .tf-tab{
-    flex:0 0 auto;padding:7px 14px;border-radius:8px;cursor:pointer;
+    flex:0 0 auto;padding:8px 14px;border-radius:var(--radius-sm);cursor:pointer;
     border:1px solid var(--border);background:var(--bg3);
-    color:var(--gold);opacity:0.75;font-size:11px;
-    font-family:'Space Mono',monospace;transition:all 0.15s;
+    color:var(--gold);opacity:0.75;font-size:12px;
+    font-family:var(--sys);transition:all 0.15s;
     white-space:nowrap;position:relative;
   }
   .tf-tab.active{
@@ -200,32 +279,32 @@
   }
   .tf-tab.has-img{border-color:var(--gold-dim);opacity:0.9;}
   .tf-tab.has-img::after{
-    content:'';position:absolute;top:3px;right:3px;
-    width:5px;height:5px;border-radius:50%;
+    content:'';position:absolute;top:4px;right:4px;
+    width:4px;height:4px;border-radius:50%;
     background:var(--win);box-shadow:0 0 6px var(--win);
   }
   .tf-preview{
-    width:100%;min-height:180px;border-radius:14px;
+    width:100%;min-height:180px;border-radius:var(--radius-lg);
     background:var(--bg3);border:1px solid var(--border);
     overflow:hidden;display:flex;align-items:center;justify-content:center;
     margin-bottom:24px;transition:border-color 0.2s;
   }
-  .tf-preview .no-img{color:var(--gold);opacity:0.4;text-align:center;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;line-height:2;}
+  .tf-preview .no-img{color:var(--gold);opacity:0.4;text-align:center;font-family:var(--sys);font-size:12px;letter-spacing:0.5px;line-height:2;}
 
   /* ── NOTE BOX ── */
   .note-box{
     background:var(--bg3);border:1px solid var(--border);
-    border-radius:14px;padding:18px;margin-bottom:24px;
+    border-radius:var(--radius-lg);padding:18px;margin-bottom:24px;
     font-size:16px;color:var(--text);line-height:1.8;
     font-style:italic;
   }
 
   /* ── AI ── */
   .ai-btn{
-    width:100%;padding:16px;border-radius:14px;
+    width:100%;padding:16px;border-radius:var(--radius-lg);
     background:linear-gradient(135deg,var(--gold-faint),transparent);
     border:1px solid var(--gold-dim);color:var(--gold);
-    font-size:13px;font-family:'Space Mono',monospace;letter-spacing:2px;
+    font-size:13px;font-family:var(--sys);letter-spacing:0.5px;
     cursor:pointer;transition:all 0.2s;margin-bottom:12px;
     position:relative;overflow:hidden;
   }
@@ -238,7 +317,7 @@
   .ai-btn:disabled{opacity:0.45;cursor:not-allowed;}
   .ai-result{
     background:var(--bg3);border:1px solid var(--gold-dim);
-    border-radius:14px;padding:18px;font-size:15px;
+    border-radius:var(--radius-lg);padding:18px;font-size:15px;
     color:var(--text);line-height:1.9;white-space:pre-wrap;margin-bottom:16px;
   }
 
@@ -250,10 +329,10 @@
     padding:16px 20px 28px;z-index:150;
   }
   .save-btn{
-    width:100%;padding:16px;border-radius:14px;
+    width:100%;padding:16px;border-radius:var(--radius-lg);
     background:linear-gradient(135deg,var(--gold-faint),var(--gold-dim));
     border:1px solid var(--gold);color:var(--gold);
-    font-size:13px;font-family:'Space Mono',monospace;letter-spacing:3px;
+    font-size:13px;font-family:var(--sys);letter-spacing:1px;
     cursor:pointer;transition:all 0.2s;
     box-shadow:0 4px 20px var(--gold-faint);
   }
@@ -261,7 +340,7 @@
   .save-btn:disabled{opacity:0.45;cursor:not-allowed;box-shadow:none;}
   .delete-btn{
     background:none;border:none;color:var(--loss);opacity:0.6;
-    font-size:12px;cursor:pointer;font-family:'Space Mono',monospace;
+    font-size:12px;cursor:pointer;font-family:var(--sys);
     letter-spacing:1px;width:100%;text-align:center;
     padding:12px;margin-top:6px;transition:opacity 0.15s;
   }
@@ -270,8 +349,8 @@
   /* ── LOADING ── */
   .loading{
     display:flex;align-items:center;justify-content:center;
-    padding:40px;color:var(--gold);font-family:'Space Mono',monospace;
-    font-size:11px;letter-spacing:3px;animation:pulse 1.5s infinite;
+    padding:40px;color:var(--gold);font-family:var(--sys);
+    font-size:12px;letter-spacing:1px;animation:pulse 1.5s infinite;
   }
   @keyframes pulse{0%,100%{opacity:0.3}50%{opacity:1}}
 
@@ -282,24 +361,24 @@
   }
   .folder-bar::-webkit-scrollbar{display:none;}
   .folder-chip{
-    flex:0 0 auto;padding:6px 14px;border-radius:20px;cursor:pointer;
+    flex:0 0 auto;padding:6px 14px;border-radius:var(--radius-xl);cursor:pointer;
     border:1px solid var(--border);background:transparent;
-    color:var(--gold);opacity:0.85;font-size:11px;
-    font-family:'Space Mono',monospace;transition:all 0.15s;
-    white-space:nowrap;letter-spacing:0.5px;
+    color:var(--gold);opacity:0.85;font-size:12px;
+    font-family:var(--sys);transition:all 0.15s;
+    white-space:nowrap;letter-spacing:0.4px;
   }
   .folder-chip.active{border-color:var(--gold);background:var(--gold-faint);opacity:1;}
   .folder-chip.add-folder{border-style:dashed;}
   .sort-bar{
     display:flex;align-items:center;justify-content:flex-end;
-    padding:5px 16px;border-bottom:1px solid var(--border);
+    padding:4px 16px;border-bottom:1px solid var(--border);
     background:var(--bg);flex-shrink:0;gap:8px;
   }
-  .sort-label{font-size:10px;color:var(--gold);font-family:'Space Mono',monospace;letter-spacing:1px;}
+  .sort-label{font-size:12px;color:var(--gold);font-family:var(--sys);letter-spacing:1px;}
   .sort-btn{
     background:none;border:1px solid var(--border);border-radius:6px;
-    color:var(--gold);opacity:0.85;font-size:10px;
-    font-family:'Space Mono',monospace;padding:4px 12px;cursor:pointer;transition:all 0.15s;
+    color:var(--gold);opacity:0.85;font-size:12px;
+    font-family:var(--sys);padding:4px 12px;cursor:pointer;transition:all 0.15s;
   }
   .sort-btn.active{border-color:var(--gold);opacity:1;background:var(--gold-faint);}
 
@@ -308,76 +387,76 @@
     position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
     background:var(--bg3);border:1px solid var(--gold-dim);
     border-radius:24px;padding:10px 24px;color:var(--gold);
-    font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;
+    font-family:var(--sys);font-size:12px;letter-spacing:0.5px;
     z-index:9999;backdrop-filter:blur(20px);
     transition:opacity 0.4s;pointer-events:none;white-space:nowrap;
     box-shadow:var(--shadow);
-  }
+  ;animation:toastIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both}
 
   /* ── CHARTS ── */
   .chart-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-  .chart-bar-label{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);width:50px;text-align:right;flex-shrink:0;}
+  .chart-bar-label{font-family:var(--sys);font-size:12px;color:var(--gold);width:50px;text-align:right;flex-shrink:0;}
   .chart-bar-bg{flex:1;background:var(--bg);border-radius:6px;height:22px;overflow:hidden;}
   .chart-bar-fill{height:100%;border-radius:6px;transition:width 0.6s ease;display:flex;align-items:center;padding-left:10px;}
-  .chart-bar-val{font-size:11px;font-family:'Space Mono',monospace;color:#fff;font-weight:700;}
+  .chart-bar-val{font-size:12px;font-family:var(--sys);color:#fff;font-weight:700;}
 
   /* ── MODAL ── */
   .modal-overlay{position:fixed;inset:0;background:#000000cc;z-index:500;display:flex;align-items:flex-end;justify-content:center;}
   .modal-sheet{
     background:var(--bg2);border-top:1px solid var(--gold-dim);
-    border-radius:20px 20px 0 0;width:100%;max-width:480px;
+    border-radius:var(--radius-xl) 20px 0 0;width:100%;max-width:480px;
     padding:24px 20px calc(40px + env(safe-area-inset-bottom,0px));
     max-height:80vh;overflow-y:auto;
   }
-  .modal-title{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:4px;color:var(--gold);margin-bottom:18px;text-align:center;text-transform:uppercase;}
-  .modal-option{padding:14px 18px;border-radius:12px;margin-bottom:8px;cursor:pointer;border:1px solid var(--border);font-size:15px;color:var(--text);transition:all 0.15s;}
+  .modal-title{font-family:var(--sys);font-size:12px;letter-spacing:1px;color:var(--gold);margin-bottom:18px;text-align:center;text-transform:uppercase;}
+  .modal-option{padding:14px 18px;border-radius:var(--radius-md);margin-bottom:8px;cursor:pointer;border:1px solid var(--border);font-size:15px;color:var(--text);transition:all 0.15s;}
   .modal-option:active{background:var(--gold-faint);}
   .modal-option.selected{border-color:var(--gold);background:var(--gold-faint);color:var(--gold);}
-  .modal-cancel{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,67,58,0.3);background:none;color:var(--loss);opacity:0.7;font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;margin-top:4px;}
+  .modal-cancel{width:100%;padding:12px;border-radius:var(--radius-md);border:1px solid rgba(255,67,58,0.3);background:none;color:var(--loss);opacity:0.7;font-family:var(--sys);font-size:12px;cursor:pointer;margin-top:4px;}
 
   /* ── NEW UX ── */
   .breadcrumb{
     display:flex;align-items:center;justify-content:space-between;
     gap:6px;padding:8px 20px;background:var(--bg2);
     border-bottom:1px solid var(--border);
-    font-size:10px;color:var(--gold);font-family:'Space Mono',monospace;
+    font-size:12px;color:var(--gold);font-family:var(--sys);
     letter-spacing:1px;flex-shrink:0;
   }
   .result-filter{display:flex;gap:6px;padding:8px 16px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;}
   .rf-btn{
-    flex:1;padding:7px 4px;border-radius:8px;
+    flex:1;padding:8px 4px;border-radius:var(--radius-sm);
     border:1px solid var(--border);background:transparent;
-    color:var(--gold);opacity:0.85;font-size:11px;
-    font-family:'Space Mono',monospace;cursor:pointer;text-align:center;transition:all 0.15s;
+    color:var(--gold);opacity:0.85;font-size:12px;
+    font-family:var(--sys);cursor:pointer;text-align:center;transition:all 0.15s;
   }
   .rf-btn.active{opacity:1;background:var(--gold-faint);border-color:var(--gold);}
   .rf-btn.win-f.active{border-color:var(--win);background:#3ddc8418;color:var(--win);}
   .rf-btn.loss-f.active{border-color:var(--loss);background:#ff453a18;color:var(--loss);}
   .rf-btn.be-f.active{border-color:var(--be);background:#8e9bae18;color:var(--be);}
-  .hl{background:var(--gold-faint);color:var(--gold);border-radius:3px;padding:0 3px;}
-  .trade-thumb{width:46px;height:36px;border-radius:7px;object-fit:cover;border:1px solid var(--border);flex-shrink:0;margin-left:8px;cursor:pointer;}
-  .undo-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--loss);border-radius:14px;padding:12px 18px;display:flex;align-items:center;gap:14px;z-index:9999;box-shadow:var(--shadow);pointer-events:all;white-space:nowrap;}
-  .undo-toast-msg{font-size:13px;color:var(--text);font-family:'Crimson Pro',serif;}
-  .undo-btn{padding:7px 16px;border-radius:10px;border:1px solid var(--gold);background:var(--gold-faint);color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;}
-  .copy-btn{background:none;border:none;color:var(--gold);opacity:0.65;cursor:pointer;font-size:13px;padding:3px 6px;border-radius:6px;transition:opacity 0.15s;vertical-align:middle;}
+  .hl{background:var(--gold-faint);color:var(--gold);border-radius:4px;padding:0 4px;}
+  .trade-thumb{width:46px;height:36px;border-radius:var(--radius-sm);object-fit:cover;border:1px solid var(--border);flex-shrink:0;margin-left:8px;cursor:pointer;}
+  .undo-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--loss);border-radius:var(--radius-lg);padding:12px 18px;display:flex;align-items:center;gap:14px;z-index:9999;box-shadow:var(--shadow);pointer-events:all;white-space:nowrap;}
+  .undo-toast-msg{font-size:13px;color:var(--text);font-family:var(--sys);}
+  .undo-btn{padding:8px 16px;border-radius:var(--radius-md);border:1px solid var(--gold);background:var(--gold-faint);color:var(--gold);font-family:var(--sys);font-size:12px;cursor:pointer;letter-spacing:1px;}
+  .copy-btn{background:none;border:none;color:var(--gold);opacity:0.65;cursor:pointer;font-size:13px;padding:4px 6px;border-radius:6px;transition:opacity 0.15s;vertical-align:middle;}
   .copy-btn:active{opacity:1;}
-  .today-card{background:linear-gradient(135deg,var(--gold-faint),transparent);border:1px solid var(--gold-dim);border-radius:16px;padding:18px;margin-bottom:16px;cursor:pointer;transition:all 0.2s;}
+  .today-card{background:linear-gradient(135deg,var(--gold-faint),transparent);border:1px solid var(--gold-dim);border-radius:var(--radius-lg);padding:18px;margin-bottom:16px;cursor:pointer;transition:all 0.2s;}
   .today-card:active{border-color:var(--gold);transform:scale(0.99);}
-  .today-label{font-size:8px;letter-spacing:4px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:10px;opacity:0.8;text-transform:uppercase;}
-  .quick-save-btn{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;opacity:1;transition:all 0.15s;}
+  .today-label{font-size:8px;letter-spacing:1px;color:var(--gold);font-family:var(--sys);margin-bottom:10px;opacity:0.8;text-transform:uppercase;}
+  .quick-save-btn{flex:1;padding:10px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg3);color:var(--gold);font-family:var(--sys);font-size:12px;letter-spacing:1px;cursor:pointer;opacity:1;transition:all 0.15s;}
   .quick-save-btn:active{background:var(--gold-faint);border-color:var(--gold);}
 
   /* ── THEORY ── */
   .theory-card{
     background:var(--bg3);border:1px solid var(--border);
-    border-radius:16px;margin-bottom:14px;overflow:hidden;
+    border-radius:var(--radius-lg);margin-bottom:14px;overflow:hidden;
     transition:all 0.2s;
   }
   .theory-card.expanded{border-color:var(--gold-dim);box-shadow:0 4px 24px var(--gold-faint);}
   .theory-card-header{padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;}
   .theory-card-icon{font-size:24px;flex-shrink:0;}
-  .theory-card-title{font-family:'Cinzel',serif;font-size:14px;color:var(--gold);letter-spacing:0.5px;flex:1;line-height:1.4;font-weight:600;}
-  .theory-card-tag{font-size:9px;letter-spacing:2px;font-family:'Space Mono',monospace;padding:4px 10px;border-radius:20px;background:var(--gold-faint);color:var(--gold);opacity:1;flex-shrink:0;text-transform:uppercase;}
+  .theory-card-title{font-family:var(--sys);font-size:14px;color:var(--gold);letter-spacing:0.4px;flex:1;line-height:1.4;font-weight:600;}
+  .theory-card-tag{font-size:12px;letter-spacing:0.5px;font-family:var(--sys);padding:8px 12px;border-radius:var(--radius-xl);background:var(--gold-faint);color:var(--gold);opacity:1;flex-shrink:0;text-transform:uppercase;}
   .theory-card-chevron{font-size:14px;color:var(--gold);opacity:0.7;transition:transform 0.3s;flex-shrink:0;}
   .theory-card.expanded .theory-card-chevron{transform:rotate(180deg);}
   .theory-card-body{max-height:0;overflow:hidden;transition:max-height 0.4s ease;}
@@ -385,38 +464,38 @@
   .theory-card-content{padding:4px 18px 18px;border-top:1px solid var(--border);}
 
   /* Theory image */
-  .theory-img{width:100%;border-radius:10px;margin:12px 0;object-fit:cover;border:1px solid var(--border);}
-  .theory-img-caption{font-size:11px;color:var(--gold);opacity:0.65;font-family:'Space Mono',monospace;text-align:center;margin:-6px 0 12px;letter-spacing:1px;}
+  .theory-img{width:100%;border-radius:var(--radius-md);margin:12px 0;object-fit:cover;border:1px solid var(--border);}
+  .theory-img-caption{font-size:12px;color:var(--gold);opacity:0.65;font-family:var(--sys);text-align:center;margin:-6px 0 12px;letter-spacing:1px;}
 
   .theory-rule{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);align-items:flex-start;}
   .theory-rule:last-child{border-bottom:none;}
-  .theory-rule-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:9px;}
+  .theory-rule-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:8px;}
   .theory-rule-text{font-size:14px;color:var(--text);line-height:1.7;}
   .theory-rule-text b{color:var(--gold);font-weight:600;}
   .theory-highlight{
-    background:var(--gold-faint);border-left:3px solid var(--gold);
+    background:var(--gold-faint);border-left:4px solid var(--gold);
     border-radius:0 10px 10px 0;padding:12px 16px;margin:12px 0;
     font-size:14px;color:var(--text);line-height:1.7;
   }
   .theory-highlight.warn{border-left-color:var(--loss);background:rgba(255,67,58,0.08);}
   .theory-highlight.info{border-left-color:#42a5f5;background:rgba(66,165,245,0.08);}
-  .theory-progress-bar{height:3px;background:var(--bg2);border-radius:2px;margin:12px 0;}
+  .theory-progress-bar{height:4px;background:var(--bg2);border-radius:2px;margin:12px 0;}
   .theory-progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold),var(--gold-dim));transition:width 0.5s ease;}
-  .theory-daily-badge{display:inline-flex;align-items:center;gap:6px;background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:20px;padding:5px 14px;font-size:10px;font-family:'Space Mono',monospace;color:var(--gold);letter-spacing:1px;}
-  .theory-search{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:24px;padding:9px 18px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;transition:all 0.2s;}
-  .theory-search:focus{border-color:var(--gold-dim);box-shadow:0 0 0 3px var(--gold-faint);}
+  .theory-daily-badge{display:inline-flex;align-items:center;gap:6px;background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-xl);padding:4px 14px;font-size:12px;font-family:var(--sys);color:var(--gold);letter-spacing:1px;}
+  .theory-search{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:24px;padding:8px 18px;color:var(--text);font-size:14px;font-family:var(--sys);outline:none;transition:all 0.2s;}
+  .theory-search:focus{border-color:var(--gold-dim);box-shadow:0 0 0 4px var(--gold-faint);}
   .theory-search::placeholder{color:var(--gold);opacity:0.35;}
   .theory-tab-bar{display:flex;gap:8px;padding:10px 18px;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;}
-  .theory-tab{flex:0 0 auto;padding:7px 16px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--gold);opacity:0.8;font-size:10px;font-family:'Space Mono',monospace;cursor:pointer;white-space:nowrap;transition:all 0.15s;text-transform:uppercase;letter-spacing:1px;}
+  .theory-tab{flex:0 0 auto;padding:8px 16px;border-radius:var(--radius-xl);border:1px solid var(--border);background:transparent;color:var(--gold);opacity:0.8;font-size:12px;font-family:var(--sys);cursor:pointer;white-space:nowrap;transition:all 0.15s;text-transform:uppercase;letter-spacing:1px;}
   .theory-tab.active{border-color:var(--gold);background:var(--gold-faint);opacity:1;}
   .theory-mastered{border-color:var(--win) !important;}
 
   /* ── SETTINGS ── */
-  .theme-mode-btn{padding:18px 8px;border-radius:14px;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text);transition:all 0.2s;text-align:center;width:100%;}
+  .theme-mode-btn{padding:18px 8px;border-radius:var(--radius-lg);cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text);transition:all 0.2s;text-align:center;width:100%;}
   .theme-mode-btn.active{border-color:var(--gold);background:var(--gold-faint);box-shadow:0 0 20px var(--gold-faint);}
-  .theme-size-btn{padding:16px 8px;border-radius:14px;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text);transition:all 0.2s;text-align:center;width:100%;}
+  .theme-size-btn{padding:16px 8px;border-radius:var(--radius-lg);cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text);transition:all 0.2s;text-align:center;width:100%;}
   .theme-size-btn.active{border-color:var(--gold);background:var(--gold-faint);}
-  .color-swatch{width:44px;height:44px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all 0.2s;position:relative;margin:0 auto;display:block;}
+  .color-swatch{width:44px;height:44px;border-radius:50%;cursor:pointer;border:4px solid transparent;transition:all 0.2s;position:relative;margin:0 auto;display:block;}
   .color-swatch.active{border-color:#fff;box-shadow:0 0 0 2px var(--gold),0 0 20px var(--gold-faint);}
   .color-swatch.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#000;font-size:16px;font-weight:700;}
 
@@ -442,18 +521,18 @@
     padding-bottom:env(safe-area-inset-bottom,0);
     backdrop-filter:blur(20px);
   }
-  .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 8px;cursor:pointer;border:none;background:transparent;color:var(--gold);opacity:0.55;transition:all 0.2s;font-family:'Space Mono',monospace;}
+  .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 8px;cursor:pointer;border:none;background:transparent;color:var(--gold);opacity:0.55;transition:all 0.2s;font-family:var(--sys);}
   .bn-item.active{opacity:1;}
-  .bn-item .bn-icon{font-size:20px;margin-bottom:3px;}
-  .bn-item .bn-label{font-size:9px;letter-spacing:1px;text-transform:uppercase;font-weight:700;}
+  .bn-item .bn-icon{font-size:20px;margin-bottom:4px;}
+  .bn-item .bn-label{font-size:12px;letter-spacing:1px;text-transform:uppercase;font-weight:700;}
 
   /* ── IMPORT ── */
-  .import-drop{border:1px dashed var(--gold-dim);border-radius:16px;padding:44px 20px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:16px;background:var(--bg3);}
+  .import-drop{border:1px dashed var(--gold-dim);border-radius:var(--radius-lg);padding:44px 20px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:16px;background:var(--bg3);}
   .import-drop:active,.import-drop.drag-over{background:var(--gold-faint);border-color:var(--gold);}
-  .import-preview{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;}
+  .import-preview{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;margin-bottom:10px;}
 
   /* ── PATTERN RESULT ── */
-  .pattern-result{background:var(--bg3);border:1px solid var(--gold-dim);border-radius:14px;padding:16px;font-size:14px;color:var(--text);line-height:1.9;white-space:pre-wrap;margin-bottom:14px;}
+  .pattern-result{background:var(--bg3);border:1px solid var(--gold-dim);border-radius:var(--radius-lg);padding:16px;font-size:14px;color:var(--text);line-height:1.9;white-space:pre-wrap;margin-bottom:14px;}
 
   /* ── FAB ── */
   .fab{
@@ -478,7 +557,7 @@
 
   /* Stats bar shimmer */
   .stat-val{
-    font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:var(--gold);
+    font-family:var(--sys);font-size:22px;font-weight:700;color:var(--gold);
     text-shadow:0 0 20px var(--gold-dim);letter-spacing:1px;
   }
 
@@ -491,8 +570,8 @@
   }
   .trade-item:active{background:var(--gold-faint);transform:scale(0.995);}
   .trade-item::before{
-    content:'';position:absolute;left:0;top:10%;bottom:10%;width:3px;
-    background:transparent;border-radius:0 3px 3px 0;transition:background 0.15s;
+    content:'';position:absolute;left:0;top:10%;bottom:10%;width:4px;
+    background:transparent;border-radius:0 4px 4px 0;transition:all 0.15s cubic-bezier(0.4,0,0.2,1);
   }
   .trade-item:active::before,.trade-item.win-item::before{background:var(--win);}
   .trade-item.loss-item::before{background:var(--loss);}
@@ -500,17 +579,17 @@
 
   /* Session pill */
   .session-pill{
-    display:inline-flex;align-items:center;gap:5px;
-    padding:4px 12px;border-radius:20px;font-size:10px;
-    font-family:'Space Mono',monospace;letter-spacing:1px;
+    display:inline-flex;align-items:center;gap:4px;
+    padding:4px 12px;border-radius:var(--radius-xl);font-size:12px;
+    font-family:var(--sys);letter-spacing:1px;
     border:1px solid var(--gold-dim);background:var(--gold-faint);
     color:var(--gold);white-space:nowrap;
   }
 
   /* Section label upgrade */
   .section-label{
-    font-size:9px;letter-spacing:5px;color:var(--gold);
-    text-transform:uppercase;font-family:'Space Mono',monospace;
+    font-size:12px;letter-spacing:1px;color:var(--gold);
+    text-transform:uppercase;font-family:var(--sys);
     margin-bottom:14px;opacity:1;font-weight:700;
     display:flex;align-items:center;gap:10px;
   }
@@ -522,7 +601,7 @@
   /* Stats cells upgrade */
   .stats-cell{
     background:linear-gradient(135deg,var(--bg3),var(--bg2));
-    border-radius:14px;padding:14px 10px;
+    border-radius:var(--radius-lg);padding:14px 10px;
     text-align:center;border:1px solid var(--border);
     transition:border-color 0.2s,transform 0.15s,box-shadow 0.15s;
   }
@@ -536,7 +615,7 @@
   .note-box{
     background:linear-gradient(135deg,var(--bg3),var(--bg2));
     border:1px solid var(--border);
-    border-left:3px solid var(--gold-dim);
+    border-left:4px solid var(--gold-dim);
     border-radius:0 14px 14px 0;padding:18px;margin-bottom:24px;
     font-size:16px;color:var(--text);line-height:1.9;
     font-style:italic;
@@ -544,20 +623,20 @@
 
   /* Theory image from URL */
   .theory-diagram{
-    width:100%;border-radius:12px;margin:14px 0;
+    width:100%;border-radius:var(--radius-md);margin:14px 0;
     border:1px solid var(--border);object-fit:contain;
     background:var(--bg);max-height:240px;display:block;
   }
   .theory-diagram-caption{
-    font-size:10px;color:var(--gold);opacity:0.6;
-    font-family:'Space Mono',monospace;text-align:center;
-    margin:-8px 0 14px;letter-spacing:1.5px;
+    font-size:12px;color:var(--gold);opacity:0.6;
+    font-family:var(--sys);text-align:center;
+    margin:-8px 0 14px;letter-spacing:1.4px;
   }
 
   /* AI result prettier */
   .ai-result{
     background:linear-gradient(135deg,var(--bg3),var(--bg2));
-    border:1px solid var(--gold-dim);border-radius:14px;
+    border:1px solid var(--gold-dim);border-radius:var(--radius-lg);
     padding:18px;font-size:14px;color:var(--text);
     line-height:2;white-space:pre-wrap;margin-bottom:16px;
     box-shadow:inset 0 1px 0 var(--gold-faint);
@@ -565,10 +644,10 @@
 
   /* Save button glow */
   .save-btn{
-    width:100%;padding:16px;border-radius:14px;
+    width:100%;padding:16px;border-radius:var(--radius-lg);
     background:linear-gradient(135deg,var(--gold-faint),var(--gold-dim));
     border:1px solid var(--gold);color:var(--gold);
-    font-size:12px;font-family:'Space Mono',monospace;letter-spacing:4px;
+    font-size:12px;font-family:var(--sys);letter-spacing:1px;
     cursor:pointer;transition:all 0.2s;
     box-shadow:0 4px 24px var(--gold-faint),inset 0 1px 0 rgba(255,255,255,0.1);
   }
@@ -591,20 +670,20 @@
     width:100%;background:var(--bg3);
     border:1px solid var(--border);border-radius:var(--radius);
     padding:13px 16px;color:var(--text);font-size:15px;
-    font-family:'Crimson Pro',serif;outline:none;
+    font-family:var(--sys);outline:none;
     transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;
   }
   .field input:focus,.field textarea:focus,.field select:focus{
-    border-color:var(--gold-dim);box-shadow:0 0 0 3px var(--gold-faint);
+    border-color:var(--gold-dim);box-shadow:0 0 0 4px var(--gold-faint);
     background:var(--bg2);
   }
 
   /* Toggle btn upgrade */
   .toggle-btn{
-    flex:1;padding:11px 4px;border-radius:10px;cursor:pointer;
+    flex:1;padding:12px 4px;border-radius:var(--radius-md);cursor:pointer;
     border:1px solid var(--border);background:var(--bg3);
     color:var(--gold);opacity:0.75;font-size:12px;
-    font-family:'Space Mono',monospace;letter-spacing:0.5px;
+    font-family:var(--sys);letter-spacing:0.4px;
     transition:all 0.15s;text-align:center;
   }
   .toggle-btn.active{
@@ -615,10 +694,10 @@
 
   /* AI btn upgrade */
   .ai-btn{
-    width:100%;padding:16px;border-radius:14px;
+    width:100%;padding:16px;border-radius:var(--radius-lg);
     background:linear-gradient(135deg,var(--gold-faint),transparent);
     border:1px solid var(--gold-dim);color:var(--gold);
-    font-size:12px;font-family:'Space Mono',monospace;letter-spacing:2px;
+    font-size:12px;font-family:var(--sys);letter-spacing:0.5px;
     cursor:pointer;transition:all 0.2s;margin-bottom:10px;
     position:relative;overflow:hidden;
     box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
@@ -631,16 +710,44 @@
   .search-input{
     width:100%;background:var(--bg3);
     border:1px solid var(--border);border-radius:24px;
-    padding:11px 20px;color:var(--text);font-size:14px;
-    font-family:'Crimson Pro',serif;outline:none;
+    padding:12px 20px;color:var(--text);font-size:14px;
+    font-family:var(--sys);outline:none;
     transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;
   }
-  .search-input:focus{border-color:var(--gold-dim);box-shadow:0 0 0 3px var(--gold-faint);background:var(--bg2);}
+  .search-input:focus{border-color:var(--gold-dim);box-shadow:0 0 0 4px var(--gold-faint);background:var(--bg2);}
   .search-input::placeholder{color:var(--gold);opacity:0.4;}
 
+
+  img { -webkit-touch-callout: none; }
+  .folder-chip, .theory-tab, .sort-btn, .bn-item { -webkit-touch-callout: none; }
+  input, textarea, select { -webkit-touch-callout: default; }
+
+  .trade-item { position:relative; overflow:hidden; }
+  .swipe-delete-bg {
+    position:absolute; right:0; top:0; bottom:0; width:80px;
+    background:var(--loss); display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:20px; opacity:0; transition:opacity 0.2s;
+    pointer-events:none; border-radius:0 12px 12px 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Jony Ive: even overscroll should feel intentional */
+  .screen { overscroll-behavior: contain; }
+  #trade-list, #theory-list { overscroll-behavior-y: auto; }
+  /* Smooth scrolling everywhere */
+  * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 </style>
 </head>
 <body>
+<a href="#trade-list" style="position:absolute;top:-100px;left:0;background:var(--gold);color:#000;padding:8px 16px;z-index:9999;border-radius:0 0 8px 0;font-size:13px;transition:top 0.2s;" onfocus="this.style.top='0'" onblur="this.style.top='-100px'">Bỏ qua đến nội dung chính</a>
+
 
 <!-- LIST -->
 <div class="screen active" id="screen-list">
@@ -648,7 +755,7 @@
     <button class="header-btn" onclick="openNew()" style="font-size:24px;font-weight:300;letter-spacing:-1px;" title="Thêm lệnh mới">+</button>
     <div class="header-title">
       <div class="label">NHẬT KÝ GIAO DỊCH · ICT</div>
-      <div class="name">TradeLog</div>
+      <div class="name" style="font-family:'Cinzel',serif;letter-spacing:2px">TradeLog</div>
     </div>
     <button class="header-btn" onclick="showScreen('settings')" style="font-size:16px;opacity:0.7;" title="Cài đặt">⚙️</button>
   </div>
@@ -660,32 +767,32 @@
   </div>
   <!-- Fix 7: streak row -->
   <div id="streak-row" style="display:flex;justify-content:space-between;align-items:center;padding:7px 18px;background:var(--bg2);border-bottom:1px solid var(--gold-faint);flex-shrink:0;cursor:pointer;gap:8px;" onclick="toggleSessionInfo()">
-    <div id="streak-text" style="font-size:11px;color:var(--gold);opacity:0.9;font-family:'Cinzel',serif;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+    <div id="streak-text" style="font-size:11px;color:var(--gold);opacity:0.9;font-family:var(--sys);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
     <div id="session-badge" class="session-pill">⏳ Loading...</div>
-    <div id="last-trade-text" style="font-size:11px;color:var(--gold);opacity:0.9;font-family:'Cinzel',serif;flex-shrink:0;"></div>
+    <div id="last-trade-text" style="font-size:11px;color:var(--gold);opacity:0.9;font-family:var(--sys);flex-shrink:0;"></div>
   </div>
   <!-- Session detail panel -->
   <div id="session-detail" style="display:none;background:var(--bg2);border-bottom:1px solid var(--gold-faint);padding:10px 18px;flex-shrink:0;">
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-      <div id="sess-asian" style="border:1px solid var(--gold-faint);border-radius:10px;padding:10px 8px;text-align:center;transition:all 0.3s;">
+      <div id="sess-asian" style="border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:10px 8px;text-align:center;transition:all 0.3s;">
         <div style="font-size:16px;margin-bottom:3px;">🌏</div>
-        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:1px;">ASIAN</div>
-        <div style="font-size:10px;color:var(--text);opacity:0.7;margin-top:3px;">20:00–03:00</div>
+        <div style="font-family:var(--sys);font-size:11px;color:var(--gold);letter-spacing:1px;">ASIAN</div>
+        <div style="font-size:11px;color:var(--text);opacity:0.7;margin-top:3px;">20:00–03:00</div>
       </div>
-      <div id="sess-london" style="border:1px solid var(--gold-faint);border-radius:10px;padding:10px 8px;text-align:center;transition:all 0.3s;">
+      <div id="sess-london" style="border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:10px 8px;text-align:center;transition:all 0.3s;">
         <div style="font-size:16px;margin-bottom:3px;">🇬🇧</div>
-        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:1px;">LONDON</div>
-        <div style="font-size:10px;color:var(--text);opacity:0.7;margin-top:3px;">14:00–17:00</div>
+        <div style="font-family:var(--sys);font-size:11px;color:var(--gold);letter-spacing:1px;">LONDON</div>
+        <div style="font-size:11px;color:var(--text);opacity:0.7;margin-top:3px;">14:00–17:00</div>
       </div>
-      <div id="sess-ny" style="border:1px solid var(--gold-faint);border-radius:10px;padding:10px 8px;text-align:center;transition:all 0.3s;">
+      <div id="sess-ny" style="border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:10px 8px;text-align:center;transition:all 0.3s;">
         <div style="font-size:16px;margin-bottom:3px;">🗽</div>
-        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:1px;">NEW YORK</div>
-        <div style="font-size:10px;color:var(--text);opacity:0.7;margin-top:3px;">19:30–22:00</div>
+        <div style="font-family:var(--sys);font-size:11px;color:var(--gold);letter-spacing:1px;">NEW YORK</div>
+        <div style="font-size:11px;color:var(--text);opacity:0.7;margin-top:3px;">19:30–22:00</div>
       </div>
     </div>
   </div>
   <div class="search-bar">
-    <input class="search-input" id="search-input" placeholder="🔍  Tìm tên, symbol, tags..." oninput="renderList()"/>
+    <input class="search-input" id="search-input" placeholder="🔍  Tìm tên, symbol, tags..." oninput="debouncedSearch(this.value)"/>
   </div>
   <!-- Fix 8: result filter -->
   <div class="result-filter">
@@ -697,15 +804,17 @@
   <div class="folder-bar" id="folder-bar"></div>
   <!-- Copy to theory bar — hiện khi đang xem 1 thư mục cụ thể -->
   <div id="folder-action-bar" style="display:none;padding:8px 16px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;align-items:center;gap:8px;">
-    <span id="folder-action-label" style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold);flex:1;"></span>
-    <button id="folder-action-btn" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:8px;padding:7px 14px;color:var(--gold);font-size:11px;font-family:'Cinzel',serif;cursor:pointer;letter-spacing:1px;">📖 Di Chuyển / Copy → Lý Thuyết</button>
+    <span id="folder-action-label" style="font-family:var(--sys);font-size:11px;color:var(--gold);flex:1;"></span>
+    <button id="folder-action-btn" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);padding:7px 14px;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;letter-spacing:1px;">📖 Di Chuyển / Copy → Lý Thuyết</button>
   </div>
+  <!-- Tag filter chips - hiện khi có tags trong danh sách hiện tại -->
+  <div id="tag-filter-bar" style="display:none;padding:6px 16px;overflow-x:auto;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0;white-space:nowrap;gap:6px;"></div>
   <div class="sort-bar">
     <span class="sort-label">Sắp xếp:</span>
     <button class="sort-btn active" id="sort-desc" onclick="setSort('desc')">↓ Mới nhất</button>
     <button class="sort-btn" id="sort-asc" onclick="setSort('asc')">↑ Cũ nhất</button>
   </div>
-  <div id="trade-list" style="flex:1;padding-bottom:80px;"></div>
+  <div id="trade-list" role="main" aria-label="Danh sách lệnh" style="flex:1;padding-bottom:80px;"></div>
 </div>
 
 <!-- COPY/MOVE TO THEORY MODAL -->
@@ -715,15 +824,15 @@
 
     <!-- Copy vs Move toggle -->
     <div style="display:flex;gap:8px;margin-bottom:14px;">
-      <button id="ctt-copy-btn" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--gold);background:var(--gold-faint);color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;">
-        📋 COPY<br><span style="opacity:0.65;font-size:9px;">Giữ lại trong nhật ký</span>
+      <button id="ctt-copy-btn" style="flex:1;padding:10px;border-radius:var(--radius-md);border:1px solid var(--gold);background:var(--gold-faint);color:var(--gold);font-family:var(--sys);font-size:11px;letter-spacing:1px;cursor:pointer;">
+        📋 COPY<br><span style="opacity:0.65;font-size:11px;">Giữ lại trong nhật ký</span>
       </button>
-      <button id="ctt-move-btn" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;opacity:0.6;">
-        🚀 DI CHUYỂN<br><span style="opacity:0.65;font-size:9px;">Xóa khỏi nhật ký</span>
+      <button id="ctt-move-btn" style="flex:1;padding:10px;border-radius:var(--radius-md);border:1px solid var(--border);background:transparent;color:var(--gold);font-family:var(--sys);font-size:11px;letter-spacing:1px;cursor:pointer;opacity:0.6;">
+        🚀 DI CHUYỂN<br><span style="opacity:0.65;font-size:11px;">Xóa khỏi nhật ký</span>
       </button>
     </div>
 
-    <div style="font-size:10px;color:var(--gold);opacity:0.6;font-family:'Space Mono',monospace;letter-spacing:1px;margin-bottom:8px;">CHỌN THƯ MỤC LÝ THUYẾT:</div>
+    <div style="font-size:11px;color:var(--gold);opacity:0.6;font-family:var(--sys);letter-spacing:1px;margin-bottom:8px;">CHỌN THƯ MỤC LÝ THUYẾT:</div>
     <div id="modal-copy-theory-list" style="max-height:45vh;overflow-y:auto;"></div>
     <button class="modal-cancel" onclick="document.getElementById('modal-copy-theory').style.display='none'">Huỷ</button>
   </div>
@@ -731,14 +840,14 @@
 
 <!-- BOTTOM NAV (global) -->
 <div class="bottom-nav" id="bottom-nav">
-  <button class="bn-item active" id="bn-list" onclick="showScreen('list')">
-    <div class="bn-icon">📋</div><div class="bn-label">LỆNH</div>
+  <button class="bn-item active" id="bn-list" onclick="showScreen('list')" aria-label="Nhật ký lệnh">
+    <div class="bn-icon" aria-hidden="true">📋</div><div class="bn-label">LỆNH</div>
   </button>
-  <button class="bn-item" id="bn-stats" onclick="showScreen('stats')">
-    <div class="bn-icon">📊</div><div class="bn-label">THỐNG KÊ</div>
+  <button class="bn-item" id="bn-stats" onclick="showScreen('stats')" aria-label="Thống kê">
+    <div class="bn-icon" aria-hidden="true">📊</div><div class="bn-label">THỐNG KÊ</div>
   </button>
-  <button class="bn-item" id="bn-theory" onclick="showScreen('theory')">
-    <div class="bn-icon">📚</div><div class="bn-label">LÝ THUYẾT</div>
+  <button class="bn-item" id="bn-theory" onclick="showScreen('theory')" aria-label="Lý thuyết">
+    <div class="bn-icon" aria-hidden="true">📚</div><div class="bn-label">LÝ THUYẾT</div>
   </button>
   <button class="bn-item" id="bn-import" onclick="showScreen('import')">
     <div class="bn-icon">📥</div><div class="bn-label">IMPORT</div>
@@ -756,8 +865,8 @@
     <div style="width:36px;"></div>
   </div>
   <div style="padding:16px 18px 120px;flex:1;overflow-y:auto;">
-    <div style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:12px;padding:14px 16px;margin-bottom:20px;">
-      <div style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold);letter-spacing:2px;margin-bottom:8px;">🤖 AI TỰ ĐỘNG NHẬP LỆNH</div>
+    <div style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:20px;">
+      <div style="font-family:var(--sys);font-size:12px;color:var(--gold);letter-spacing:2px;margin-bottom:8px;">🤖 AI TỰ ĐỘNG NHẬP LỆNH</div>
       <div style="font-size:13px;color:var(--text);line-height:1.6;">Upload file Word (.docx), CSV hoặc dán text có lịch sử lệnh — AI sẽ tự đọc và nhập từng lệnh vào app.</div>
     </div>
 
@@ -765,24 +874,24 @@
     <div class="section-label">Upload File</div>
     <div class="import-drop" id="import-drop" onclick="document.getElementById('import-file').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleImportDrop(event)">
       <div style="font-size:36px;margin-bottom:10px;">📄</div>
-      <div style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold);letter-spacing:2px;margin-bottom:6px;">CHỌN HOẶC KÉO THẢ FILE</div>
+      <div style="font-family:var(--sys);font-size:12px;color:var(--gold);letter-spacing:2px;margin-bottom:6px;">CHỌN HOẶC KÉO THẢ FILE</div>
       <div style="font-size:12px;color:var(--text);opacity:0.85;">.docx · .csv · .txt</div>
     </div>
     <input type="file" id="import-file" accept=".docx,.csv,.txt,.xlsx" style="display:none" onchange="handleImportFile(this)"/>
 
     <!-- Or paste text -->
     <div class="section-label" style="margin-top:16px;">Hoặc Dán Text</div>
-    <textarea id="import-text" placeholder="Dán lịch sử lệnh vào đây... VD:&#10;26/04 XAUUSD Win +2R theo plan FVG H1&#10;25/04 NQ Loss -1R sai plan, không đợi IFVG..." style="width:100%;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:10px;padding:12px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;resize:vertical;min-height:120px;line-height:1.6;box-sizing:border-box;"></textarea>
+    <textarea id="import-text" placeholder="Dán lịch sử lệnh vào đây... VD:&#10;26/04 XAUUSD Win +2R theo plan FVG H1&#10;25/04 NQ Loss -1R sai plan, không đợi IFVG..." style="width:100%;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:12px;color:var(--text);font-size:14px;font-family:var(--sys);outline:none;resize:vertical;min-height:120px;line-height:1.6;box-sizing:border-box;"></textarea>
 
     <div id="import-preview-area" style="margin-top:16px;"></div>
 
-    <button id="import-btn" onclick="runImportAI()" style="width:100%;margin-top:8px;padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--gold-faint),transparent);border:1px solid var(--gold-dim);color:var(--gold);font-size:14px;font-family:'Cinzel',serif;letter-spacing:2px;cursor:pointer;">🤖 AI ĐỌC & NHẬP LỆNH</button>
+    <button id="import-btn" onclick="runImportAI()" style="width:100%;margin-top:8px;padding:14px;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--gold-faint),transparent);border:1px solid var(--gold-dim);color:var(--gold);font-size:14px;font-family:var(--sys);letter-spacing:2px;cursor:pointer;">🤖 AI ĐỌC & NHẬP LỆNH</button>
     <div id="import-result" style="margin-top:14px;display:none;"></div>
   </div>
 </div>
 
 <!-- GLOBAL FAB -->
-<button class="fab" id="fab-btn" onclick="openNew()">+</button>
+<button class="fab" id="fab-btn" onclick="openNew()" aria-label="Thêm lệnh mới">+</button>
 
 <!-- STATS -->
 <div class="screen" id="screen-stats">
@@ -805,10 +914,10 @@
     <div class="field">
       <label class="field-label">Ngày & Giờ Vào Lệnh</label>
       <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;">
-        <input id="f-date" type="date" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 10px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;" oninput="formDirty=true"/>
-        <input id="f-hour" type="number" min="0" max="23" placeholder="Giờ" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 8px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;text-align:center;" oninput="formDirty=true"/>
-        <input id="f-minute" type="number" min="0" max="59" placeholder="Phút" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 8px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;text-align:center;" oninput="formDirty=true"/>
-        <button onclick="setNow()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:8px;padding:11px 4px;color:var(--gold);font-size:11px;cursor:pointer;font-family:'Cinzel',serif;">Now</button>
+        <input id="f-date" type="date" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:11px 10px;color:var(--text);font-size:14px;font-family:var(--sys);outline:none;" oninput="formDirty=true"/>
+        <input id="f-hour" type="number" min="0" max="23" placeholder="Giờ" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:11px 8px;color:var(--text);font-size:14px;font-family:var(--sys);outline:none;text-align:center;" oninput="formDirty=true"/>
+        <input id="f-minute" type="number" min="0" max="59" placeholder="Phút" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:11px 8px;color:var(--text);font-size:14px;font-family:var(--sys);outline:none;text-align:center;" oninput="formDirty=true"/>
+        <button onclick="setNow()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);padding:11px 4px;color:var(--gold);font-size:11px;cursor:pointer;font-family:var(--sys);">Now</button>
       </div>
     </div>
     <div class="field"><label class="field-label">Tên lệnh / Câu hỏi</label><input id="f-title" type="text" placeholder="VD: Có tách thửa được ko..." oninput="formDirty=true"/></div>
@@ -822,15 +931,15 @@
       </div>
     </div>
     <div class="field">
-      <label class="field-label">P&amp;L <span style="font-size:10px;opacity:0.7;font-family:'Crimson Pro',serif;letter-spacing:0;">(hoặc dùng RR Calculator)</span></label>
+      <label class="field-label">P&amp;L <span style="font-size:11px;opacity:0.7;font-family:var(--sys);letter-spacing:0;">(hoặc dùng RR Calculator)</span></label>
       <input id="f-pnl" type="text" placeholder="+2R hoặc -1R" oninput="formDirty=true"/>
       <div style="display:flex;gap:6px;margin-top:8px;" id="rr-calc-row">
-        <input id="rr-entry" type="number" step="any" placeholder="Entry" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:'Crimson Pro',serif;outline:none;"/>
-        <input id="rr-sl" type="number" step="any" placeholder="SL" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:'Crimson Pro',serif;outline:none;"/>
-        <input id="rr-tp" type="number" step="any" placeholder="TP" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:'Crimson Pro',serif;outline:none;"/>
-        <button onclick="calcRR()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:7px 10px;color:var(--gold);font-size:12px;font-family:'Cinzel',serif;cursor:pointer;white-space:nowrap;">= R</button>
+        <input id="rr-entry" type="number" step="any" placeholder="Entry" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;"/>
+        <input id="rr-sl" type="number" step="any" placeholder="SL" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;"/>
+        <input id="rr-tp" type="number" step="any" placeholder="TP" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;"/>
+        <button onclick="calcRR()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:7px 10px;color:var(--gold);font-size:12px;font-family:var(--sys);cursor:pointer;white-space:nowrap;">= R</button>
       </div>
-      <div id="rr-result" style="font-size:13px;color:var(--gold);margin-top:5px;font-family:'Cinzel',serif;display:none;"></div>
+      <div id="rr-result" style="font-size:13px;color:var(--gold);margin-top:5px;font-family:var(--sys);display:none;"></div>
     </div>
     <div class="field">
       <label class="field-label">Vào đúng plan?</label>
@@ -846,7 +955,7 @@
     </div>
     <div class="field"><label class="field-label">Tags (cách nhau bằng dấu phẩy)</label>
       <input id="f-tags" type="text" placeholder="VD: FVG, OB, BOLO, Kiền..." oninput="formDirty=true;suggestTags(this)" autocomplete="off" list=""/>
-      <div id="tag-suggestions" style="display:none;position:absolute;background:var(--bg2);border:1px solid var(--gold-dim);border-radius:8px;z-index:500;width:calc(100% - 36px);max-height:150px;overflow-y:auto;box-shadow:0 4px 20px #00000055;"></div>
+      <div id="tag-suggestions" style="display:none;position:absolute;background:var(--bg2);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);z-index:500;width:calc(100% - 36px);max-height:150px;overflow-y:auto;box-shadow:0 4px 20px #00000055;"></div>
     </div>
     <div class="field">
       <label class="field-label">Ảnh Biểu Đồ (D1 → M1)</label>
@@ -877,8 +986,8 @@
   <div class="breadcrumb" style="justify-content:space-between;">
     <span>📋 Danh sách <span style="opacity:0.5;">›</span> Chi tiết lệnh</span>
     <div style="display:flex;gap:4px;">
-      <button onclick="navTrade(-1)" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:3px 10px;color:var(--gold);font-size:14px;cursor:pointer;" title="Lệnh trước">‹</button>
-      <button onclick="navTrade(1)" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:3px 10px;color:var(--gold);font-size:14px;cursor:pointer;" title="Lệnh sau">›</button>
+      <button onclick="navTrade(-1)" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:14px;cursor:pointer;" title="Lệnh trước">‹</button>
+      <button onclick="navTrade(1)" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:14px;cursor:pointer;" title="Lệnh sau">›</button>
     </div>
   </div>
   <div class="detail-banner" id="detail-banner"></div>
@@ -889,16 +998,25 @@
     <div class="note-box" id="detail-note"></div>
     <div class="section-label">Biểu Đồ Phân Tích</div>
     <!-- Fix 6: Swipe hint -->
-    <div style="font-size:10px;color:var(--gold);opacity:0.75;font-family:'Cinzel',serif;letter-spacing:1px;margin-bottom:6px;">← vuốt để chuyển khung →</div>
+    <div style="font-size:11px;color:var(--gold);opacity:0.75;font-family:var(--sys);letter-spacing:1px;margin-bottom:6px;">← vuốt để chuyển khung →</div>
     <div class="tf-tabs" id="detail-tf-tabs"></div>
     <div class="tf-preview" id="detail-tf-preview"></div>
     <div class="section-label">Phân Tích AI</div>
     <button class="ai-btn" id="ai-btn" onclick="analyzeAI()">🤖 PHÂN TÍCH AI</button>
     <div class="ai-result" id="ai-result" style="display:none;"></div>
-    <button class="ai-btn" onclick="openEdit()">✏️ SỬA LỆNH NÀY</button>
-    <button class="ai-btn" onclick="duplicateTrade()" style="border-color:#4caf5066;color:#4caf50;">📋 NHÂN BẢN LỆNH</button>
-    <button class="ai-btn" onclick="openMoveFolder()" style="border-color:#42a5f566;color:#42a5f5;">🗂 DI CHUYỂN THƯ MỤC</button>
-    <button class="ai-btn" onclick="moveSingleTradeToTheory()" style="border-color:#c9a84c88;color:var(--gold);">📖 CHUYỂN SANG LÝ THUYẾT</button>
+
+    <!-- PRIMARY ACTION -->
+    <button onclick="openEdit()" style="width:100%;padding:16px;border-radius:var(--radius-lg);background:var(--gold-faint);border:1.5px solid var(--gold);color:var(--gold);font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;transition:all 0.2s;letter-spacing:0.5px;">✏️ Sửa lệnh này</button>
+
+    <!-- SECONDARY ACTIONS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+      <button onclick="duplicateTrade()" style="padding:12px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--border);color:var(--text);font-size:13px;cursor:pointer;transition:all 0.2s;">📋 Nhân bản</button>
+      <button onclick="openMoveFolder()" style="padding:12px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--border);color:var(--text);font-size:13px;cursor:pointer;transition:all 0.2s;">🗂 Thư mục</button>
+    </div>
+    <button onclick="moveSingleTradeToTheory()" style="width:100%;padding:12px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--border);color:var(--text);font-size:13px;cursor:pointer;margin-top:8px;transition:all 0.2s;">📖 Chuyển sang Lý Thuyết</button>
+
+    <!-- DESTRUCTIVE — separated, red -->
+    <div style="height:1px;background:var(--border);margin:20px 0 16px;opacity:0.5;"></div>
     <button class="delete-btn" onclick="deleteTrade()">🗑 Xóa lệnh này</button>
   </div>
 </div>
@@ -916,10 +1034,10 @@
     <div class="field">
       <label class="field-label">Ngày & Giờ Vào Lệnh</label>
       <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;">
-        <input id="e-date" type="date" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 10px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;" oninput="formDirty=true"/>
-        <input id="e-hour" type="number" min="0" max="23" placeholder="Giờ" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 8px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;text-align:center;" oninput="formDirty=true"/>
-        <input id="e-minute" type="number" min="0" max="59" placeholder="Phút" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:11px 8px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;text-align:center;" oninput="formDirty=true"/>
-        <button onclick="setEditNow()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:8px;padding:11px 4px;color:var(--gold);font-size:11px;cursor:pointer;font-family:'Cinzel',serif;">Now</button>
+        <input id="e-date" type="date" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:11px 10px;color:var(--text);font-size:14px;font-family:var(--sys);outline:none;" oninput="formDirty=true"/>
+        <input id="e-hour" type="number" min="0" max="23" placeholder="Giờ" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:11px 8px;color:var(--text);font-size:14px;font-family:var(--sys);outline:none;text-align:center;" oninput="formDirty=true"/>
+        <input id="e-minute" type="number" min="0" max="59" placeholder="Phút" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:11px 8px;color:var(--text);font-size:14px;font-family:var(--sys);outline:none;text-align:center;" oninput="formDirty=true"/>
+        <button onclick="setEditNow()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);padding:11px 4px;color:var(--gold);font-size:11px;cursor:pointer;font-family:var(--sys);">Now</button>
       </div>
     </div>
     <div class="field"><label class="field-label">Tên lệnh / Câu hỏi</label><input id="e-title" type="text" oninput="formDirty=true"/></div>
@@ -944,7 +1062,7 @@
     <div class="field"><label class="field-label">Thư mục</label><select id="e-folder" onchange="formDirty=true"></select></div>
     <div class="field"><label class="field-label">Tags (cách nhau bằng dấu phẩy)</label>
       <input id="e-tags" type="text" placeholder="VD: FVG, OB, BOLO..." oninput="formDirty=true;suggestTags(this)" autocomplete="off"/>
-      <div id="e-tag-suggestions" style="display:none;position:absolute;background:var(--bg2);border:1px solid var(--gold-dim);border-radius:8px;z-index:500;width:calc(100% - 36px);max-height:150px;overflow-y:auto;box-shadow:0 4px 20px #00000055;"></div>
+      <div id="e-tag-suggestions" style="display:none;position:absolute;background:var(--bg2);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);z-index:500;width:calc(100% - 36px);max-height:150px;overflow-y:auto;box-shadow:0 4px 20px #00000055;"></div>
     </div>
     <div class="field"><label class="field-label">Ghi chú / Bài học</label><textarea id="e-note" oninput="formDirty=true"></textarea></div>
     <div class="field">
@@ -963,16 +1081,16 @@
 
     <!-- Mode switch: trade folder vs theory folder -->
     <div id="modal-move-mode-bar" style="display:flex;gap:6px;margin-bottom:12px;">
-      <button id="mmb-trade" onclick="setMoveMode('trade')" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--gold);background:var(--gold-faint);color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;">📒 Nhật Ký</button>
-      <button id="mmb-theory" onclick="setMoveMode('theory')" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;opacity:0.6;">📖 Lý Thuyết</button>
+      <button id="mmb-trade" onclick="setMoveMode('trade')" style="flex:1;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--gold);background:var(--gold-faint);color:var(--gold);font-family:var(--sys);font-size:11px;cursor:pointer;letter-spacing:1px;">📒 Nhật Ký</button>
+      <button id="mmb-theory" onclick="setMoveMode('theory')" style="flex:1;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--gold);font-family:var(--sys);font-size:11px;cursor:pointer;letter-spacing:1px;opacity:0.6;">📖 Lý Thuyết</button>
     </div>
 
     <div id="modal-folder-list" style="overflow-y:auto;max-height:calc(85vh - 200px);"></div>
 
     <!-- Add new folder/subfolder -->
     <div style="display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--gold-faint);">
-      <input id="modal-new-folder-input" placeholder="Tên thư mục mới..." style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:'Crimson Pro',serif;outline:none;"/>
-      <button onclick="addFolderFromModal()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:8px;padding:8px 14px;color:var(--gold);font-size:12px;font-family:'Cinzel',serif;cursor:pointer;flex-shrink:0;">+ Tạo</button>
+      <input id="modal-new-folder-input" placeholder="Tên thư mục mới..." style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;"/>
+      <button onclick="addFolderFromModal()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);padding:8px 14px;color:var(--gold);font-size:12px;font-family:var(--sys);cursor:pointer;flex-shrink:0;">+ Tạo</button>
     </div>
 
     <button class="modal-cancel" style="margin-top:8px;" onclick="document.getElementById('modal-move').style.display='none'">Huỷ</button>
@@ -991,7 +1109,7 @@
   <div style="padding:12px 18px;background:var(--bg2);border-bottom:1px solid var(--gold-faint);flex-shrink:0;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
       <div id="theory-daily-badge" class="theory-daily-badge">📅 Hôm nay: 0/0 đã ôn</div>
-      <div id="theory-streak" style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold);opacity:1;font-weight:600;">🔥 0 ngày liên tiếp</div>
+      <div id="theory-streak" style="font-family:var(--sys);font-size:11px;color:var(--gold);opacity:1;font-weight:600;">🔥 0 ngày liên tiếp</div>
     </div>
     <div class="theory-progress-bar"><div class="theory-progress-fill" id="theory-progress" style="width:0%"></div></div>
   </div>
@@ -1010,78 +1128,78 @@
   <!-- Edit Mode Bar -->
   <div id="theory-edit-bar" style="display:none;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--gold-dim);flex-shrink:0;display:none;">
     <div style="display:flex;align-items:center;gap:8px;">
-      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:2px;flex:1;">✏️ CHẾ ĐỘ CHỈNH SỬA</div>
-      <button onclick="openAddTheoryCard()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:8px;padding:6px 14px;color:var(--gold);font-size:11px;font-family:'Cinzel',serif;cursor:pointer;letter-spacing:1px;">+ Thêm thẻ</button>
-      <button onclick="toggleTheoryEditMode()" style="background:none;border:1px solid #ef535055;border-radius:8px;padding:6px 14px;color:var(--loss);font-size:11px;font-family:'Cinzel',serif;cursor:pointer;opacity:0.8;">✕ Thoát</button>
+      <div style="font-family:var(--sys);font-size:11px;color:var(--gold);letter-spacing:2px;flex:1;">✏️ CHẾ ĐỘ CHỈNH SỬA</div>
+      <button onclick="openAddTheoryCard()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);padding:6px 14px;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;letter-spacing:1px;">+ Thêm thẻ</button>
+      <button onclick="toggleTheoryEditMode()" style="background:none;border:1px solid #ef535055;border-radius:var(--radius-sm);padding:6px 14px;color:var(--loss);font-size:11px;font-family:var(--sys);cursor:pointer;opacity:0.8;">✕ Thoát</button>
     </div>
   </div>
 
   <!-- Cards -->
-  <div id="theory-list" style="flex:1;padding:14px 18px 100px;overflow-y:auto;"></div>
+  <div id="theory-list" role="main" aria-label="Danh sách lý thuyết" style="flex:1;padding:14px 18px 100px;overflow-y:auto;"></div>
 </div>
 
 <!-- THEORY EDIT MODAL -->
 <div id="modal-theory-edit" style="display:none;" class="modal-overlay" onclick="closeTheoryEditModal(event)">
-  <div class="modal-sheet" style="max-height:94vh;padding-bottom:16px;border-radius:20px 20px 0 0;" onclick="event.stopPropagation()">
+  <div class="modal-sheet" style="max-height:94vh;padding-bottom:16px;border-radius:var(--radius-xl) 20px 0 0;overflow-y:auto;-webkit-overflow-scrolling:touch;" onclick="event.stopPropagation()">
     <div class="modal-title" id="theory-edit-modal-title">CHỈNH SỬA THẺ LÝ THUYẾT</div>
 
     <div id="te-scroll-body" style="display:flex;flex-direction:column;gap:12px;overflow-y:auto;max-height:calc(94vh - 130px);padding-bottom:8px;">
 
       <!-- ── THÔNG TIN CƠ BẢN ── -->
-      <div style="background:var(--bg3);border-radius:12px;padding:14px;border:1px solid var(--gold-faint);">
-        <div style="font-size:9px;letter-spacing:3px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:10px;opacity:0.8;">THÔNG TIN CƠ BẢN</div>
+      <div style="background:var(--bg3);border-radius:var(--radius-md);padding:14px;border:1px solid var(--gold-faint);">
+        <div style="font-size:11px;letter-spacing:0.5px;color:var(--gold);font-family:var(--sys);margin-bottom:10px;opacity:0.8;">THÔNG TIN CƠ BẢN</div>
         <div style="display:grid;grid-template-columns:60px 1fr;gap:8px;margin-bottom:10px;">
           <div>
-            <div style="font-size:9px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:4px;opacity:0.7;">ICON</div>
-            <input id="te-icon" type="text" placeholder="📌" style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:8px;padding:8px 4px;color:var(--text);font-size:20px;text-align:center;outline:none;"/>
+            <div style="font-size:11px;color:var(--gold);font-family:var(--sys);margin-bottom:4px;opacity:0.7;">ICON</div>
+            <input id="te-icon" type="text" placeholder="📌" style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:8px 4px;color:var(--text);font-size:20px;text-align:center;outline:none;"/>
           </div>
           <div>
-            <div style="font-size:9px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:4px;opacity:0.7;">DANH MỤC</div>
-            <select id="te-cat" style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:8px;padding:9px 10px;color:var(--text);font-size:13px;outline:none;">
+            <div style="font-size:11px;color:var(--gold);font-family:var(--sys);margin-bottom:4px;opacity:0.7;">DANH MỤC</div>
+            <select id="te-cat" style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:9px 10px;color:var(--text);font-size:13px;outline:none;">
               <option value="all">📖 Tất cả</option>
             </select>
           </div>
         </div>
         <div style="margin-bottom:8px;">
-          <div style="font-size:9px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:4px;opacity:0.7;">TIÊU ĐỀ</div>
-          <input id="te-title" type="text" placeholder="VD: Ngày 03/11/2025 — BPR H1 + IFVG" style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:8px;padding:9px 12px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;"/>
+          <div style="font-size:11px;color:var(--gold);font-family:var(--sys);margin-bottom:4px;opacity:0.7;">TIÊU ĐỀ</div>
+          <input id="te-title" type="text" placeholder="VD: Ngày 03/11/2025 — BPR H1 + IFVG" style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);font-size:14px;font-family:var(--sys);outline:none;"/>
         </div>
         <div>
-          <div style="font-size:9px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:4px;opacity:0.7;">TAG</div>
-          <input id="te-tag" type="text" placeholder="VD: BPR, IFVG, AMD..." style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:8px;padding:9px 12px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;"/>
+          <div style="font-size:11px;color:var(--gold);font-family:var(--sys);margin-bottom:4px;opacity:0.7;">TAG</div>
+          <input id="te-tag" type="text" placeholder="VD: BPR, IFVG, AMD..." style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);font-size:14px;font-family:var(--sys);outline:none;"/>
         </div>
       </div>
 
       <!-- ── ẢNH CHART THEO TIMEFRAME ── -->
-      <div style="background:var(--bg3);border-radius:12px;padding:14px;border:1px solid var(--gold-faint);">
+      <div style="background:var(--bg3);border-radius:var(--radius-md);padding:14px;border:1px solid var(--gold-faint);">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div style="font-size:9px;letter-spacing:3px;color:var(--gold);font-family:'Space Mono',monospace;opacity:0.8;">ẢNH CHART</div>
-          <div style="font-size:10px;color:var(--gold);opacity:0.55;font-family:'Space Mono',monospace;">📋 Ctrl+V để dán</div>
+          <div style="font-size:11px;letter-spacing:0.5px;color:var(--gold);font-family:var(--sys);opacity:0.8;">ẢNH CHART</div>
+          <div style="font-size:11px;color:var(--gold);opacity:0.55;font-family:var(--sys);">📋 Ctrl+V để dán</div>
         </div>
         <div id="te-img-sections" style="display:flex;flex-direction:column;gap:10px;"></div>
-        <button onclick="addTheoryImgSection()" style="width:100%;margin-top:8px;padding:10px;border-radius:8px;border:1px dashed var(--gold-dim);background:transparent;color:var(--gold);font-size:11px;font-family:'Cinzel',serif;cursor:pointer;letter-spacing:1px;">+ Thêm khung thời gian</button>
+        <button onclick="addTheoryImgSection()" style="width:100%;margin-top:8px;padding:10px;border-radius:var(--radius-sm);border:1px dashed var(--gold-dim);background:transparent;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;letter-spacing:1px;">+ Thêm khung thời gian</button>
       </div>
 
       <!-- ASCII field hidden - not needed with image upload -->
       <textarea id="te-img" style="display:none;"></textarea>
 
       <!-- ── NỘI DUNG / PHÂN TÍCH ── -->
-      <div style="background:var(--bg3);border-radius:12px;padding:14px;border:1px solid var(--gold-faint);">
-        <div style="font-size:9px;letter-spacing:3px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:8px;opacity:0.8;">NỘI DUNG / PHÂN TÍCH</div>
+      <div style="background:var(--bg3);border-radius:var(--radius-md);padding:14px;border:1px solid var(--gold-faint);">
+        <div style="font-size:11px;letter-spacing:0.5px;color:var(--gold);font-family:var(--sys);margin-bottom:8px;opacity:0.8;">NỘI DUNG / PHÂN TÍCH</div>
         <div id="te-rules-list" style="display:flex;flex-direction:column;gap:6px;"></div>
-        <button onclick="addTheoryRuleField()" style="margin-top:8px;width:100%;padding:8px;border-radius:8px;border:1px dashed var(--gold-faint);background:transparent;color:var(--gold);font-size:11px;font-family:'Cinzel',serif;cursor:pointer;letter-spacing:1px;">+ Thêm dòng phân tích</button>
+        <button onclick="addTheoryRuleField()" style="margin-top:8px;width:100%;padding:8px;border-radius:var(--radius-sm);border:1px dashed var(--gold-faint);background:transparent;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;letter-spacing:1px;">+ Thêm dòng phân tích</button>
       </div>
 
       <!-- ── HIGHLIGHT ── -->
-      <div style="background:var(--bg3);border-radius:12px;padding:14px;border:1px solid var(--gold-faint);">
-        <div style="font-size:9px;letter-spacing:3px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:8px;opacity:0.8;">KẾT LUẬN / HIGHLIGHT</div>
+      <div style="background:var(--bg3);border-radius:var(--radius-md);padding:14px;border:1px solid var(--gold-faint);">
+        <div style="font-size:11px;letter-spacing:0.5px;color:var(--gold);font-family:var(--sys);margin-bottom:8px;opacity:0.8;">KẾT LUẬN / HIGHLIGHT</div>
         <div style="display:grid;grid-template-columns:90px 1fr;gap:8px;">
-          <select id="te-hl-type" style="background:var(--bg);border:1px solid var(--gold-faint);border-radius:8px;padding:9px 6px;color:var(--text);font-size:12px;outline:none;">
+          <select id="te-hl-type" style="background:var(--bg);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:9px 6px;color:var(--text);font-size:12px;outline:none;">
             <option value="tip">💡 Tip</option>
             <option value="warn">⚠️ Warn</option>
             <option value="info">ℹ️ Info</option>
           </select>
-          <input id="te-hl-text" type="text" placeholder="Bài học rút ra, key takeaway..." style="background:var(--bg);border:1px solid var(--gold-faint);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;font-family:'Crimson Pro',serif;outline:none;"/>
+          <input id="te-hl-text" type="text" placeholder="Bài học rút ra, key takeaway..." style="background:var(--bg);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;"/>
         </div>
       </div>
 
@@ -1089,16 +1207,49 @@
 
     <!-- Action buttons — Xóa TRÊN, Lưu DƯỚI -->
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;border-top:1px solid var(--gold-faint);padding-top:10px;">
-      <button id="te-delete-btn" onclick="deleteTheoryCard()" style="display:none;width:100%;padding:12px;border-radius:12px;background:#ef535014;border:1px solid #ef535066;color:var(--loss);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;cursor:pointer;">🗑 XÓA THẺ NÀY</button>
-      <button onclick="saveTheoryCard()" style="width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg,var(--gold-faint),var(--gold-dim));border:1px solid var(--gold);color:var(--gold);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;cursor:pointer;">💾 LƯU THẺ</button>
+      <button id="te-delete-btn" onclick="deleteTheoryCard()" style="display:none;width:100%;padding:12px;border-radius:var(--radius-md);background:#ef535014;border:1px solid #ef535066;color:var(--loss);font-family:var(--sys);font-size:11px;letter-spacing:2px;cursor:pointer;">🗑 XÓA THẺ NÀY</button>
+      <button onclick="saveTheoryCard()" style="width:100%;padding:14px;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--gold-faint),var(--gold-dim));border:1px solid var(--gold);color:var(--gold);font-family:var(--sys);font-size:11px;letter-spacing:0.5px;cursor:pointer;">💾 LƯU THẺ</button>
     </div>
   </div>
 </div>
 
 <!-- THEORY IMAGE FULLSCREEN -->
-<div id="theory-img-fullscreen" style="display:none;position:fixed;inset:0;background:#000000ee;z-index:9000;align-items:center;justify-content:center;" onclick="this.style.display='none'">
-  <img id="theory-img-fullscreen-img" style="max-width:98vw;max-height:96vh;border-radius:8px;object-fit:contain;"/>
+<div id="theory-img-fullscreen" style="display:none;position:fixed;inset:0;background:#000000ee;z-index:9000;align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
+  <img id="theory-img-fullscreen-img" style="max-width:98vw;max-height:96vh;border-radius:var(--radius-sm);object-fit:contain;touch-action:none;transition:transform 0.1s;transform-origin:center center;" />
+  <button onclick="document.getElementById('theory-img-fullscreen').style.display='none'" style="position:fixed;top:16px;right:16px;background:#ffffff22;border:none;border-radius:50%;width:36px;height:36px;color:#fff;font-size:20px;cursor:pointer;z-index:9001;">✕</button>
 </div>
+<script>
+// Pinch-to-zoom for fullscreen image
+(function(){
+  const fs = document.getElementById('theory-img-fullscreen');
+  const img = document.getElementById('theory-img-fullscreen-img');
+  if(!fs||!img) return;
+  let scale=1, startDist=0, startScale=1, isDragging=false, startX=0, startY=0, tx=0, ty=0, baseTx=0, baseTy=0;
+  function dist(t){return Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);}
+  function apply(){img.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;}
+  img.addEventListener('touchstart',e=>{
+    if(e.touches.length===2){startDist=dist(e.touches);startScale=scale;e.preventDefault();}
+    else if(e.touches.length===1){isDragging=true;startX=e.touches[0].clientX-tx;startY=e.touches[0].clientY-ty;}
+  },{passive:false});
+  img.addEventListener('touchmove',e=>{
+    if(e.touches.length===2){scale=Math.min(5,Math.max(1,startScale*(dist(e.touches)/startDist)));apply();e.preventDefault();}
+    else if(isDragging&&scale>1){tx=e.touches[0].clientX-startX;ty=e.touches[0].clientY-startY;apply();}
+  },{passive:false});
+  img.addEventListener('touchend',e=>{
+    isDragging=false;
+    if(scale<=1){scale=1;tx=0;ty=0;apply();}
+  });
+  // Double-tap to reset
+  let lastTap=0;
+  img.addEventListener('touchend',e=>{
+    const now=Date.now();
+    if(now-lastTap<300){scale=1;tx=0;ty=0;apply();}
+    lastTap=now;
+  });
+  // Reset on close
+  fs.addEventListener('click',e=>{if(e.target===fs){scale=1;tx=0;ty=0;apply();}});
+})();
+</script>
 
 <!-- SETTINGS -->
 <div class="screen" id="screen-settings">
@@ -1114,11 +1265,11 @@
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px;">
       <button class="theme-mode-btn active" id="mode-dark" onclick="setMode('dark')">
         <div style="font-size:28px;margin-bottom:6px;">🌙</div>
-        <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;">DARK</div>
+        <div style="font-family:var(--sys);font-size:11px;letter-spacing:2px;">DARK</div>
       </button>
       <button class="theme-mode-btn" id="mode-light" onclick="setMode('light')">
         <div style="font-size:28px;margin-bottom:6px;">☀️</div>
-        <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;">LIGHT</div>
+        <div style="font-family:var(--sys);font-size:11px;letter-spacing:2px;">LIGHT</div>
       </button>
     </div>
 
@@ -1130,45 +1281,47 @@
     <div class="section-label">Cỡ Chữ</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px;">
       <button class="theme-size-btn" id="size-small" onclick="setFontSize('small')">
-        <div style="font-size:14px;margin-bottom:4px;font-family:'Cinzel',serif;">Aa</div>
-        <div style="font-size:10px;letter-spacing:1px;font-family:'Cinzel',serif;">NHỎ</div>
+        <div style="font-size:14px;margin-bottom:4px;font-family:var(--sys);">Aa</div>
+        <div style="font-size:11px;letter-spacing:1px;font-family:var(--sys);">NHỎ</div>
       </button>
       <button class="theme-size-btn active" id="size-medium" onclick="setFontSize('medium')">
-        <div style="font-size:20px;margin-bottom:4px;font-family:'Cinzel',serif;">Aa</div>
-        <div style="font-size:10px;letter-spacing:1px;font-family:'Cinzel',serif;">VỪA</div>
+        <div style="font-size:20px;margin-bottom:4px;font-family:var(--sys);">Aa</div>
+        <div style="font-size:11px;letter-spacing:1px;font-family:var(--sys);">VỪA</div>
       </button>
       <button class="theme-size-btn" id="size-large" onclick="setFontSize('large')">
-        <div style="font-size:26px;margin-bottom:4px;font-family:'Cinzel',serif;">Aa</div>
-        <div style="font-size:10px;letter-spacing:1px;font-family:'Cinzel',serif;">LỚN</div>
+        <div style="font-size:26px;margin-bottom:4px;font-family:var(--sys);">Aa</div>
+        <div style="font-size:11px;letter-spacing:1px;font-family:var(--sys);">LỚN</div>
       </button>
     </div>
 
     <!-- PREVIEW -->
     <div class="section-label">Xem Trước</div>
-    <div style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:12px;padding:16px;margin-bottom:24px;">
-      <div style="font-family:'Cinzel',serif;font-size:14px;color:var(--gold);font-weight:600;margin-bottom:6px;">XAUUSD — Lệnh Mẫu</div>
+    <div style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:16px;margin-bottom:24px;">
+      <div style="font-family:var(--sys);font-size:14px;color:var(--gold);font-weight:600;margin-bottom:6px;">XAUUSD — Lệnh Mẫu</div>
       <div style="font-size:13px;color:var(--text);margin-bottom:4px;">Giao dịch theo ICT setup, vào lệnh đúng plan tại FVG H1.</div>
       <div style="display:flex;gap:10px;margin-top:10px;">
-        <span style="color:var(--win);font-family:'Cinzel',serif;font-size:13px;font-weight:600;">✅ Win</span>
-        <span style="color:var(--gold);font-family:'Cinzel',serif;font-size:13px;">+2.5R</span>
+        <span style="color:var(--win);font-family:var(--sys);font-size:13px;font-weight:600;">✅ Win</span>
+        <span style="color:var(--gold);font-family:var(--sys);font-size:13px;">+2.5R</span>
       </div>
     </div>
 
     <!-- RESET -->
-    <button onclick="resetTheme()" style="width:100%;padding:12px;border-radius:10px;border:1px solid #ef535055;background:none;color:#ef535099;font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;cursor:pointer;margin-bottom:20px;">↺ ĐẶT LẠI MẶC ĐỊNH</button>
+    <button onclick="resetTheme()" style="width:100%;padding:12px;border-radius:var(--radius-md);border:1px solid #ef535055;background:none;color:#ef535099;font-family:var(--sys);font-size:12px;letter-spacing:2px;cursor:pointer;margin-bottom:20px;">↺ ĐẶT LẠI MẶC ĐỊNH</button>
 
     <!-- APP INFO -->
     <div style="text-align:center;padding:16px 0;border-top:1px solid var(--gold-faint);">
-      <div style="font-family:'Cinzel',serif;font-size:15px;color:var(--gold);letter-spacing:3px;margin-bottom:6px;">📒 TRADELOG</div>
+      <div style="font-family:var(--sys);font-size:15px;color:var(--gold);letter-spacing:0.5px;margin-bottom:6px;">📒 TRADELOG</div>
       <div style="font-size:12px;color:var(--text-dim);margin-bottom:4px;">Nhật Ký Giao Dịch ICT</div>
-      <div style="font-size:11px;color:var(--gold-dim);font-family:'Cinzel',serif;letter-spacing:1px;">Phiên bản 2.0</div>
+      <div style="font-size:11px;color:var(--gold-dim);font-family:var(--sys);letter-spacing:1px;">Phiên bản 2.0</div>
     </div>
   </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, updateDoc, getDoc, setDoc, limit, startAfter } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+<script>
+// Bootstrap: load Firebase via dynamic import then run app
+(async () => {
+const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js");
+const { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, updateDoc, getDoc, setDoc, limit, startAfter } = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js");
 const firebaseConfig = {
   apiKey: "AIzaSyDO21Q-RPuEeREv56Cl9fGXGXqF7yDiq_s",
   authDomain: "backtest-2825d.firebaseapp.com",
@@ -1179,11 +1332,17 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+// Offline persistence
+try {
+  const {enableIndexedDbPersistence} = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js");
+  enableIndexedDbPersistence(db).catch(()=>{});
+} catch(e) {}
+
 const TFS = ["D1","H4","H1","M30","M15","M5","M1","S30","S15","M2"];
 
 // ── State ──
 let trades = [], currentTrade = null, currentTF = "D1";
-let currentFolder = "all", currentSort = "desc", currentResultFilter = "all";
+let currentFolder = "all", currentSort = "desc", currentResultFilter = "all", currentTagFilter = "";
 let folders = ["all"];
 let formImages = {}, formCaptions = {};
 let lastDeletedTrade = null, undoTimer = null;
@@ -1198,7 +1357,7 @@ function fmtDate(ts) {
 }
 function showToast(msg) {
   let t = document.querySelector(".toast");
-  if (!t) { t = document.createElement("div"); t.className="toast"; document.body.appendChild(t); }
+  if (!t) { t = document.createElement("div"); t.className="toast"; t.setAttribute("role","status"); t.setAttribute("aria-live","polite"); t.setAttribute("aria-atomic","true"); document.body.appendChild(t); }
   t.textContent=msg; t.style.opacity="1";
   clearTimeout(t._t); t._t=setTimeout(()=>t.style.opacity="0", 2400);
 }
@@ -1209,7 +1368,7 @@ function compressImage(dataUrl, maxW=1200) {
       const c=document.createElement("canvas");
       const r=Math.min(1,maxW/img.width); c.width=img.width*r; c.height=img.height*r;
       c.getContext("2d").drawImage(img,0,0,c.width,c.height);
-      res(c.toDataURL("image/jpeg",0.70));
+      res(c.toDataURL("image/jpeg",0.55));
     };
     img.onerror=()=>rej(new Error("Không thể đọc ảnh"));
     img.src=dataUrl;
@@ -1223,7 +1382,7 @@ window.showScreen = function(name) {
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   const el=document.getElementById("screen-"+name);
   if(el){el.classList.add("active");el.scrollTop=0;}
-  if(name==="stats") renderStats();
+  if(name==="stats") { renderStats(); setTimeout(renderStatsExtra, 100); }
   if(name==="settings") syncSettingsUI(themeSettings);
   if(name==="theory") { renderTheoryFolderBar(); renderTheory(); }
   // FAB: show only on list screen
@@ -1283,7 +1442,7 @@ async function loadTrades(append=false) {
     renderList();
     if(!tradesAllLoaded) {
       const el=document.getElementById("trade-list");
-      if(el) el.insertAdjacentHTML("beforeend",`<div style="text-align:center;padding:16px 16px 80px;"><button onclick="loadTrades(true)" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:20px;padding:8px 20px;color:var(--gold);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer;">Tải thêm ${tradesPageSize} lệnh...</button></div>`);
+      if(el) el.insertAdjacentHTML("beforeend",`<div style="text-align:center;padding:16px 16px 80px;"><button onclick="loadTrades(true)" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-xl);padding:8px 20px;color:var(--gold);font-family:var(--sys);font-size:11px;letter-spacing:1px;cursor:pointer;">Tải thêm ${tradesPageSize} lệnh...</button></div>`);
     }
   } catch(e) {
     document.getElementById("trade-list").innerHTML=`<div class="loading">Lỗi tải dữ liệu: ${e.message}</div>`;
@@ -1333,11 +1492,11 @@ window.setCopyMoveMode = function(mode) {
   const mb = document.getElementById("ctt-move-btn");
   if (!cb||!mb) return;
   if (mode==="copy") {
-    cb.style.cssText="flex:1;padding:10px;border-radius:10px;border:1px solid var(--gold);background:var(--gold-faint);color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;";
-    mb.style.cssText="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;opacity:0.55;";
+    cb.style.cssText="flex:1;padding:10px;border-radius:var(--radius-md);border:1px solid var(--gold);background:var(--gold-faint);color:var(--gold);font-family:var(--sys);font-size:11px;letter-spacing:1px;cursor:pointer;";
+    mb.style.cssText="flex:1;padding:10px;border-radius:var(--radius-md);border:1px solid var(--border);background:transparent;color:var(--gold);font-family:var(--sys);font-size:11px;letter-spacing:1px;cursor:pointer;opacity:0.55;";
   } else {
-    mb.style.cssText="flex:1;padding:10px;border-radius:10px;border:1px solid var(--loss);background:#ef535014;color:var(--loss);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;";
-    cb.style.cssText="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;opacity:0.55;";
+    mb.style.cssText="flex:1;padding:10px;border-radius:var(--radius-md);border:1px solid var(--loss);background:#ef535014;color:var(--loss);font-family:var(--sys);font-size:11px;letter-spacing:1px;cursor:pointer;";
+    cb.style.cssText="flex:1;padding:10px;border-radius:var(--radius-md);border:1px solid var(--border);background:transparent;color:var(--gold);font-family:var(--sys);font-size:11px;letter-spacing:1px;cursor:pointer;opacity:0.55;";
   }
 };
 
@@ -1365,7 +1524,7 @@ window._openTheoryTransferModal = function(title, folderName, isSingle) {
 
   if (nonFixed.length === 0) {
     const msg = document.createElement("div");
-    msg.style.cssText = "text-align:center;padding:16px;color:var(--gold);opacity:0.6;font-family:'Cinzel',serif;font-size:12px;letter-spacing:1px;";
+    msg.style.cssText = "text-align:center;padding:16px;color:var(--gold);opacity:0.6;font-family:var(--sys);font-size:12px;letter-spacing:1px;";
     msg.textContent = "Chưa có thư mục lý thuyết";
     listEl.appendChild(msg);
   } else {
@@ -1481,6 +1640,7 @@ window.deleteFolder=async function(f){
 // ══ MOVE FOLDER MODAL ══
 
 // ══ RESULT FILTER ══
+window.setTagFilter = function(tag) { currentTagFilter = tag; renderList(); };
 window.setResultFilter = function(val, btn) {
   currentResultFilter = val;
   document.querySelectorAll(".rf-btn").forEach(b => b.classList.remove("active"));
@@ -1534,6 +1694,22 @@ function renderList() {
     (t.symbol||"").toLowerCase().includes(search)||
     (Array.isArray(t.tags)?t.tags:[t.tags||""]).join(" ").toLowerCase().includes(search)
   );
+  if(currentTagFilter) list=list.filter(t=>(Array.isArray(t.tags)?t.tags:[t.tags||""]).join(" ").toLowerCase().includes(currentTagFilter.toLowerCase()));
+
+  // Render tag filter chips from all visible trades (before tag filter)
+  const allTags = {};
+  let preTagList=[...trades].sort((a,b)=>currentSort==="desc"?getTs(b)-getTs(a):getTs(a)-getTs(b));
+  if(currentFolder!=="all") preTagList=preTagList.filter(t=>(t.folder||"")===currentFolder);
+  if(currentResultFilter!=="all") preTagList=preTagList.filter(t=>t.result===currentResultFilter);
+  preTagList.forEach(t=>{(Array.isArray(t.tags)?t.tags:(t.tags?[t.tags]:[])).forEach(tag=>{if(tag)allTags[tag]=(allTags[tag]||0)+1;});});
+  const tagBar=document.getElementById("tag-filter-bar");
+  const tagKeys=Object.keys(allTags).sort((a,b)=>allTags[b]-allTags[a]).slice(0,12);
+  if(tagKeys.length>0&&tagBar){
+    tagBar.style.display="flex";
+    tagBar.style.flexWrap="nowrap";
+    tagBar.innerHTML=`<button onclick="setTagFilter('')" style="flex-shrink:0;padding:8px 12px;border-radius:var(--radius-md);border:0.5px solid ${!currentTagFilter?"var(--gold)":"var(--border)"};background:${!currentTagFilter?"var(--gold-faint)":"transparent"};color:${!currentTagFilter?"var(--gold)":"var(--text)"};font-size:11px;font-family:var(--sys);cursor:pointer;margin-right:6px;">Tất cả</button>`+
+    tagKeys.map(tag=>`<button onclick="setTagFilter('${tag.replace(/'/g,"\\'")}')" style="flex-shrink:0;padding:8px 12px;border-radius:var(--radius-md);border:0.5px solid ${currentTagFilter===tag?"var(--gold)":"var(--border)"};background:${currentTagFilter===tag?"var(--gold-faint)":"transparent"};color:${currentTagFilter===tag?"var(--gold)":"var(--text)"};font-size:11px;cursor:pointer;margin-right:6px;">${esc(tag)} <span style="opacity:0.5;font-size:11px;">${allTags[tag]}</span></button>`).join("");
+  } else if(tagBar){ tagBar.style.display="none"; }
 
   const wins=trades.filter(t=>t.result==="Win").length, losses=trades.filter(t=>t.result==="Loss").length;
   document.getElementById("stat-total").textContent=trades.length;
@@ -1544,7 +1720,16 @@ function renderList() {
 
   const el=document.getElementById("trade-list");
   if(!list.length){
-    el.innerHTML=`<div class="empty"><div class="empty-icon">${search?"🔍":"📒"}</div><div class="empty-text">${search?`Không tìm thấy<br>"${search}"`:`Chưa có${currentResultFilter!=="all"?" lệnh "+currentResultFilter:""}<br>Nhấn + để thêm`}</div></div>`;
+    if(!search && currentResultFilter==="all" && !currentTagFilter && trades.length===0) {
+      el.innerHTML=`<div class="empty">
+        <div style="font-size:48px;margin-bottom:16px;">📒</div>
+        <div class="empty-text" style="font-size:16px;font-weight:600;margin-bottom:8px;">Chưa có lệnh nào</div>
+        <div style="font-size:13px;opacity:0.6;line-height:1.6;margin-bottom:20px;">Bắt đầu ghi lại hành trình trading<br>của bạn ngay hôm nay</div>
+        <button onclick="openNew()" style="padding:12px 24px;border-radius:var(--radius-xl);background:var(--gold-faint);border:1px solid var(--gold);color:var(--gold);font-size:14px;cursor:pointer;font-weight:500;">+ Thêm lệnh đầu tiên</button>
+      </div>`;
+    } else {
+      el.innerHTML=`<div class="empty"><div class="empty-icon">${search?"🔍":"📋"}</div><div class="empty-text">${search?`Không tìm thấy<br>"${search}"`:`Không có lệnh${currentResultFilter!=="all"?" "+currentResultFilter:""}`}</div></div>`;
+    }
     return;
   }
 
@@ -1552,7 +1737,7 @@ function renderList() {
     const cls=t.result==="Win"?"win":t.result==="Loss"?"loss":"be";
     const tags=Array.isArray(t.tags)?t.tags.join(" · "):(t.tags||"");
     const date=t.tradeDate?fmtDate(t.tradeDate):(t.createdAt?fmtDate(t.createdAt):"");
-    const fb=t.folder?`<span style="font-size:10px;color:var(--gold);opacity:1;background:var(--gold-faint);border-radius:4px;padding:2px 8px;margin-left:6px;">🗂 ${esc(t.folder)}</span>`:"";
+    const fb=t.folder?`<span style="font-size:11px;color:var(--gold);opacity:1;background:var(--gold-faint);border-radius:4px;padding:6px 8px;margin-left:6px;">🗂 ${esc(t.folder)}</span>`:"";
     const isNew = t.id === lastSavedId;
     // Fix XSS: store thumbSrc in data attr, use event delegation instead of inline onclick
     let thumbSrc = "";
@@ -1598,7 +1783,7 @@ window.openDetail=function(id){
   const dd=currentTrade.tradeDate?fmtDate(currentTrade.tradeDate):(currentTrade.createdAt?fmtDate(currentTrade.createdAt):"");
   document.getElementById("detail-banner").innerHTML=`
     <span style="font-size:13px;color:var(--gold);opacity:0.85;font-style:italic;">${dd}${currentTrade.folder?" · 🗂 "+esc(currentTrade.folder):""}</span>
-    <span class="${cls}" style="font-family:'Cinzel',serif;font-size:15px;font-weight:600;">${esc(currentTrade.result)||""} ${esc(currentTrade.pnl)||""}</span>`;
+    <span class="${cls}" style="font-family:var(--sys);font-size:15px;font-weight:600;">${esc(currentTrade.result)||""} ${esc(currentTrade.pnl)||""}</span>`;
   document.getElementById("detail-grid").innerHTML=[
     ["Symbol", `${esc(currentTrade.symbol||"—")} ${currentTrade.symbol?`<button class="copy-btn" onclick="copySymbol('${esc(currentTrade.symbol)}')" title="Copy">📋</button>`:""}`,],
     ["P&L", esc(currentTrade.pnl||"—")],
@@ -1637,13 +1822,13 @@ function renderTFPreview(){
   const el=document.getElementById("detail-tf-preview"); el.style.height="auto";
   const list=Array.isArray(v)?v:(v?[v]:[]);
   if(list.length){
-    el.innerHTML=`<div style="width:100%;"><div style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;">${list.map((src,i)=>`<img src="${src}" onclick="openImgFull('${currentTF}',${i})" style="width:${list.length===1?"100%":"calc(50% - 4px)"};border-radius:8px;object-fit:cover;cursor:pointer;display:block;"/>`).join("")}</div>${cap?`<div style="padding:8px 12px 12px;font-size:16px;color:var(--text);font-style:italic;line-height:1.6;border-top:1px solid var(--gold-faint);">💬 ${cap}</div>`:""}</div>`;
+    el.innerHTML=`<div style="width:100%;"><div style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;">${list.map((src,i)=>`<img src="${src}" onclick="openImgFull('${currentTF}',${i})" style="width:${list.length===1?"100%":"calc(50% - 4px)"};border-radius:var(--radius-sm);object-fit:cover;cursor:pointer;display:block;"/>`).join("")}</div>${cap?`<div style="padding:8px 12px 12px;font-size:16px;color:var(--text);font-style:italic;line-height:1.6;border-top:1px solid var(--gold-faint);">💬 ${cap}</div>`:""}</div>`;
   } else { el.style.height="160px"; el.innerHTML=`<div class="no-img">📊<br><br>Chưa có ảnh ${currentTF}</div>`; }
 }
 window.openImgFull=function(tf,idx){
   const v=currentTrade?.images?.[tf]; const list=Array.isArray(v)?v:(v?[v]:[]); const src=list[idx]; if(!src) return;
   const o=document.createElement("div"); o.style.cssText="position:fixed;inset:0;background:#000000ee;z-index:999;display:flex;align-items:center;justify-content:center;cursor:pointer;";
-  o.innerHTML=`<img src="${src}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px;"/>`;
+  o.innerHTML=`<img src="${src}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:var(--radius-sm);"/>`;
   o.onclick=()=>document.body.removeChild(o); document.body.appendChild(o);
 };
 
@@ -1678,6 +1863,7 @@ window.saveTrade=async function(){
     window.formDirty=false;
     lastSavedId=ref.id; // Fix 3
     showToast("✅ Đã lưu lệnh");
+    try{if(navigator.vibrate)navigator.vibrate(10);}catch(e){}
     await loadTrades();showScreen("list");
   }catch(e){alert("Lỗi lưu: "+e.message);}
   btn.disabled=false; btn.textContent="LƯU LỆNH ĐẦY ĐỦ";
@@ -1866,14 +2052,14 @@ window.openNew=function(){
 // ══ IMAGE UPLOAD (NEW) ══
 function buildTFUploadRow(){
   document.getElementById("tf-upload-row").innerHTML=TFS.map(tf=>`
-    <div style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:10px;padding:12px;">
+    <div style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:12px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <div style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold);letter-spacing:2px;">${tf}</div>
-        <button onclick="addTFImg('${tf}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:4px 10px;color:var(--gold);font-size:11px;cursor:pointer;font-family:'Cinzel',serif;">+ Thêm ảnh</button>
+        <div style="font-family:var(--sys);font-size:12px;color:var(--gold);letter-spacing:2px;">${tf}</div>
+        <button onclick="addTFImg('${tf}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:11px;cursor:pointer;font-family:var(--sys);">+ Thêm ảnh</button>
       </div>
       <div id="tf-images-${tf}" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;min-height:60px;"></div>
-      <div style="font-size:10px;letter-spacing:2px;color:var(--gold);opacity:0.9;font-family:'Cinzel',serif;margin-bottom:5px;">CHÚ THÍCH</div>
-      <textarea id="tf-caption-${tf}" placeholder="Ghi chú cho khung ${tf}..." style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:16px;font-family:'Crimson Pro',serif;outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;" onpaste="handlePaste('${tf}',event)"></textarea>
+      <div style="font-size:11px;letter-spacing:2px;color:var(--gold);opacity:0.9;font-family:var(--sys);margin-bottom:5px;">CHÚ THÍCH</div>
+      <textarea id="tf-caption-${tf}" placeholder="Ghi chú cho khung ${tf}..." style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:16px;font-family:var(--sys);outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;" onpaste="handlePaste('${tf}',event)"></textarea>
       <input type="file" accept="image/*" multiple style="display:none" id="tf-input-${tf}" onchange="handleImgMulti('${tf}',this)"/>
     </div>`).join("");
 }
@@ -1882,13 +2068,14 @@ window.clearTFImg=function(tf,i){if(!formImages[tf]) return;formImages[tf].splic
 function renderTFImages(tf){
   const imgs=formImages[tf]||[]; const c=document.getElementById("tf-images-"+tf); if(!c) return;
   if(!imgs.length){c.innerHTML=`<div style="color:var(--gold);opacity:0.5;font-size:12px;padding:10px;">Chưa có ảnh</div>`;return;}
-  c.innerHTML=imgs.map((src,i)=>`<div style="position:relative;flex:0 0 auto;"><img src="${src}" style="width:90px;height:68px;object-fit:cover;border-radius:7px;border:1px solid var(--gold-dim);display:block;cursor:pointer;" onclick="viewFormImg('${tf}',${i})"/><button onclick="clearTFImg('${tf}',${i})" style="position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:10px;cursor:pointer;line-height:1;">✕</button></div>`).join("");
+  c.innerHTML=imgs.map((src,i)=>`<div style="position:relative;flex:0 0 auto;"><img src="${src}" style="width:90px;height:68px;object-fit:cover;border-radius:7px;border:1px solid var(--gold-dim);display:block;cursor:pointer;" onclick="viewFormImg('${tf}',${i})"/><button onclick="clearTFImg('${tf}',${i})" style="position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:11px;cursor:pointer;line-height:1;">✕</button></div>`).join("");
 }
 window.viewFormImg=function(tf,idx){const src=(formImages[tf]||[])[idx];if(src) viewImg(src);};
-window.viewImg=function(src){const o=document.createElement("div");o.style.cssText="position:fixed;inset:0;background:#000e;z-index:999;display:flex;align-items:center;justify-content:center;cursor:pointer;";o.innerHTML=`<img src="${src}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px;"/>`;o.onclick=()=>document.body.removeChild(o);document.body.appendChild(o);};
+window.viewImg=function(src){const o=document.createElement("div");o.style.cssText="position:fixed;inset:0;background:#000e;z-index:999;display:flex;align-items:center;justify-content:center;cursor:pointer;";o.innerHTML=`<img src="${src}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:var(--radius-sm);"/>`;o.onclick=()=>document.body.removeChild(o);document.body.appendChild(o);};
 window.handlePaste=function(tf,event){
   const items=event.clipboardData?.items; if(!items) return;
-  for(const item of items){if(item.type.startsWith("image/")){event.preventDefault();const reader=new FileReader();reader.onload=async e=>{try{const c=await compressImage(e.target.result);if(!formImages[tf])formImages[tf]=[];formImages[tf].push(c);window.formDirty=true;renderTFImages(tf);}catch(err){showToast("⚠️ Không thể đọc ảnh");}};reader.readAsDataURL(item.getAsFile());return;}}
+  for(const item of items){if(item.type.startsWith("image/")){event.preventDefault();const reader=new FileReader();reader.onload=async e=>{try{const c=await compressImage(e.target.result);if(!formImages[tf])formImages[tf]=[];formImages[tf].push(c);window.formDirty=true;renderTFImages(tf);}catch(err){try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
+  showToast("⚠️ Không thể đọc ảnh");}};reader.readAsDataURL(item.getAsFile());return;}}
 };
 window.handleImgMulti=function(tf,input){
   const files=Array.from(input.files); if(!files.length) return;
@@ -1896,7 +2083,8 @@ window.handleImgMulti=function(tf,input){
   // parallel compression
   const readers=files.map(file=>new Promise(res=>{
     const r=new FileReader();
-    r.onload=async e=>{try{res(await compressImage(e.target.result));}catch{showToast("⚠️ Không thể đọc ảnh");res(null);}};
+    r.onload=async e=>{try{res(await compressImage(e.target.result));}catch{try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
+  showToast("⚠️ Không thể đọc ảnh");res(null);}};
     r.readAsDataURL(file);
   }));
   Promise.all(readers).then(results=>{
@@ -1923,14 +2111,14 @@ window.openEdit=function(){
 };
 function buildEditTFUploadRow(){
   document.getElementById("e-tf-upload-row").innerHTML=TFS.map(tf=>`
-    <div style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:10px;padding:12px;">
+    <div style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:12px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <div style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold);letter-spacing:2px;">${tf}</div>
-        <button onclick="addEditTFImg('${tf}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:4px 10px;color:var(--gold);font-size:11px;cursor:pointer;font-family:'Cinzel',serif;">+ Thêm ảnh</button>
+        <div style="font-family:var(--sys);font-size:12px;color:var(--gold);letter-spacing:2px;">${tf}</div>
+        <button onclick="addEditTFImg('${tf}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:11px;cursor:pointer;font-family:var(--sys);">+ Thêm ảnh</button>
       </div>
       <div id="e-tf-images-${tf}" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;min-height:60px;"></div>
-      <div style="font-size:10px;letter-spacing:2px;color:var(--gold);opacity:0.9;font-family:'Cinzel',serif;margin-bottom:5px;">CHÚ THÍCH</div>
-      <textarea id="e-tf-caption-${tf}" placeholder="Ghi chú cho khung ${tf}..." style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:16px;font-family:'Crimson Pro',serif;outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;" onpaste="handleEditPaste('${tf}',event)"></textarea>
+      <div style="font-size:11px;letter-spacing:2px;color:var(--gold);opacity:0.9;font-family:var(--sys);margin-bottom:5px;">CHÚ THÍCH</div>
+      <textarea id="e-tf-caption-${tf}" placeholder="Ghi chú cho khung ${tf}..." style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:16px;font-family:var(--sys);outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;" onpaste="handleEditPaste('${tf}',event)"></textarea>
       <input type="file" accept="image/*" multiple style="display:none" id="e-tf-input-${tf}" onchange="handleEditImgMulti('${tf}',this)"/>
     </div>`).join("");
 }
@@ -1939,18 +2127,20 @@ window.clearEditTFImg=function(tf,i){if(!editImages[tf]) return;editImages[tf].s
 function renderEditTFImages(tf){
   const imgs=editImages[tf]||[]; const c=document.getElementById("e-tf-images-"+tf); if(!c) return;
   if(!imgs.length){c.innerHTML=`<div style="color:var(--gold);opacity:0.5;font-size:12px;padding:10px;">Chưa có ảnh</div>`;return;}
-  c.innerHTML=imgs.map((src,i)=>`<div style="position:relative;flex:0 0 auto;"><img src="${src}" style="width:90px;height:68px;object-fit:cover;border-radius:7px;border:1px solid var(--gold-dim);display:block;"/><button onclick="clearEditTFImg('${tf}',${i})" style="position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:10px;cursor:pointer;line-height:1;">✕</button></div>`).join("");
+  c.innerHTML=imgs.map((src,i)=>`<div style="position:relative;flex:0 0 auto;"><img src="${src}" style="width:90px;height:68px;object-fit:cover;border-radius:7px;border:1px solid var(--gold-dim);display:block;"/><button onclick="clearEditTFImg('${tf}',${i})" style="position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:11px;cursor:pointer;line-height:1;">✕</button></div>`).join("");
 }
 window.handleEditPaste=function(tf,event){
   const items=event.clipboardData?.items; if(!items) return;
-  for(const item of items){if(item.type.startsWith("image/")){event.preventDefault();const reader=new FileReader();reader.onload=async e=>{try{const c=await compressImage(e.target.result);if(!editImages[tf])editImages[tf]=[];editImages[tf].push(c);window.formDirty=true;renderEditTFImages(tf);}catch(err){showToast("⚠️ Không thể đọc ảnh");}};reader.readAsDataURL(item.getAsFile());return;}}
+  for(const item of items){if(item.type.startsWith("image/")){event.preventDefault();const reader=new FileReader();reader.onload=async e=>{try{const c=await compressImage(e.target.result);if(!editImages[tf])editImages[tf]=[];editImages[tf].push(c);window.formDirty=true;renderEditTFImages(tf);}catch(err){try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
+  showToast("⚠️ Không thể đọc ảnh");}};reader.readAsDataURL(item.getAsFile());return;}}
 };
 window.handleEditImgMulti=function(tf,input){
   const files=Array.from(input.files); if(!files.length) return;
   if(!editImages[tf]) editImages[tf]=[];
   const readers=files.map(file=>new Promise(res=>{
     const r=new FileReader();
-    r.onload=async e=>{try{res(await compressImage(e.target.result));}catch{showToast("⚠️ Không thể đọc ảnh");res(null);}};
+    r.onload=async e=>{try{res(await compressImage(e.target.result));}catch{try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
+  showToast("⚠️ Không thể đọc ảnh");res(null);}};
     r.readAsDataURL(file);
   }));
   Promise.all(readers).then(results=>{
@@ -2017,10 +2207,10 @@ function renderStats(){
     </div>
     ${equityPoints.length>=2?`
     <div class="section-label">Equity Curve (R)</div>
-    <div style="background:var(--bg3);border-radius:14px;padding:14px 14px 10px;margin-bottom:20px;border:1px solid var(--border);">
+    <div style="background:var(--bg3);border-radius:var(--radius-lg);padding:14px 14px 10px;margin-bottom:20px;border:1px solid var(--border);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:1px;">${equityPoints.length} LỆNH CÓ R DATA</div>
-        <div style="font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:${lastR>=0?"var(--win)":"var(--loss)"};">${lastR>=0?"+":""}${lastR.toFixed(1)}R</div>
+        <div style="font-family:var(--sys);font-size:11px;color:var(--gold);letter-spacing:1px;">${equityPoints.length} LỆNH CÓ R DATA</div>
+        <div style="font-family:var(--sys);font-size:14px;font-weight:700;color:${lastR>=0?"var(--win)":"var(--loss)"};">${lastR>=0?"+":""}${lastR.toFixed(1)}R</div>
       </div>
       <svg viewBox="0 0 ${svgW} ${svgH}" style="width:100%;height:80px;">
         <line x1="14" y1="${(svgH-10-(0-eqMin)/eqRange*(svgH-20)).toFixed(1)}" x2="${svgW-14}" y2="${(svgH-10-(0-eqMin)/eqRange*(svgH-20)).toFixed(1)}" stroke="var(--gold)" stroke-width="0.5" stroke-opacity="0.3" stroke-dasharray="3,3"/>
@@ -2031,24 +2221,24 @@ function renderStats(){
       </svg>
     </div>`:``}
     <div class="section-label">Kết Quả</div>
-    <div style="background:var(--bg3);border-radius:14px;padding:14px;margin-bottom:20px;border:1px solid var(--border);">
+    <div style="background:var(--bg3);border-radius:var(--radius-lg);padding:14px;margin-bottom:20px;border:1px solid var(--border);">
       ${[["Win",wins,"#4caf50"],["Loss",losses,"#ef5350"],["BE",bes,"#90a4ae"]].map(([l,v,c])=>`<div class="chart-bar-row"><div class="chart-bar-label">${l}</div><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${total?Math.round(v/total*100):0}%;background:${c};"><span class="chart-bar-val">${v}</span></div></div><div style="font-size:11px;color:var(--gold);opacity:0.65;width:35px;text-align:right;">${total?Math.round(v/total*100):0}%</div></div>`).join("")}
     </div>
     <div class="section-label">Theo Symbol</div>
-    <div style="background:var(--bg3);border-radius:14px;padding:14px;margin-bottom:20px;border:1px solid var(--border);">
-      ${topSym.map(([s,v])=>{const t2=v.w+v.l+v.be;return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--gold-faint);"><div style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold);">${s}</div><div style="display:flex;gap:8px;font-size:13px;"><span class="win">✅${v.w}</span><span class="loss">❌${v.l}</span><span style="color:var(--gold);opacity:0.55;">${t2?Math.round(v.w/t2*100):0}%WR</span></div></div>`;}).join("")}
+    <div style="background:var(--bg3);border-radius:var(--radius-lg);padding:14px;margin-bottom:20px;border:1px solid var(--border);">
+      ${topSym.map(([s,v])=>{const t2=v.w+v.l+v.be;return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--gold-faint);"><div style="font-family:var(--sys);font-size:13px;color:var(--gold);">${s}</div><div style="display:flex;gap:8px;font-size:13px;"><span class="win">✅${v.w}</span><span class="loss">❌${v.l}</span><span style="color:var(--gold);opacity:0.55;">${t2?Math.round(v.w/t2*100):0}%WR</span></div></div>`;}).join("")}
     </div>
     <div class="section-label">Theo Tháng</div>
-    <div style="background:var(--bg3);border-radius:14px;padding:14px;margin-bottom:20px;border:1px solid var(--border);">
-      ${months.length?months.map(([m,v])=>{const t2=v.w+v.l+v.be;return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--gold-faint);"><div style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold);">📅 ${m}</div><div style="display:flex;gap:8px;font-size:13px;"><span class="win">✅${v.w}</span><span class="loss">❌${v.l}</span><span style="color:var(--gold);opacity:0.55;">${t2?Math.round(v.w/t2*100):0}%WR</span></div></div>`;}).join(""):"<div style='color:var(--gold);opacity:0.5;padding:10px;text-align:center;'>Chưa có dữ liệu</div>"}
+    <div style="background:var(--bg3);border-radius:var(--radius-lg);padding:14px;margin-bottom:20px;border:1px solid var(--border);">
+      ${months.length?months.map(([m,v])=>{const t2=v.w+v.l+v.be;return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--gold-faint);"><div style="font-family:var(--sys);font-size:12px;color:var(--gold);">📅 ${m}</div><div style="display:flex;gap:8px;font-size:13px;"><span class="win">✅${v.w}</span><span class="loss">❌${v.l}</span><span style="color:var(--gold);opacity:0.55;">${t2?Math.round(v.w/t2*100):0}%WR</span></div></div>`;}).join(""):"<div style='color:var(--gold);opacity:0.5;padding:10px;text-align:center;'>Chưa có dữ liệu</div>"}
     </div>
     <div class="section-label">Xuất Dữ Liệu</div>
     <div style="display:flex;gap:10px;margin-bottom:20px;">
-      <button onclick="exportCSV()" style="flex:1;padding:14px;border-radius:12px;background:var(--gold-faint);border:1px solid var(--gold-dim);color:var(--gold);font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;cursor:pointer;transition:all 0.2s;">📊 XUẤT CSV</button>
-      <button onclick="exportPDF()" style="flex:1;padding:14px;border-radius:12px;background:var(--gold-faint);border:1px solid var(--gold-dim);color:var(--gold);font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;cursor:pointer;transition:all 0.2s;">📄 XUẤT PDF</button>
+      <button onclick="exportCSV()" style="flex:1;padding:14px;border-radius:var(--radius-md);background:var(--gold-faint);border:1px solid var(--gold-dim);color:var(--gold);font-family:var(--sys);font-size:11px;letter-spacing:2px;cursor:pointer;transition:all 0.2s;">📊 XUẤT CSV</button>
+      <button onclick="exportPDF()" style="flex:1;padding:14px;border-radius:var(--radius-md);background:var(--gold-faint);border:1px solid var(--gold-dim);color:var(--gold);font-family:var(--sys);font-size:11px;letter-spacing:2px;cursor:pointer;transition:all 0.2s;">📄 XUẤT PDF</button>
     </div>
     <div class="section-label">Phân Tích AI Tổng Hợp</div>
-    <button id="pattern-btn" onclick="analyzePattern()" style="width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--gold-faint),transparent);border:1px solid var(--gold-dim);color:var(--gold);font-size:11px;font-family:'Space Mono',monospace;letter-spacing:3px;cursor:pointer;margin-bottom:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);">🔬 PHÂN TÍCH PATTERN AI CHUYÊN SÂU</button>
+    <button id="pattern-btn" onclick="analyzePattern()" style="width:100%;padding:16px;border-radius:var(--radius-lg);background:linear-gradient(135deg,var(--gold-faint),transparent);border:1px solid var(--gold-dim);color:var(--gold);font-size:11px;font-family:var(--sys);letter-spacing:0.5px;cursor:pointer;margin-bottom:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);">🔬 PHÂN TÍCH PATTERN AI CHUYÊN SÂU</button>
     <div id="pattern-result" class="pattern-result" style="display:none;"></div>`;
   } catch(err) { console.error('renderStats:',err); document.getElementById('stats-body').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Lỗi hiển thị thống kê</div></div>'; }
 }
@@ -2069,7 +2259,7 @@ window.exportPDF=function(){
   const wins=trades.filter(t=>t.result==="Win").length, wr=Math.round(wins/trades.length*100);
   const rows=trades.map(t=>`<tr><td>${t.tradeDate?fmtDate(t.tradeDate):(t.createdAt?fmtDate(t.createdAt):"")}</td><td><b>${t.title||""}</b></td><td>${t.symbol||""}</td><td style="color:${t.result==="Win"?"#4caf50":t.result==="Loss"?"#ef5350":"#90a4ae"}">${t.result||""}</td><td>${t.pnl||""}</td><td>${t.onplan||""}</td><td>${t.folder||""}</td><td style="max-width:180px;word-break:break-word;">${(t.note||"").substring(0,100)}</td></tr>`).join("");
   const w=window.open("","_blank");
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>TradeLog Export</title><style>body{font-family:serif;padding:20px;color:#222;}h1{font-size:18px;}.sum{display:flex;gap:16px;margin:12px 0 20px;}.s{background:#f5f5f0;border-radius:8px;padding:8px 16px;text-align:center;}.s b{display:block;font-size:20px;}table{width:100%;border-collapse:collapse;font-size:12px;}th{background:#c9a84c;color:#fff;padding:7px;text-align:left;font-size:10px;letter-spacing:1px;}td{padding:6px 7px;border-bottom:1px solid #eee;vertical-align:top;}tr:nth-child(even){background:#fafaf7;}@media print{body{padding:0}}</style></head><body>
+  w.document.write(`<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"/><title>TradeLog Export</title><style>body{font-family:serif;padding:20px;color:#222;}h1{font-size:18px;}.sum{display:flex;gap:16px;margin:12px 0 20px;}.s{background:#f5f5f0;border-radius:var(--radius-sm);padding:8px 16px;text-align:center;}.s b{display:block;font-size:20px;}table{width:100%;border-collapse:collapse;font-size:12px;}th{background:#c9a84c;color:#fff;padding:7px;text-align:left;font-size:11px;letter-spacing:1px;}td{padding:6px 7px;border-bottom:1px solid #eee;vertical-align:top;}tr:nth-child(even){background:#fafaf7;}@media print{body{padding:0}}</style></head><body>
   <h1>📒 TradeLog – Nhật Ký Giao Dịch</h1><div style="font-size:12px;color:#888;">Xuất ngày ${fmtDate(Date.now())}</div>
   <div class="sum"><div class="s"><b>${trades.length}</b>Tổng</div><div class="s"><b style="color:#4caf50">${wins}</b>Win</div><div class="s"><b style="color:#ef5350">${trades.filter(t=>t.result==="Loss").length}</b>Loss</div><div class="s"><b>${wr}%</b>WR</div></div>
   <table><thead><tr><th>Ngày</th><th>Tên lệnh</th><th>Symbol</th><th>KQ</th><th>P&L</th><th>Plan</th><th>Thư mục</th><th>Ghi chú</th></tr></thead><tbody>${rows}</tbody></table>
@@ -2101,7 +2291,7 @@ function buildColorGrid() {
       <div class="color-swatch${themeSettings.color===i?" active":""}" id="swatch-${i}"
         style="background:${c.hex};border-color:${themeSettings.color===i?"#fff":"transparent"};"
         onclick="setAccentColor(${i})"></div>
-      <div style="font-size:9px;color:var(--text-dim);margin-top:4px;font-family:'Cinzel',serif;">${c.name}</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:4px;font-family:var(--sys);">${c.name}</div>
     </div>`
   ).join("");
 }
@@ -2594,20 +2784,20 @@ let theoryFolders = [
 
 // ══ THEORY FOLDER MANAGEMENT ══
 async function loadTheoryFolders() {
+  const clean = arr => (arr||[]).filter(f=>f.key!=="quiz");
   try {
     const snap = await getDoc(doc(db,"app_config","theory_folders"));
     if (snap.exists()) {
       const saved = snap.data().folders;
       if (Array.isArray(saved) && saved.length) {
-        theoryFolders = saved;
-        // Always ensure "all" and "quiz" exist
+        theoryFolders = clean(saved);
         if (!theoryFolders.find(f=>f.key==="all")) theoryFolders.unshift({key:"all",label:"Tất cả",icon:"📖",children:[]});
       }
     }
   } catch(e) {
     const local = JSON.parse(localStorage.getItem("tl_theory_folders")||"null");
     if (local) {
-      theoryFolders = local;
+      theoryFolders = clean(local);
       if (!theoryFolders.find(f=>f.key==="all")) theoryFolders.unshift({key:"all",label:"Tất cả",icon:"📖",children:[]});
     }
   }
@@ -2643,29 +2833,30 @@ function renderTheoryFolderBar() {
 
   bar.innerHTML = theoryFolders.map(f => {
     const active = f.key===curParent || (f.key==="all" && theoryCategory==="all");
-    const isFixed = f.key==="all"; // cannot delete
-    const deleteBtn = (theoryEditMode && !isFixed)
-      ? `<span onclick="event.stopPropagation();deleteTheoryFolder('${f.key}')" style="margin-left:5px;opacity:0.6;font-size:11px;line-height:1;padding:0 2px;" title="Xóa thư mục">✕</span>`
+    const isFixed = f.key==="all";
+    const editBtns = (theoryEditMode && !isFixed)
+      ? `<span onclick="event.stopPropagation();renameTheoryFolder('${f.key}')" style="margin-left:4px;opacity:0.6;font-size:11px;padding:1px 4px;border-radius:3px;border:1px solid var(--gold-faint);" title="Đổi tên">✏️</span>
+         <span onclick="event.stopPropagation();deleteTheoryFolder('${f.key}')" style="margin-left:2px;opacity:0.6;font-size:11px;padding:1px 3px;" title="Xóa">✕</span>`
       : "";
-    return `<button class="folder-chip${active?" active":""}" onclick="setTheoryFolder('${f.key}')" style="display:inline-flex;align-items:center;gap:2px;">${f.icon} ${f.label}${deleteBtn}</button>`;
+    return `<button class="folder-chip${active?" active":""}" onclick="setTheoryFolder('${f.key}')" style="display:inline-flex;align-items:center;gap:2px;">${f.icon} ${f.label}${editBtns}</button>`;
   }).join("") +
   (theoryEditMode ? `<button class="folder-chip add-folder" onclick="addTheoryFolder()" style="border-style:dashed;">＋ Thư mục</button>` : "");
 
-  // Show subfolder bar if current folder has children
   const parentFolder = theoryFolders.find(f=>f.key===curParent);
   const children = parentFolder?.children||[];
-  if (children.length && curParent!=="all" && curParent!=="quiz") {
+  if (children.length && curParent!=="all") {
     sub.style.display = "flex";
     sub.innerHTML =
       `<button class="folder-chip${!theorySubfolder?" active":""}" onclick="setTheorySubfolder('')">📁 Tất cả</button>` +
       children.map(c => {
         const active = theorySubfolder===c.key;
-        const delBtn = theoryEditMode
-          ? `<span onclick="event.stopPropagation();deleteTheorySubfolder('${curParent}','${c.key}')" style="margin-left:4px;opacity:0.55;font-size:11px;">✕</span>`
+        const editBtns = theoryEditMode
+          ? `<span onclick="event.stopPropagation();renameTheorySubfolder('${curParent}','${c.key}')" style="margin-left:4px;opacity:0.6;font-size:11px;border:1px solid var(--gold-faint);border-radius:3px;padding:1px 4px;">✏️</span>
+             <span onclick="event.stopPropagation();deleteTheorySubfolder('${curParent}','${c.key}')" style="margin-left:2px;opacity:0.55;font-size:11px;">✕</span>`
           : "";
-        return `<button class="folder-chip${active?" active":""}" onclick="setTheorySubfolder('${c.key}')" style="display:inline-flex;align-items:center;">${c.label||c.key}${delBtn}</button>`;
+        return `<button class="folder-chip${active?" active":""}" onclick="setTheorySubfolder('${c.key}')" style="display:inline-flex;align-items:center;">${c.label||c.key}${editBtns}</button>`;
       }).join("") +
-      (theoryEditMode ? `<button class="folder-chip add-folder" onclick="addTheorySubfolder('${curParent}')" style="border-style:dashed;font-size:10px;">＋ Thư mục con</button>` : "");
+      (theoryEditMode ? `<button class="folder-chip add-folder" onclick="addTheorySubfolder('${curParent}')" style="border-style:dashed;font-size:11px;">＋ Thư mục con</button>` : "");
   } else {
     sub.style.display = "none";
     if (theorySubfolder) theorySubfolder = "";
@@ -2679,6 +2870,29 @@ window.setTheoryFolder = function(key) {
 window.setTheorySubfolder = function(sub) {
   theorySubfolder = sub;
   renderTheoryFolderBar(); renderTheory();
+};
+
+window.renameTheoryFolder = async function(key) {
+  const folder = theoryFolders.find(f=>f.key===key);
+  if (!folder) return;
+  const newLabel = prompt("Đổi tên thư mục:", folder.label);
+  if (!newLabel?.trim() || newLabel.trim()===folder.label) return;
+  folder.label = newLabel.trim();
+  await saveTheoryFolders();
+  renderTheoryFolderBar();
+  showToast("✅ Đã đổi tên: " + newLabel.trim());
+};
+
+window.renameTheorySubfolder = async function(parentKey, childKey) {
+  const parent = theoryFolders.find(f=>f.key===parentKey);
+  const child = parent?.children?.find(c=>c.key===childKey);
+  if (!child) return;
+  const newLabel = prompt("Đổi tên thư mục con:", child.label||childKey);
+  if (!newLabel?.trim() || newLabel.trim()===child.label) return;
+  child.label = newLabel.trim();
+  await saveTheoryFolders();
+  renderTheoryFolderBar();
+  showToast("✅ Đã đổi tên: " + newLabel.trim());
 };
 
 window.addTheoryFolder = async function() {
@@ -2825,7 +3039,8 @@ window.execMove = async function(destType, destKey) {
       } catch(e){alert("Lỗi: "+e.message);}
     } else if (moveModalIsTheory) {
       // Convert theory card → trade: not supported, show toast
-      showToast("⚠️ Không thể chuyển thẻ lý thuyết vào nhật ký lệnh");
+      try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
+  showToast("⚠️ Không thể chuyển thẻ lý thuyết vào nhật ký lệnh");
     }
   } else {
     // Move to theory folder
@@ -2911,17 +3126,17 @@ window.addTheoryImgSection = function(tf="", imgs=[], caption="") {
   const wrap = document.getElementById("te-img-sections");
   const sec = document.createElement("div");
   sec.id = "te-sec-"+idx;
-  sec.style.cssText = "background:var(--bg);border:1px solid var(--gold-faint);border-radius:10px;padding:12px;";
+  sec.style.cssText = "background:var(--bg);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:12px;";
   sec.innerHTML = `
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-      <input class="te-tf-label" placeholder="Timeframe (H4, H1, M15...)" value="${esc(tf)}" oninput="teImgSections[${idx}].tf=this.value" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:6px 10px;color:var(--gold);font-size:12px;font-family:'Cinzel',serif;outline:none;letter-spacing:2px;font-weight:600;"/>
-      <button onclick="removeTeSec(${idx})" style="background:none;border:1px solid #ef535044;border-radius:6px;padding:4px 10px;color:var(--loss);font-size:11px;cursor:pointer;flex-shrink:0;">✕</button>
+      <input class="te-tf-label" placeholder="Timeframe (H4, H1, M15...)" value="${esc(tf)}" oninput="teImgSections[${idx}].tf=this.value" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:6px 10px;color:var(--gold);font-size:12px;font-family:var(--sys);outline:none;letter-spacing:2px;font-weight:600;"/>
+      <button onclick="removeTeSec(${idx})" style="background:none;border:1px solid #ef535044;border-radius:6px;padding:8px 12px;color:var(--loss);font-size:11px;cursor:pointer;flex-shrink:0;">✕</button>
     </div>
     <div id="te-imgs-${idx}" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;min-height:48px;"></div>
     <div style="display:flex;gap:6px;">
-      <button onclick="tePickImg(${idx})" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:6px 12px;color:var(--gold);font-size:11px;font-family:'Cinzel',serif;cursor:pointer;flex-shrink:0;">+ Thêm ảnh</button>
+      <button onclick="tePickImg(${idx})" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:6px 12px;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;flex-shrink:0;">+ Thêm ảnh</button>
       <input type="file" accept="image/*" multiple style="display:none" id="te-file-${idx}" onchange="teHandleFiles(${idx},this)"/>
-      <textarea placeholder="Chú thích / Phân tích khung này..." oninput="teImgSections[${idx}].caption=this.value" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:'Crimson Pro',serif;outline:none;resize:none;height:36px;line-height:1.4;">${esc(caption)}</textarea>
+      <textarea placeholder="Chú thích / Phân tích khung này..." oninput="teImgSections[${idx}].caption=this.value" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;resize:none;height:36px;line-height:1.4;">${esc(caption)}</textarea>
     </div>`;
   wrap.appendChild(sec);
   teRenderSecImgs(idx);
@@ -2958,8 +3173,8 @@ window.teHandleFiles = async function(idx, input) {
 function teRenderSecImgs(idx) {
   const wrap=document.getElementById("te-imgs-"+idx); if(!wrap||!teImgSections[idx]) return;
   const imgs=teImgSections[idx].images;
-  if(!imgs.length){wrap.innerHTML=`<div style="color:var(--gold);opacity:0.35;font-size:10px;font-family:'Space Mono',monospace;padding:10px;">Chưa có ảnh — nhấn "+ Thêm ảnh" hoặc Ctrl+V để dán</div>`;return;}
-  wrap.innerHTML=imgs.map((src,i)=>`<div style="position:relative;flex:0 0 auto;"><img src="${src}" onclick="openTeImgFull(teImgSections[${idx}].images[${i}])" style="width:90px;height:68px;object-fit:cover;border-radius:6px;border:1px solid var(--gold-dim);display:block;cursor:zoom-in;"/><button onclick="teRemoveImg(${idx},${i})" style="position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:10px;cursor:pointer;line-height:1;">✕</button></div>`).join("");
+  if(!imgs.length){wrap.innerHTML=`<div style="color:var(--gold);opacity:0.35;font-size:11px;font-family:var(--sys);padding:10px;">Chưa có ảnh — nhấn "+ Thêm ảnh" hoặc Ctrl+V để dán</div>`;return;}
+  wrap.innerHTML=imgs.map((src,i)=>`<div style="position:relative;flex:0 0 auto;"><img src="${src}" onclick="openTeImgFull(teImgSections[${idx}].images[${i}])" style="width:90px;height:68px;object-fit:cover;border-radius:6px;border:1px solid var(--gold-dim);display:block;cursor:zoom-in;"/><button onclick="teRemoveImg(${idx},${i})" style="position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:11px;cursor:pointer;line-height:1;">✕</button></div>`).join("");
 }
 window.teRemoveImg=function(idx,i){teImgSections[idx].images.splice(i,1);teRenderSecImgs(idx);};
 window.openTeImgFull=function(src){const fs=document.getElementById("theory-img-fullscreen");document.getElementById("theory-img-fullscreen-img").src=src;fs.style.display="flex";};
@@ -3022,21 +3237,27 @@ window.addTheoryRuleField=function(){addRuleFieldWith("");};
 function addRuleFieldWith(val) {
   const list=document.getElementById("te-rules-list");
   const row=document.createElement("div"); row.style.cssText="display:flex;gap:6px;align-items:flex-start;";
-  row.innerHTML=`<textarea class="te-rule-input" rows="2" placeholder="Nhập nội dung phân tích (tag &lt;b&gt; được phép)..." style="flex:1;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:13px;font-family:'Crimson Pro',serif;outline:none;resize:vertical;line-height:1.5;">${val}</textarea><button onclick="this.parentElement.remove()" style="background:none;border:1px solid #ef535044;border-radius:6px;padding:6px 8px;color:var(--loss);font-size:12px;cursor:pointer;flex-shrink:0;margin-top:2px;">✕</button>`;
+  row.innerHTML=`<textarea class="te-rule-input" rows="2" placeholder="Nhập nội dung phân tích (tag &lt;b&gt; được phép)..." style="flex:1;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;resize:vertical;line-height:1.5;">${val}</textarea><button onclick="this.parentElement.remove()" style="background:none;border:1px solid #ef535044;border-radius:6px;padding:6px 8px;color:var(--loss);font-size:12px;cursor:pointer;flex-shrink:0;margin-top:2px;">✕</button>`;
   list.appendChild(row);
 }
 
 window.saveTheoryCard = async function() {
   const title=document.getElementById("te-title").value.trim();
-  if(!title){showToast("⚠️ Nhập tiêu đề!");return;}
+  if(!title){try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
+  showToast("⚠️ Nhập tiêu đề!");return;}
   const id=theoryEditingId||("tc_"+Date.now());
   const rules=Array.from(document.querySelectorAll(".te-rule-input")).map(el=>el.value.trim()).filter(Boolean);
   const imgSections=teImgSections.filter(Boolean).filter(s=>s.images.length>0||s.caption||s.tf);
   const card={id,icon:document.getElementById("te-icon").value.trim()||"📌",cat:document.getElementById("te-cat").value,title,tag:document.getElementById("te-tag").value.trim(),img:document.getElementById("te-img").value,rules:rules.map(r=>({t:r})),imgSections,highlight:{type:document.getElementById("te-hl-type").value,text:document.getElementById("te-hl-text").value.trim()}};
-  if(estimateKB(card)>950){showToast("⚠️ Dữ liệu quá lớn! Xóa bớt ảnh.");return;}
+  const sizeKB = estimateKB(card);
+  if(sizeKB>950){try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
+  showToast("⚠️ Quá lớn ("+sizeKB+"KB)! Xóa bớt ảnh hoặc dùng ảnh nhỏ hơn.");return;}
+  if(sizeKB>600){try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
+  showToast("⚠️ Cảnh báo: thẻ nặng "+sizeKB+"KB — có thể lỗi khi lưu ảnh nhiều");}
   theoryCustomData[id]=card;
   await saveCustomTheory();
   document.getElementById("modal-theory-edit").style.display="none";
+  try{if(navigator.vibrate)navigator.vibrate([10,30,10]);}catch(e){}
   renderTheory(); showToast("✅ Đã lưu thẻ!");
 };
 
@@ -3101,7 +3322,7 @@ async function saveTheoryData() {
 function getTheoryDiagramSVG(id) {
   const gold = "var(--gold)", win = "var(--win)", loss = "var(--loss)", text = "var(--text)", bg3 = "var(--bg3)", border = "var(--border)";
   const diagrams = {
-    t001: `<svg viewBox="0 0 340 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:10px;background:#080808;border:1px solid #c9a84c22;">
+    t001: `<svg viewBox="0 0 340 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:var(--radius-md);background:#080808;border:1px solid #c9a84c22;">
       <text x="30" y="22" fill="#c9a84c" font-size="9" font-family="monospace" opacity="0.7">ERL (Ngoài)</text>
       <text x="220" y="22" fill="#c9a84c" font-size="9" font-family="monospace" opacity="0.7">IRL (Trong)</text>
       <line x1="30" y1="40" x2="160" y2="40" stroke="#c9a84c" stroke-width="1.5" opacity="0.9"/>
@@ -3122,7 +3343,7 @@ function getTheoryDiagramSVG(id) {
       <text x="140" y="99" fill="#3ddc84" font-size="8" font-family="monospace">→</text>
       <text x="30" y="175" fill="#c9a84c" font-size="8" font-family="monospace" opacity="0.6">Giá: ERL → IRL → ERL (chu kỳ liên tục)</text>
     </svg>`,
-    t002: `<svg viewBox="0 0 340 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:10px;background:#080808;border:1px solid #c9a84c22;">
+    t002: `<svg viewBox="0 0 340 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:var(--radius-md);background:#080808;border:1px solid #c9a84c22;">
       <text x="14" y="22" fill="#c9a84c" font-size="10" font-family="monospace" font-weight="bold">Thứ tự ưu tiên PDA</text>
       <rect x="14" y="35" width="220" height="28" fill="#c9a84c" opacity="0.08" rx="6"/>
       <text x="20" y="53" fill="#c9a84c" font-size="11" font-family="monospace">FVG</text>
@@ -3137,7 +3358,7 @@ function getTheoryDiagramSVG(id) {
       <text x="185" y="127" fill="#3ddc84" font-size="9" font-family="monospace">✓ Ưu tiên</text>
       <text x="14" y="153" fill="#c9a84c" font-size="8" font-family="monospace" opacity="0.5">FVG A+ = MSS + đóng qua TK (HTF+LTF confluence)</text>
     </svg>`,
-    t005: `<svg viewBox="0 0 340 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:10px;background:#080808;border:1px solid #c9a84c22;">
+    t005: `<svg viewBox="0 0 340 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:var(--radius-md);background:#080808;border:1px solid #c9a84c22;">
       <text x="14" y="22" fill="#c9a84c" font-size="10" font-family="monospace" font-weight="bold">Macro Time Windows (giờ VN)</text>
       <rect x="14" y="35" width="310" height="42" fill="#42a5f5" opacity="0.08" rx="8" stroke="#42a5f5" stroke-width="1" stroke-opacity="0.3"/>
       <text x="24" y="52" fill="#42a5f5" font-size="9" font-family="monospace">xx:17</text>
@@ -3152,7 +3373,7 @@ function getTheoryDiagramSVG(id) {
       <text x="14" y="152" fill="#3ddc84" font-size="9" font-family="monospace">✓ Đỉnh/đáy TRONG window → uy tín cao hơn</text>
       <text x="14" y="165" fill="#c9a84c" font-size="8" font-family="monospace" opacity="0.5">VD: Đỉnh 9:55 &gt; Đỉnh 9:37 (9:55 ∈ 45→15 window)</text>
     </svg>`,
-    t006: `<svg viewBox="0 0 340 175" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:10px;background:#080808;border:1px solid #c9a84c22;">
+    t006: `<svg viewBox="0 0 340 175" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:var(--radius-md);background:#080808;border:1px solid #c9a84c22;">
       <text x="14" y="20" fill="#c9a84c" font-size="9" font-family="monospace" opacity="0.7">Bullish OB (Long)</text>
       <text x="200" y="20" fill="#c9a84c" font-size="9" font-family="monospace" opacity="0.7">Bearish OB (Short)</text>
       <rect x="60" y="130" width="16" height="30" fill="#3ddc84" opacity="0.8" rx="1"/>
@@ -3173,7 +3394,7 @@ function getTheoryDiagramSVG(id) {
       <rect x="287" y="108" width="16" height="45" fill="#c9a84c" opacity="0.6" rx="1"/>
       <text x="14" y="170" fill="#c9a84c" font-size="8" font-family="monospace" opacity="0.5">OB A+: nến cuối ngược chiều + MSS + discount/premium + tôn trọng 1-2 nến</text>
     </svg>`,
-    t014: `<svg viewBox="0 0 340 175" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:10px;background:#080808;border:1px solid #c9a84c22;">
+    t014: `<svg viewBox="0 0 340 175" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:var(--radius-md);background:#080808;border:1px solid #c9a84c22;">
       <text x="14" y="18" fill="#c9a84c" font-size="9" font-family="monospace" font-weight="bold">Opening Range Gap (VN time)</text>
       <rect x="14" y="28" width="310" height="65" fill="#c9a84c" opacity="0.05" rx="6"/>
       <line x1="14" y1="38" x2="324" y2="38" stroke="#ef5350" stroke-width="1.5"/>
@@ -3191,7 +3412,7 @@ function getTheoryDiagramSVG(id) {
       <text x="183" y="136" fill="#3ddc84" font-size="8" font-family="monospace">Open &lt; Settlement → LONG</text>
       <text x="14" y="165" fill="#c9a84c" font-size="8" font-family="monospace" opacity="0.6">70% xác suất test CE trong ngày. Không vào lệnh 30 phút đầu.</text>
     </svg>`,
-    t018: `<svg viewBox="0 0 340 175" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:10px;background:#080808;border:1px solid #c9a84c22;">
+    t018: `<svg viewBox="0 0 340 175" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:var(--radius-md);background:#080808;border:1px solid #c9a84c22;">
       <text x="14" y="18" fill="#c9a84c" font-size="9" font-family="monospace" font-weight="bold">FVG Body Rule — Quy Tắc Vàng</text>
       <text x="50" y="40" fill="#3ddc84" font-size="9" font-family="monospace">Bullish FVG</text>
       <rect x="30" y="50" width="120" height="60" fill="#3ddc84" opacity="0.06" rx="6" stroke="#3ddc84" stroke-width="1" stroke-opacity="0.3"/>
@@ -3244,7 +3465,12 @@ function renderTheory() {
 
   const el = document.getElementById("theory-list");
   if (!list.length) {
-    el.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">Chưa có thẻ nào${theoryEditMode?"<br><small>Nhấn '+ Thêm thẻ' để bắt đầu</small>":""}</div></div>`;
+    el.innerHTML = `<div class="empty">
+      <div style="font-size:48px;margin-bottom:16px;">📚</div>
+      <div class="empty-text" style="font-size:16px;font-weight:600;margin-bottom:8px;">Chưa có thẻ lý thuyết</div>
+      <div style="font-size:13px;opacity:0.6;line-height:1.6;margin-bottom:20px;">Tạo thẻ lý thuyết từ kiến thức ICT<br>hoặc chuyển lệnh backtest sang đây</div>
+      ${theoryEditMode?`<button onclick="openAddTheoryCard()" style="padding:12px 24px;border-radius:var(--radius-xl);background:var(--gold-faint);border:1px solid var(--gold);color:var(--gold);font-size:14px;cursor:pointer;font-weight:500;">+ Tạo thẻ đầu tiên</button>`:""}
+    </div>`;
     return;
   }
 
@@ -3257,9 +3483,9 @@ function renderTheory() {
       const ruleText = typeof firstRule==="string" ? firstRule : (firstRule?.t||"");
       todayHtml = `<div class="today-card" onclick="scrollToCard('${todayCard.id}')">
         <div class="today-label">📅 BÀI HỌC HÔM NAY</div>
-        <div style="font-family:'Cinzel',serif;font-size:14px;color:var(--gold);margin-bottom:6px;">${todayCard.icon} ${todayCard.title}</div>
+        <div style="font-family:var(--sys);font-size:14px;color:var(--gold);margin-bottom:6px;">${todayCard.icon} ${todayCard.title}</div>
         <div style="font-size:13px;color:var(--text);opacity:0.7;line-height:1.5;">${ruleText.replace(/<[^>]+>/g,"").slice(0,80)}...</div>
-        <div style="margin-top:10px;font-size:11px;color:var(--gold);opacity:0.85;font-family:'Cinzel',serif;letter-spacing:1px;">Nhấn để ôn bài →</div>
+        <div style="margin-top:10px;font-size:11px;color:var(--gold);opacity:0.85;font-family:var(--sys);letter-spacing:1px;">Nhấn để ôn bài →</div>
       </div>`;
     }
   }
@@ -3271,9 +3497,9 @@ function renderTheory() {
     const rules = (t.rules||[]).map(r=>typeof r==="string"?r:r.t);
     const catLabel = theoryFolderLabel(t.cat||"basic");
     const editBtns = theoryEditMode ? `
-      <button onclick="event.stopPropagation();openEditTheoryCard('${t.id}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:3px 8px;color:var(--gold);font-size:11px;font-family:'Cinzel',serif;cursor:pointer;flex-shrink:0;">✏️</button>
-      <button onclick="event.stopPropagation();openMoveTheoryCard('${t.id}')" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:3px 8px;color:var(--gold);font-size:11px;font-family:'Cinzel',serif;cursor:pointer;flex-shrink:0;" title="Di chuyển">🗂</button>
-      <button onclick="event.stopPropagation();quickDeleteTheoryCard('${t.id}')" style="background:#ef535014;border:1px solid #ef535055;border-radius:6px;padding:3px 8px;color:var(--loss);font-size:11px;cursor:pointer;flex-shrink:0;" title="Xóa">🗑</button>` : "";
+      <button onclick="event.stopPropagation();openEditTheoryCard('${t.id}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;flex-shrink:0;">✏️</button>
+      <button onclick="event.stopPropagation();openMoveTheoryCard('${t.id}')" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;flex-shrink:0;" title="Di chuyển">🗂</button>
+      <button onclick="event.stopPropagation();quickDeleteTheoryCard('${t.id}')" style="background:#ef535014;border:1px solid #ef535055;border-radius:6px;padding:8px 12px;color:var(--loss);font-size:11px;cursor:pointer;flex-shrink:0;" title="Xóa">🗑</button>` : "";
     return `<div class="theory-card${mastered?" theory-mastered":""}" id="tc-${t.id}">
       <div class="theory-card-header" onclick="toggleTheoryCard('${t.id}')">
         <span class="theory-card-icon">${t.icon}</span>
@@ -3291,16 +3517,16 @@ function renderTheory() {
             const secs=(t.imgSections||[]).filter(s=>s&&(s.images?.length||s.caption));
             if(secs.length) return secs.map(s=>`
               <div style="margin:12px 0;">
-                ${s.tf?`<div style="font-family:'Cinzel',serif;font-size:10px;color:var(--gold);letter-spacing:3px;margin-bottom:6px;opacity:0.8;">${s.tf}</div>`:""}
-                ${(s.images||[]).length?`<div style="margin-bottom:6px;">${(s.images||[]).map(src=>`<img src="${src}" onclick="document.getElementById('theory-img-fullscreen').style.display='flex';document.getElementById('theory-img-fullscreen-img').src=this.src" style="width:100%;border-radius:8px;border:1px solid var(--gold-dim);object-fit:contain;cursor:zoom-in;display:block;margin-bottom:6px;" loading="lazy"/>`).join("")}</div>`:""}
+                ${s.tf?`<div style="font-family:var(--sys);font-size:11px;color:var(--gold);letter-spacing:0.5px;margin-bottom:6px;opacity:0.8;">${s.tf}</div>`:""}
+                ${(s.images||[]).length?`<div style="margin-bottom:6px;">${(s.images||[]).map(src=>`<img src="${src}" onclick="document.getElementById('theory-img-fullscreen').style.display='flex';document.getElementById('theory-img-fullscreen-img').src=this.src" style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);object-fit:contain;cursor:zoom-in;display:block;margin-bottom:6px;" loading="lazy"/>`).join("")}</div>`:""}
                 ${s.caption?`<div style="font-size:13px;color:var(--text);line-height:1.7;font-style:italic;opacity:0.85;padding:8px 12px;background:var(--bg3);border-left:2px solid var(--gold-dim);border-radius:0 8px 8px 0;">${s.caption}</div>`:""}
               </div>`).join("<div style='height:1px;background:var(--border);margin:8px 0;'></div>");
-            if(t.img) return `<pre style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:11px;color:var(--gold);opacity:0.85;font-family:monospace;overflow-x:auto;white-space:pre;margin:14px 0;line-height:1.7;">${t.img}</pre>`;
+            if(t.img) return `<pre style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;font-size:11px;color:var(--gold);opacity:0.85;font-family:monospace;overflow-x:auto;white-space:pre;margin:14px 0;line-height:1.7;">${t.img}</pre>`;
             return "";
           })()}
           ${rules.map(r=>`<div class="theory-rule"><div class="theory-rule-dot"></div><div class="theory-rule-text">${r}</div></div>`).join("")}
           ${highlight?.text?`<div class="theory-highlight ${highlight.type==="warn"?"warn":highlight.type==="info"?"info":""}">💡 ${highlight.text}</div>`:""}
-          <button onclick="toggleMastered('${t.id}')" style="width:100%;margin-top:14px;padding:12px;border-radius:10px;border:1px solid ${mastered?"var(--win)":"var(--gold-faint)"};background:${mastered?"#4caf5018":"transparent"};color:${mastered?"var(--win)":"var(--gold)"};font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;cursor:pointer;transition:all 0.2s;">
+          <button onclick="toggleMastered('${t.id}')" style="width:100%;margin-top:14px;padding:12px;border-radius:var(--radius-md);border:1px solid ${mastered?"var(--win)":"var(--gold-faint)"};background:${mastered?"#4caf5018":"transparent"};color:${mastered?"var(--win)":"var(--gold)"};font-family:var(--sys);font-size:11px;letter-spacing:0.5px;cursor:pointer;transition:all 0.2s;">
             ${mastered?"✓ ĐÃ THUỘC":"○ ĐÁNH DẤU ĐÃ THUỘC"}
           </button>
         </div>
@@ -3464,17 +3690,17 @@ Chỉ điền captions cho timeframe có đề cập. Nếu không có → bỏ 
     try{
       const clean=raw.replace(/```json|```/g,"").trim();
       parsed=JSON.parse(clean);
-    }catch(e){ resultEl.innerHTML=`<div style="color:var(--loss);font-family:'Cinzel',serif;font-size:12px;">❌ AI không thể phân tích. Thử lại với text rõ hơn.</div>`; btn.disabled=false;btn.textContent="🤖 AI ĐỌC & NHẬP LỆNH"; return; }
+    }catch(e){ resultEl.innerHTML=`<div style="color:var(--loss);font-family:var(--sys);font-size:12px;">❌ AI không thể phân tích. Thử lại với text rõ hơn.</div>`; btn.disabled=false;btn.textContent="🤖 AI ĐỌC & NHẬP LỆNH"; return; }
 
-    if(!parsed.length){ resultEl.innerHTML=`<div style="color:var(--gold);font-family:'Cinzel',serif;font-size:12px;">⚠️ Không tìm thấy lệnh nào trong nội dung này.</div>`; btn.disabled=false;btn.textContent="🤖 AI ĐỌC & NHẬP LỆNH"; return; }
+    if(!parsed.length){ resultEl.innerHTML=`<div style="color:var(--gold);font-family:var(--sys);font-size:12px;">⚠️ Không tìm thấy lệnh nào trong nội dung này.</div>`; btn.disabled=false;btn.textContent="🤖 AI ĐỌC & NHẬP LỆNH"; return; }
 
     // Show preview — store parsed in window var to avoid HTML attribute injection
     window._importParsed = parsed;
     resultEl.innerHTML=`
-      <div style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold);letter-spacing:2px;margin-bottom:12px;">✅ TÌM THẤY ${parsed.length} LỆNH</div>
+      <div style="font-family:var(--sys);font-size:12px;color:var(--gold);letter-spacing:2px;margin-bottom:12px;">✅ TÌM THẤY ${parsed.length} LỆNH</div>
       ${parsed.map((t,i)=>`
         <div class="import-preview">
-          <div style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold);margin-bottom:4px;">${esc(t.date||"")} · ${esc(t.symbol||"—")}</div>
+          <div style="font-family:var(--sys);font-size:12px;color:var(--gold);margin-bottom:4px;">${esc(t.date||"")} · ${esc(t.symbol||"—")}</div>
           <div style="font-size:14px;color:var(--text);margin-bottom:4px;">${esc(t.title||"")}</div>
           <div style="display:flex;gap:10px;font-size:13px;">
             <span class="${t.result==="Win"?"win":t.result==="Loss"?"loss":"be"}">${esc(t.result||"?")}</span>
@@ -3482,8 +3708,8 @@ Chỉ điền captions cho timeframe có đề cập. Nếu không có → bỏ 
           </div>
         </div>`).join("")}
       <div style="display:flex;gap:8px;margin-top:8px;">
-        <button id="confirm-import-btn" onclick="confirmImport()" style="flex:1;padding:14px;border-radius:10px;background:linear-gradient(135deg,#4caf5033,transparent);border:1px solid var(--win);color:var(--win);font-family:'Cinzel',serif;font-size:13px;letter-spacing:2px;cursor:pointer;">✅ NHẬP ${parsed.length} LỆNH</button>
-        <button onclick="resetImport()" style="padding:14px 16px;border-radius:10px;border:1px solid var(--gold-faint);background:transparent;color:var(--gold);font-family:'Cinzel',serif;font-size:11px;cursor:pointer;">✕ HỦY</button>
+        <button id="confirm-import-btn" onclick="confirmImport()" style="flex:1;padding:14px;border-radius:var(--radius-md);background:linear-gradient(135deg,#4caf5033,transparent);border:1px solid var(--win);color:var(--win);font-family:var(--sys);font-size:13px;letter-spacing:2px;cursor:pointer;">✅ NHẬP ${parsed.length} LỆNH</button>
+        <button onclick="resetImport()" style="padding:14px 16px;border-radius:var(--radius-md);border:1px solid var(--gold-faint);background:transparent;color:var(--gold);font-family:var(--sys);font-size:11px;cursor:pointer;">✕ HỦY</button>
       </div>`;
   }catch(e){
     resultEl.innerHTML=`<div style="color:var(--loss);">❌ Lỗi: ${e.message}</div>`;
@@ -3519,7 +3745,7 @@ window.confirmImport=async function(){
   window._importParsed=null;
   await loadTrades();
   showToast(`✅ Đã nhập ${ok} lệnh${fail?` (${fail} lỗi)`:""}`);
-  document.getElementById("import-result").innerHTML=`<div style="text-align:center;padding:20px;font-family:'Cinzel',serif;font-size:13px;color:var(--win);">✅ Đã nhập thành công ${ok} lệnh!<br><button onclick="resetImport()" style="margin-top:12px;padding:8px 20px;border-radius:20px;border:1px solid var(--gold-faint);background:transparent;color:var(--gold);font-family:'Cinzel',serif;font-size:11px;cursor:pointer;">+ Nhập thêm</button></div>`;
+  document.getElementById("import-result").innerHTML=`<div style="text-align:center;padding:20px;font-family:var(--sys);font-size:13px;color:var(--win);">✅ Đã nhập thành công ${ok} lệnh!<br><button onclick="resetImport()" style="margin-top:12px;padding:8px 20px;border-radius:var(--radius-xl);border:1px solid var(--gold-faint);background:transparent;color:var(--gold);font-family:var(--sys);font-size:11px;cursor:pointer;">+ Nhập thêm</button></div>`;
   document.getElementById("import-text").value="";
 };
 
@@ -3806,11 +4032,293 @@ renderTheoryFolderBar();
 populateFolderSelects();
 buildTFUploadRow();
 TFS.forEach(tf=>renderTFImages(tf));
+// Show skeleton while loading
+const _tl = document.getElementById("trade-list");
+if(_tl) _tl.innerHTML = Array(5).fill(0).map((_,i)=>`
+  <div style="padding:16px 18px;border-bottom:0.5px solid var(--border);display:flex;gap:12px;animation-delay:${i*0.1}s">
+    <div style="flex:1">
+      <div class="skeleton" style="height:16px;width:60%;margin-bottom:8px;"></div>
+      <div class="skeleton" style="height:11px;width:40%;"></div>
+    </div>
+    <div class="skeleton" style="width:44px;height:44px;border-radius:var(--radius-sm);"></div>
+  </div>`).join("");
+
 await loadTrades();
 const _fab=document.getElementById("fab-btn");
 if(_fab) _fab.classList.add("visible");
 updateSessionBadge();
 setInterval(updateSessionBadge, 60000);
+
+// ═══ PULL TO REFRESH ═══
+(function(){
+  const el = document.getElementById("trade-list");
+  if(!el) return;
+  let startY=0, pulling=false, indicator=null;
+  
+  function createIndicator(){
+    if(indicator) return;
+    indicator = document.createElement("div");
+    indicator.id = "ptr-indicator";
+    indicator.style.cssText = "position:fixed;top:0;left:50%;transform:translateX(-50%);background:var(--bg2);color:var(--gold);font-size:12px;padding:8px 20px;border-radius:0 0 16px 16px;z-index:999;opacity:0;transition:opacity 0.2s;border:0.5px solid var(--gold-faint);";
+    indicator.textContent = "↓ Kéo để làm mới";
+    document.body.appendChild(indicator);
+  }
+  
+  document.addEventListener("touchstart", e=>{
+    if(document.getElementById("screen-list")?.classList.contains("active") && el.scrollTop===0){
+      startY = e.touches[0].clientY;
+      pulling = true;
+      createIndicator();
+    }
+  }, {passive:true});
+  
+  document.addEventListener("touchmove", e=>{
+    if(!pulling) return;
+    const dy = e.touches[0].clientY - startY;
+    if(dy > 20 && indicator){
+      indicator.style.opacity = "1";
+      indicator.textContent = dy > 60 ? "↑ Thả để làm mới" : "↓ Kéo để làm mới";
+    }
+  }, {passive:true});
+  
+  document.addEventListener("touchend", async e=>{
+    if(!pulling) return;
+    pulling = false;
+    const dy = e.changedTouches[0].clientY - startY;
+    if(dy > 60){
+      if(indicator) indicator.textContent = "⟳ Đang tải...";
+      await loadTrades();
+      showToast("✅ Đã cập nhật");
+    }
+    setTimeout(()=>{ if(indicator){indicator.style.opacity="0";} }, 300);
+  });
+})();
+
+
+window.renderStatsExtra = function() {
+  const winByDay = Array(7).fill(0).map(()=>({w:0,l:0}));
+  trades.forEach(t=>{
+    if(!t.tradeDate) return;
+    const d = new Date(t.tradeDate).getDay();
+    if(t.result==="Win") winByDay[d].w++;
+    else if(t.result==="Loss") winByDay[d].l++;
+  });
+  const days = ["CN","T2","T3","T4","T5","T6","T7"];
+  const extra = document.getElementById("stats-extra");
+  if(!extra) return;
+  const maxVal = Math.max(...winByDay.map(d=>d.w+d.l), 1);
+  extra.innerHTML = `<div style="margin-top:20px;background:var(--bg2);border-radius:var(--radius-lg);padding:16px;border:0.5px solid var(--border);">
+    <div style="font-size:11px;letter-spacing:2px;color:var(--gold);margin-bottom:14px;font-weight:500;">WIN RATE THEO NGÀY</div>
+    <div style="display:flex;align-items:flex-end;gap:6px;height:80px;">
+      ${winByDay.map((d,i)=>{
+        const total=d.w+d.l;
+        const wr=total?Math.round(d.w/total*100):0;
+        const h=total?Math.round((total/maxVal)*64):2;
+        const col=wr>=60?"var(--win)":wr>=40?"var(--gold)":"var(--loss)";
+        return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div style="font-size:9px;color:${col};font-weight:600;">${total?wr+"%":""}</div>
+          <div style="width:100%;height:${h}px;background:${col};border-radius:4px 4px 0 0;opacity:0.85;min-height:2px;"></div>
+          <div style="font-size:10px;color:var(--text);opacity:0.6;">${days[i]}</div>
+        </div>`;
+      }).join("")}
+    </div>
+  </div>`;
+};
+
+
+// ═══ PWA / OFFLINE ═══
+if('serviceWorker' in navigator) {
+  // Inline service worker as blob URL for single-file app
+  const swCode = `
+    const CACHE = 'tradelog-v1';
+    const ASSETS = [location.pathname];
+    self.addEventListener('install', e => e.waitUntil(
+      caches.open(CACHE).then(c => c.addAll(ASSETS))
+    ));
+    self.addEventListener('fetch', e => {
+      if(e.request.method !== 'GET') return;
+      e.respondWith(
+        fetch(e.request).catch(() => caches.match(e.request))
+      );
+    });
+  `;
+  const blob = new Blob([swCode], {type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+}
+
+
+// ═══ KEYBOARD SHORTCUTS ═══
+document.addEventListener('keydown', function(e) {
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable) return;
+  const active = document.querySelector('.screen.active')?.id;
+  if(e.key==='n'||e.key==='N') { if(active==='screen-list') { openNew(); e.preventDefault(); } }
+  if(e.key==='/'||e.key==='f') { const s=document.getElementById('search-input'); if(s&&active==='screen-list'){s.focus();e.preventDefault();} }
+  if(e.key==='Escape') {
+    document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none');
+    const fullscreen = document.getElementById('theory-img-fullscreen');
+    if(fullscreen) fullscreen.style.display='none';
+  }
+  if(e.key==='ArrowLeft'&&active==='screen-detail') navTrade(-1);
+  if(e.key==='ArrowRight'&&active==='screen-detail') navTrade(1);
+});
+
+
+// ═══ SWIPE TO DELETE ═══
+(function(){
+  let startX=0, startY=0, el=null, dx=0, animFrame=null;
+  document.addEventListener('touchstart', e=>{
+    const item = e.target.closest('.trade-item');
+    if(!item) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    el = item; dx = 0;
+    // ensure delete bg exists
+    if(!item.querySelector('.swipe-delete-bg')){
+      const bg = document.createElement('div');
+      bg.className = 'swipe-delete-bg'; bg.innerHTML = '🗑';
+      item.appendChild(bg);
+    }
+  }, {passive:true});
+  
+  document.addEventListener('touchmove', e=>{
+    if(!el) return;
+    const ddx = e.touches[0].clientX - startX;
+    const ddy = e.touches[0].clientY - startY;
+    if(Math.abs(ddy) > Math.abs(ddx) && Math.abs(dx) < 5) { el=null; return; }
+    if(ddx > 0) return; // only left swipe
+    dx = Math.max(-100, ddx);
+    el.style.transform = `translateX(${dx}px)`;
+    const bg = el.querySelector('.swipe-delete-bg');
+    if(bg) bg.style.opacity = Math.min(1, -dx/60);
+    e.preventDefault();
+  }, {passive:false});
+  
+  document.addEventListener('touchend', e=>{
+    if(!el) return;
+    if(dx < -60){
+      // Confirm delete
+      const tradeId = el.id?.replace('ti-','');
+      if(tradeId && confirm('Xóa lệnh này?')){
+        el.style.transition='transform 0.2s ease,opacity 0.2s';
+        el.style.transform='translateX(-100%)'; el.style.opacity='0';
+        setTimeout(async()=>{
+          try{ await deleteDoc(doc(db,'trades',tradeId)); }catch(err){}
+          await loadTrades(); renderList();
+          showToast('🗑 Đã xóa');
+        }, 200);
+      } else {
+        el.style.transition='transform 0.3s cubic-bezier(0.34,1.56,0.64,1)';
+        el.style.transform=''; el.style.opacity='';
+        setTimeout(()=>el.style.transition='',300);
+      }
+    } else {
+      el.style.transition='transform 0.25s cubic-bezier(0.4,0,0.2,1)';
+      el.style.transform=''; el.style.opacity='';
+      setTimeout(()=>{if(el)el.style.transition='';},250);
+    }
+    el=null; dx=0;
+  });
+})();
+
+
+// ═══ LONG PRESS CONTEXT MENU ═══
+(function(){
+  let lpTimer=null, lpEl=null;
+  
+  function showContextMenu(el, tradeId) {
+    let menu = document.getElementById('context-menu');
+    if(!menu){
+      menu = document.createElement('div');
+      menu.id = 'context-menu';
+      menu.style.cssText = 'position:fixed;z-index:8000;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:6px;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,0.3);';
+      document.body.appendChild(menu);
+    }
+    const rect = el.getBoundingClientRect();
+    menu.innerHTML = `
+      <div onclick="openDetail('${tradeId}');closeContextMenu()" style="padding:12px 16px;cursor:pointer;font-size:14px;border-radius:var(--radius-sm);">👁 Xem chi tiết</div>
+      <div onclick="currentTrade=trades.find(t=>t.id==='${tradeId}');openEdit();closeContextMenu()" style="padding:12px 16px;cursor:pointer;font-size:14px;border-radius:var(--radius-sm);">✏️ Sửa lệnh</div>
+      <div onclick="lastSavedId=null;const t=trades.find(x=>x.id==='${tradeId}');if(t){currentTrade=t;duplicateTrade();}closeContextMenu()" style="padding:12px 16px;cursor:pointer;font-size:14px;border-radius:var(--radius-sm);">📋 Nhân bản</div>
+      <div style="height:0.5px;background:var(--border);margin:4px 0;"></div>
+      <div onclick="if(confirm('Xóa?')){deleteDoc(doc(db,'trades','${tradeId}')).then(()=>{loadTrades().then(renderList);showToast('🗑 Đã xóa');});}closeContextMenu()" style="padding:12px 16px;cursor:pointer;font-size:14px;border-radius:var(--radius-sm);color:var(--loss);">🗑 Xóa</div>
+    `;
+    // Position
+    const top = Math.min(rect.bottom + 4, window.innerHeight - 220);
+    const left = Math.min(rect.left, window.innerWidth - 200);
+    menu.style.top = top + 'px';
+    menu.style.left = left + 'px';
+    menu.style.display = 'block';
+    if(navigator.vibrate) navigator.vibrate(10);
+    setTimeout(()=>document.addEventListener('click', closeContextMenu, {once:true}), 100);
+  }
+  
+  window.closeContextMenu = function(){
+    const m = document.getElementById('context-menu');
+    if(m) m.style.display='none';
+  };
+  
+  document.addEventListener('touchstart', e=>{
+    const item = e.target.closest('.trade-item');
+    if(!item) return;
+    lpEl = item;
+    lpTimer = setTimeout(()=>{
+      const id = item.id?.replace('ti-','');
+      if(id) showContextMenu(item, id);
+    }, 500);
+  }, {passive:true});
+  
+  document.addEventListener('touchend', ()=>{ clearTimeout(lpTimer); lpEl=null; });
+  document.addEventListener('touchmove', ()=>{ clearTimeout(lpTimer); lpEl=null; });
+})();
+
+
+// Performance: throttle renders with rAF
+let _rafPending = false;
+function rafRenderList() {
+  if(_rafPending) return;
+  _rafPending = true;
+  requestAnimationFrame(() => { _rafPending = false; renderList(); });
+}
+
+
+// ═══ VIRTUAL SCROLL (Ternus: 60fps even with 500+ trades) ═══
+let _renderedCount = 30;
+const RENDER_BATCH = 20;
+function setupVirtualScroll() {
+  const list = document.getElementById('trade-list');
+  if(!list) return;
+  list.addEventListener('scroll', function() {
+    if(this.scrollTop + this.clientHeight > this.scrollHeight - 200) {
+      if(_renderedCount < _currentFilteredList?.length) {
+        _renderedCount += RENDER_BATCH;
+        renderList(true); // partial re-render
+      }
+    }
+  }, {passive:true});
+}
+let _currentFilteredList = [];
+
+
+// ═══ DEBOUNCE ═══
+function debounce(fn, ms) {
+  let t; return function(...args) { clearTimeout(t); t = setTimeout(()=>fn.apply(this,args), ms); };
+}
+const debouncedSearch = debounce((v) => { renderList(); }, 150);
+
+
+// ═══ FOCUS TRAP (Tim Cook: accessibility) ═══
+function trapFocus(modalEl) {
+  const focusable = modalEl.querySelectorAll('button,input,select,textarea,[tabindex]:not([tabindex="-1"])');
+  if(!focusable.length) return;
+  const first = focusable[0], last = focusable[focusable.length-1];
+  modalEl.addEventListener('keydown', function handler(e) {
+    if(e.key !== 'Tab') return;
+    if(e.shiftKey) { if(document.activeElement===first){last.focus();e.preventDefault();} }
+    else { if(document.activeElement===last){first.focus();e.preventDefault();} }
+  });
+  setTimeout(()=>first.focus(), 50);
+}
+
+})(); // end async IIFE
 </script>
 </body>
 </html>
