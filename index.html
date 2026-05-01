@@ -1041,11 +1041,8 @@
         <button onclick="addTheoryImgSection()" style="width:100%;margin-top:8px;padding:10px;border-radius:8px;border:1px dashed var(--gold-dim);background:transparent;color:var(--gold);font-size:11px;font-family:'Cinzel',serif;cursor:pointer;letter-spacing:1px;">+ Thêm khung thời gian</button>
       </div>
 
-      <!-- ── SƠ ĐỒ ASCII ── -->
-      <div style="background:var(--bg3);border-radius:12px;padding:14px;border:1px solid var(--gold-faint);">
-        <div style="font-size:9px;letter-spacing:3px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:8px;opacity:0.8;">SƠ ĐỒ ASCII (tuỳ chọn)</div>
-        <textarea id="te-img" rows="4" placeholder="Vẽ sơ đồ bằng ký tự ASCII..." style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:8px;padding:10px;color:var(--text);font-size:11px;font-family:monospace;outline:none;resize:vertical;line-height:1.6;"></textarea>
-      </div>
+      <!-- ASCII field hidden - not needed with image upload -->
+      <textarea id="te-img" style="display:none;"></textarea>
 
       <!-- ── NỘI DUNG / PHÂN TÍCH ── -->
       <div style="background:var(--bg3);border-radius:12px;padding:14px;border:1px solid var(--gold-faint);">
@@ -1314,10 +1311,89 @@ function renderFolderBar() {
   document.getElementById("folder-bar").innerHTML=
     folders.map(f=>{
       const safe=f.replace(/'/g,"\\'");
-      return `<button class="folder-chip${currentFolder===f?" active":""}" onclick="selectFolder('${safe}')">${emojis[f]||"🗂"} ${esc(f==="all"?"Tất cả":f)}${f!=="all"?`<span onclick="event.stopPropagation();deleteFolder('${safe}')" style="margin-left:6px;opacity:0.55;font-size:11px;padding:2px 3px;border-radius:3px;" title="Xóa thư mục">✕</span>`:""}</button>`;
+      const copyBtn = f!=="all"
+        ? `<span onclick="event.stopPropagation();copyFolderToTheory('${safe}')" style="margin-left:4px;opacity:0.55;font-size:10px;padding:2px 4px;border-radius:3px;border:1px solid var(--gold-faint);" title="Copy sang Lý Thuyết">📖</span>`
+        : "";
+      const delBtn = f!=="all"
+        ? `<span onclick="event.stopPropagation();deleteFolder('${safe}')" style="margin-left:2px;opacity:0.55;font-size:11px;padding:2px 3px;border-radius:3px;" title="Xóa thư mục">✕</span>`
+        : "";
+      return `<button class="folder-chip${currentFolder===f?" active":""}" onclick="selectFolder('${safe}')">${emojis[f]||"🗂"} ${esc(f==="all"?"Tất cả":f)}${copyBtn}${delBtn}</button>`;
     }).join("")+
     `<button class="folder-chip add-folder" onclick="addFolder()">＋ Thêm</button>`;
 }
+
+window.copyFolderToTheory = async function(folderName) {
+  const inFolder = trades.filter(t=>(t.folder||"")===folderName);
+  if (!inFolder.length) { showToast("Thư mục trống!"); return; }
+
+  // Pick or create theory folder
+  const nonFixed = theoryFolders.filter(f=>f.key!=="all"&&f.key!=="quiz");
+  let destKey = "";
+
+  if (nonFixed.length === 0) {
+    // No theory folders yet — create one with same name
+    const label = folderName;
+    const key = "f_" + label.toLowerCase().replace(/\s+/g,"_").replace(/[^a-z0-9_]/g,"") + "_" + Date.now().toString().slice(-4);
+    theoryFolders.push({key, label, icon:"📁", children:[]});
+    await saveTheoryFolders();
+    destKey = key;
+    showToast(`📁 Đã tạo thư mục lý thuyết "${label}"`);
+  } else {
+    // Let user pick from existing theory folders
+    const opts = nonFixed.map((f,i)=>`${i+1}. ${f.label}`).join("\n");
+    const input = prompt(`Copy "${folderName}" (${inFolder.length} lệnh) vào thư mục lý thuyết nào?\n\n${opts}\n\nNhập số, hoặc để trống để tạo thư mục mới "${folderName}":`);
+    if (input === null) return; // cancelled
+    const idx = parseInt(input)-1;
+    if (!isNaN(idx) && nonFixed[idx]) {
+      destKey = nonFixed[idx].key;
+    } else {
+      // Create new folder with same name
+      const label = folderName;
+      const key = "f_" + label.toLowerCase().replace(/\s+/g,"_").replace(/[^a-z0-9_]/g,"") + "_" + Date.now().toString().slice(-4);
+      theoryFolders.push({key, label, icon:"📁", children:[]});
+      await saveTheoryFolders();
+      destKey = key;
+    }
+  }
+
+  // Copy each trade as a theory card
+  let count = 0;
+  for (const t of inFolder) {
+    const newId = "tc_trade_" + t.id;
+    if (theoryCustomData[newId] && !theoryCustomData[newId]._deleted) continue; // skip if already copied
+    const secs = [];
+    if (t.images) {
+      for (const tf of TFS) {
+        const v = t.images[tf];
+        const list = Array.isArray(v)?v:(v?[v]:[]);
+        if (list.length) secs.push({tf, images:list, caption:(t.captions?.[tf]||"")});
+      }
+    }
+    theoryCustomData[newId] = {
+      id: newId,
+      icon: "📋",
+      cat: destKey,
+      title: t.title||"Lệnh chuyển đổi",
+      tag: (Array.isArray(t.tags)?t.tags.join(", "):(t.tags||""))||t.symbol||"",
+      img: "",
+      rules: t.note ? [{t: t.note}] : [],
+      imgSections: secs,
+      highlight: {
+        type: t.result==="Win"?"tip":t.result==="Loss"?"warn":"info",
+        text: [t.result, t.pnl, t.onplan, t.symbol].filter(Boolean).join(" · ")
+      },
+      quiz: {q:"",opts:["","","",""],ans:0},
+      _fromTrade: t.id
+    };
+    count++;
+  }
+
+  await saveCustomTheory();
+  showToast(`✅ Đã copy ${count} lệnh → Lý Thuyết`);
+  // Navigate to theory screen at the right folder
+  theoryCategory = destKey;
+  showScreen("theory");
+};
 function populateFolderSelects(selected="") {
   ["f-folder","e-folder"].forEach(id=>{
     const sel=document.getElementById(id); if(!sel) return;
