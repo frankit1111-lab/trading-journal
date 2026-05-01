@@ -698,7 +698,7 @@
   <!-- Copy to theory bar — hiện khi đang xem 1 thư mục cụ thể -->
   <div id="folder-action-bar" style="display:none;padding:8px 16px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;align-items:center;gap:8px;">
     <span id="folder-action-label" style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold);flex:1;"></span>
-    <button onclick="copyFolderToTheory(currentFolder)" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:8px;padding:7px 14px;color:var(--gold);font-size:11px;font-family:'Cinzel',serif;cursor:pointer;letter-spacing:1px;">📖 Di Chuyển / Copy → Lý Thuyết</button>
+    <button id="folder-action-btn" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:8px;padding:7px 14px;color:var(--gold);font-size:11px;font-family:'Cinzel',serif;cursor:pointer;letter-spacing:1px;">📖 Di Chuyển / Copy → Lý Thuyết</button>
   </div>
   <div class="sort-bar">
     <span class="sort-label">Sắp xếp:</span>
@@ -715,10 +715,10 @@
 
     <!-- Copy vs Move toggle -->
     <div style="display:flex;gap:8px;margin-bottom:14px;">
-      <button id="ctt-copy-btn" onclick="setCopyMoveMode('copy')" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--gold);background:var(--gold-faint);color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;">
+      <button id="ctt-copy-btn" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--gold);background:var(--gold-faint);color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;">
         📋 COPY<br><span style="opacity:0.65;font-size:9px;">Giữ lại trong nhật ký</span>
       </button>
-      <button id="ctt-move-btn" onclick="setCopyMoveMode('move')" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;opacity:0.6;">
+      <button id="ctt-move-btn" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;opacity:0.6;">
         🚀 DI CHUYỂN<br><span style="opacity:0.65;font-size:9px;">Xóa khỏi nhật ký</span>
       </button>
     </div>
@@ -1346,18 +1346,37 @@ window._openTheoryTransferModal = function(title, folderName, isSingle) {
   _theoryTransferSingle = isSingle;
   setCopyMoveMode("copy");
   document.getElementById("modal-copy-theory-title").textContent = title;
-  const nonFixed = theoryFolders.filter(f=>f.key!=="all");
-  const folderItems = nonFixed.flatMap(f => {
-    const rows = [`<div class="modal-option" onclick="execTheoryTransfer('${f.key}')">${f.icon} ${esc(f.label)}</div>`];
-    (f.children||[]).forEach(c => rows.push(`<div class="modal-option" onclick="execTheoryTransfer('${f.key}/${c.key}')" style="padding-left:28px;font-size:13px;">└ ${esc(c.label||c.key)}</div>`));
-    return rows;
-  }).join("");
 
-  document.getElementById("modal-copy-theory-list").innerHTML =
-    (nonFixed.length === 0
-      ? `<div style="text-align:center;padding:16px;color:var(--gold);opacity:0.6;font-family:'Cinzel',serif;font-size:12px;letter-spacing:1px;">Chưa có thư mục lý thuyết</div>`
-      : folderItems) +
-    `<div class="modal-option" onclick="execTheoryTransfer('__new__')" style="border:1px dashed var(--gold-dim);color:var(--gold);margin-top:${nonFixed.length?'4px':'0'};">＋ Tạo thư mục mới trong Lý Thuyết</div>`;
+  const nonFixed = theoryFolders.filter(f=>f.key!=="all");
+  const listEl = document.getElementById("modal-copy-theory-list");
+  listEl.innerHTML = "";
+
+  // Build folder options
+  const addOption = (html, key) => {
+    const d = document.createElement("div");
+    d.className = "modal-option";
+    d.innerHTML = html;
+    if (key === "__new__") {
+      d.style.cssText = "border:1px dashed var(--gold-dim);color:var(--gold);margin-top:4px;";
+    }
+    d.addEventListener("click", () => execTheoryTransfer(key));
+    listEl.appendChild(d);
+  };
+
+  if (nonFixed.length === 0) {
+    const msg = document.createElement("div");
+    msg.style.cssText = "text-align:center;padding:16px;color:var(--gold);opacity:0.6;font-family:'Cinzel',serif;font-size:12px;letter-spacing:1px;";
+    msg.textContent = "Chưa có thư mục lý thuyết";
+    listEl.appendChild(msg);
+  } else {
+    nonFixed.forEach(f => {
+      addOption(`${f.icon} ${esc(f.label)}`, f.key);
+      (f.children||[]).forEach(c => {
+        addOption(`<span style="padding-left:16px;font-size:13px;">└ ${esc(c.label||c.key)}</span>`, `${f.key}/${c.key}`);
+      });
+    });
+  }
+  addOption("＋ Tạo thư mục mới trong Lý Thuyết", "__new__");
 
   document.getElementById("modal-copy-theory").style.display = "flex";
 };
@@ -1432,9 +1451,11 @@ window.selectFolder=function(f){
   renderList();
   const bar = document.getElementById("folder-action-bar");
   const lbl = document.getElementById("folder-action-label");
+  const btn = document.getElementById("folder-action-btn");
   if (f && f!=="all" && bar) {
     bar.style.display="flex";
     if(lbl) lbl.textContent = `🗂 ${f}`;
+    if(btn) btn.onclick = () => copyFolderToTheory(f);
   } else if (bar) {
     bar.style.display="none";
   }
@@ -3767,11 +3788,10 @@ autoThemeByTime();
 await loadFolders();
 await loadTheoryData();
 
-// Expose module-scoped variables to window so onclick handlers can access them
-window._getTheoryFolders = () => theoryFolders;
-window._getTheoryCustomData = () => theoryCustomData;
-window._getTradesArr = () => trades;
-window._getTFS = () => TFS;
+// Wire modal buttons (inside module scope to avoid onclick scope issues)
+document.getElementById("ctt-copy-btn")?.addEventListener("click", () => setCopyMoveMode("copy"));
+document.getElementById("ctt-move-btn")?.addEventListener("click", () => setCopyMoveMode("move"));
+document.getElementById("folder-action-btn")?.addEventListener("click", () => copyFolderToTheory(currentFolder));
 
 renderFolderBar();
 renderTheoryFolderBar();
