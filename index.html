@@ -1017,11 +1017,7 @@
           <div>
             <div style="font-size:9px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:4px;opacity:0.7;">DANH MỤC</div>
             <select id="te-cat" style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:8px;padding:9px 10px;color:var(--text);font-size:13px;outline:none;">
-              <option value="basic">🧱 Cơ Bản</option>
-              <option value="pda">📐 PDA</option>
-              <option value="entry">🎯 Vào Lệnh</option>
-              <option value="drill">🏋️ Drill 2026</option>
-              <option value="playbook">📒 Playbook</option>
+              <option value="all">📖 Tất cả</option>
             </select>
           </div>
         </div>
@@ -2459,15 +2455,10 @@ let theoryQuizAnswered = {};
 let theoryEditMode = false;
 let theoryCustomData = {}; // Override map: id -> custom card data
 let theoryEditingId = null;
-// theoryFolders: [{key, label, icon, children:[{key,label}]}]
+// theoryFolders: loaded from Firebase, default chỉ có Tất cả + Quiz
 let theoryFolders = [
-  {key:"all",   label:"Tất cả",   icon:"📖", children:[]},
-  {key:"basic", label:"Cơ Bản",   icon:"🧱", children:[]},
-  {key:"pda",   label:"PDA",      icon:"📐", children:[]},
-  {key:"entry", label:"Vào Lệnh", icon:"🎯", children:[]},
-  {key:"drill", label:"Drill 2026",icon:"🏋️",children:[]},
-  {key:"playbook",label:"Playbook",icon:"📒",children:[]},
-  {key:"quiz",  label:"Quiz",     icon:"❓", children:[]},
+  {key:"all",   label:"Tất cả", icon:"📖", children:[]},
+  {key:"quiz",  label:"Quiz",   icon:"❓", children:[]},
 ];
 
 // ══ THEORY FOLDER MANAGEMENT ══
@@ -2476,11 +2467,20 @@ async function loadTheoryFolders() {
     const snap = await getDoc(doc(db,"app_config","theory_folders"));
     if (snap.exists()) {
       const saved = snap.data().folders;
-      if (Array.isArray(saved) && saved.length) theoryFolders = saved;
+      if (Array.isArray(saved) && saved.length) {
+        theoryFolders = saved;
+        // Always ensure "all" and "quiz" exist
+        if (!theoryFolders.find(f=>f.key==="all")) theoryFolders.unshift({key:"all",label:"Tất cả",icon:"📖",children:[]});
+        if (!theoryFolders.find(f=>f.key==="quiz")) theoryFolders.push({key:"quiz",label:"Quiz",icon:"❓",children:[]});
+      }
     }
   } catch(e) {
     const local = JSON.parse(localStorage.getItem("tl_theory_folders")||"null");
-    if (local) theoryFolders = local;
+    if (local) {
+      theoryFolders = local;
+      if (!theoryFolders.find(f=>f.key==="all")) theoryFolders.unshift({key:"all",label:"Tất cả",icon:"📖",children:[]});
+      if (!theoryFolders.find(f=>f.key==="quiz")) theoryFolders.push({key:"quiz",label:"Quiz",icon:"❓",children:[]});
+    }
   }
 }
 async function saveTheoryFolders() {
@@ -2511,26 +2511,35 @@ function renderTheoryFolderBar() {
   if (!bar) return;
 
   const curParent = theoryCategory.split("/")[0];
+
   bar.innerHTML = theoryFolders.map(f => {
     const active = f.key===curParent || (f.key==="all" && theoryCategory==="all");
-    return `<button class="folder-chip${active?" active":""}" onclick="setTheoryFolder('${f.key}')">${f.icon} ${f.label}</button>`;
+    const isFixed = f.key==="all" || f.key==="quiz"; // cannot delete
+    const deleteBtn = (theoryEditMode && !isFixed)
+      ? `<span onclick="event.stopPropagation();deleteTheoryFolder('${f.key}')" style="margin-left:5px;opacity:0.6;font-size:11px;line-height:1;padding:0 2px;" title="Xóa thư mục">✕</span>`
+      : "";
+    return `<button class="folder-chip${active?" active":""}" onclick="setTheoryFolder('${f.key}')" style="display:inline-flex;align-items:center;gap:2px;">${f.icon} ${f.label}${deleteBtn}</button>`;
   }).join("") +
   (theoryEditMode ? `<button class="folder-chip add-folder" onclick="addTheoryFolder()" style="border-style:dashed;">＋ Thư mục</button>` : "");
 
   // Show subfolder bar if current folder has children
   const parentFolder = theoryFolders.find(f=>f.key===curParent);
   const children = parentFolder?.children||[];
-  if (children.length && curParent!=="all") {
+  if (children.length && curParent!=="all" && curParent!=="quiz") {
     sub.style.display = "flex";
-    sub.innerHTML = `<button class="folder-chip${!theorySubfolder?" active":""}" onclick="setTheorySubfolder('')">📁 Tất cả</button>` +
+    sub.innerHTML =
+      `<button class="folder-chip${!theorySubfolder?" active":""}" onclick="setTheorySubfolder('')">📁 Tất cả</button>` +
       children.map(c => {
         const active = theorySubfolder===c.key;
-        return `<button class="folder-chip${active?" active":""}" onclick="setTheorySubfolder('${c.key}')">${c.label||c.key}${theoryEditMode?` <span onclick="event.stopPropagation();deleteTheorySubfolder('${curParent}','${c.key}')" style="opacity:0.5;margin-left:4px;">✕</span>`:""}</button>`;
+        const delBtn = theoryEditMode
+          ? `<span onclick="event.stopPropagation();deleteTheorySubfolder('${curParent}','${c.key}')" style="margin-left:4px;opacity:0.55;font-size:11px;">✕</span>`
+          : "";
+        return `<button class="folder-chip${active?" active":""}" onclick="setTheorySubfolder('${c.key}')" style="display:inline-flex;align-items:center;">${c.label||c.key}${delBtn}</button>`;
       }).join("") +
       (theoryEditMode ? `<button class="folder-chip add-folder" onclick="addTheorySubfolder('${curParent}')" style="border-style:dashed;font-size:10px;">＋ Thư mục con</button>` : "");
   } else {
     sub.style.display = "none";
-    theorySubfolder = "";
+    if (theorySubfolder) theorySubfolder = "";
   }
 }
 
@@ -2547,10 +2556,18 @@ window.setTheorySubfolder = function(sub) {
 window.addTheoryFolder = async function() {
   const label = prompt("Tên thư mục lý thuyết mới:");
   if (!label?.trim()) return;
-  const key = label.trim().toLowerCase().replace(/\s+/g,"_").replace(/[^a-z0-9_]/g,"") || ("f"+Date.now());
-  if (theoryFolders.find(f=>f.key===key)) { showToast("Thư mục đã tồn tại!"); return; }
+  const key = "f_" + label.trim().toLowerCase().replace(/\s+/g,"_").replace(/[^a-z0-9_]/g,"") + "_" + Date.now().toString().slice(-4);
   theoryFolders.push({key, label:label.trim(), icon:"📁", children:[]});
-  await saveTheoryFolders(); renderTheoryFolderBar(); showToast("✅ Đã thêm thư mục");
+  await saveTheoryFolders(); renderTheoryFolderBar(); showToast("✅ Đã thêm: "+label.trim());
+};
+
+window.deleteTheoryFolder = async function(key) {
+  const folder = theoryFolders.find(f=>f.key===key);
+  if (!folder) return;
+  if (!confirm(`Xóa thư mục "${folder.label}"?\nCác thẻ bên trong sẽ không bị xóa.`)) return;
+  theoryFolders = theoryFolders.filter(f=>f.key!==key);
+  if (theoryCategory===key) theoryCategory="all";
+  await saveTheoryFolders(); renderTheoryFolderBar(); renderTheory(); showToast("🗑 Đã xóa thư mục");
 };
 window.addTheorySubfolder = async function(parentKey) {
   const label = prompt("Tên thư mục con:");
@@ -2819,12 +2836,26 @@ function teRenderSecImgs(idx) {
 window.teRemoveImg=function(idx,i){teImgSections[idx].images.splice(i,1);teRenderSecImgs(idx);};
 window.openTeImgFull=function(src){const fs=document.getElementById("theory-img-fullscreen");document.getElementById("theory-img-fullscreen-img").src=src;fs.style.display="flex";};
 
+function populateTheoryCatSelect(selectedKey) {
+  const sel = document.getElementById("te-cat");
+  sel.innerHTML = theoryFolders
+    .filter(f => f.key!=="all" && f.key!=="quiz")
+    .flatMap(f => {
+      const opts = [`<option value="${f.key}">${f.icon} ${f.label}</option>`];
+      (f.children||[]).forEach(c => {
+        opts.push(`<option value="${f.key}/${c.key}">&nbsp;&nbsp;└ ${c.label||c.key}</option>`);
+      });
+      return opts;
+    }).join("") || `<option value="general">📁 Chung</option>`;
+  if (selectedKey) sel.value = selectedKey;
+}
+
 window.openAddTheoryCard = function() {
   theoryEditingId = null; teImgSections = []; window._tePasteAttached = false;
   document.getElementById("theory-edit-modal-title").textContent = "THÊM THẺ MỚI";
   ["te-icon","te-title","te-tag","te-img","te-hl-text","te-quiz-q"].forEach(id=>document.getElementById(id).value="");
   document.getElementById("te-icon").value="📌";
-  document.getElementById("te-cat").value="basic";
+  populateTheoryCatSelect(theoryCategory!=="all"&&theoryCategory!=="quiz"?theoryCategory:"");
   document.getElementById("te-hl-type").value="tip";
   document.getElementById("te-quiz-ans").value="0";
   [0,1,2,3].forEach(i=>document.getElementById("te-opt-"+i).value="");
@@ -2841,7 +2872,7 @@ window.openEditTheoryCard = function(id) {
   theoryEditingId = id; teImgSections = []; window._tePasteAttached = false;
   document.getElementById("theory-edit-modal-title").textContent = "CHỈNH SỬA THẺ";
   document.getElementById("te-icon").value = t.icon||"📌";
-  document.getElementById("te-cat").value = t.cat||"basic";
+  populateTheoryCatSelect(t.cat||"");
   document.getElementById("te-title").value = t.title||"";
   document.getElementById("te-tag").value = t.tag||"";
   document.getElementById("te-img").value = t.img||"";
@@ -2902,6 +2933,20 @@ window.quickDeleteTheoryCard = async function(id) {
   await saveCustomTheory();
   renderTheory();
   showToast("🗑 Đã xóa thẻ");
+};
+
+window.deleteAllTheoryCards = async function() {
+  if (!confirm("Xóa TẤT CẢ thẻ lý thuyết?\n\nBao gồm cả 18 thẻ ICT gốc. Bạn sẽ tự làm lại từ đầu.")) return;
+  if (!confirm("Xác nhận lần 2 — không thể hoàn tác!")) return;
+  // Mark all built-in cards as deleted
+  THEORY_DATA.forEach(t => { theoryCustomData[t.id] = { id: t.id, _deleted: true }; });
+  // Remove all custom cards
+  Object.keys(theoryCustomData).forEach(k => {
+    if (!theoryCustomData[k]._deleted) theoryCustomData[k] = { id: k, _deleted: true };
+  });
+  await saveCustomTheory();
+  renderTheory();
+  showToast("🗑 Đã xóa tất cả thẻ lý thuyết");
 };
 
 window.closeTheoryEditModal = function(e) {
