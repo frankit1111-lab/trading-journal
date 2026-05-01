@@ -42,7 +42,18 @@
   --radius-xl: 20px;
 }
 
-  /* ═══ MICRO-ANIMATIONS ═══ */
+  /* ═══ DAY GROUP ═══ */
+  .day-group { margin-bottom: 4px; }
+  .day-header {
+    display: flex; align-items: center; gap: 6px;
+    padding: 10px 16px; background: var(--bg2);
+    border-bottom: 0.5px solid var(--border);
+    cursor: pointer; user-select: none;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .day-header:hover { background: var(--bg3); }
+  .day-group-body { }
+  .day-group-body.collapsed { display: none; }
   @keyframes slideUp {
     from { opacity:0; transform:translateY(12px); }
     to   { opacity:1; transform:translateY(0); }
@@ -1106,10 +1117,10 @@
     <!-- Add new folder/subfolder -->
     <div style="display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--gold-faint);">
       <input id="modal-new-folder-input" placeholder="Tên thư mục mới..." style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;"/>
-      <button onclick="addFolderFromModal()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);padding:8px 14px;color:var(--gold);font-size:12px;font-family:var(--sys);cursor:pointer;flex-shrink:0;">+ Tạo</button>
+      <button id="btn-modal-add-folder" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);padding:8px 14px;color:var(--gold);font-size:12px;font-family:var(--sys);cursor:pointer;flex-shrink:0;">+ Tạo</button>
     </div>
 
-    <button class="modal-cancel" style="margin-top:8px;" onclick="document.getElementById('modal-move').style.display='none'">Huỷ</button>
+    <button id="btn-modal-move-cancel" class="modal-cancel" style="margin-top:8px;">Huỷ</button>
   </div>
 </div>
 
@@ -1486,36 +1497,57 @@ async function saveFolders() {
 }
 function renderFolderBar() {
   const emojis={all:"📂",Win:"✅",Loss:"❌",BE:"➖"};
-  document.getElementById("folder-bar").innerHTML=
+  const bar = document.getElementById("folder-bar");
+  bar.innerHTML =
     folders.map(f=>{
-      const safe=f.replace(/'/g,"\\'");
-      const editBtns = f!=="all"
-        ? `<span onclick="event.stopPropagation();renameFolder('${safe}')" style="margin-left:4px;opacity:0.6;font-size:11px;padding:1px 4px;border-radius:3px;border:1px solid var(--gold-faint);" title="Đổi tên">✏️</span><span onclick="event.stopPropagation();deleteFolder('${safe}')" style="margin-left:2px;opacity:0.55;font-size:11px;padding:2px 3px;border-radius:3px;" title="Xóa thư mục">✕</span>`
+      const safe = f.replace(/'/g,"\\'");
+      const actionBtns = f!=="all"
+        ? `<span class="fc-rename" data-folder="${f}" style="margin-left:5px;opacity:0.55;font-size:11px;padding:2px 4px;border-radius:3px;cursor:pointer;" title="Đổi tên">✏️</span>
+           <span class="fc-delete" data-folder="${f}" style="margin-left:2px;opacity:0.55;font-size:12px;padding:2px 4px;border-radius:3px;cursor:pointer;" title="Xóa">✕</span>`
         : "";
-      return `<button class="folder-chip${currentFolder===f?" active":""}" onclick="selectFolder('${safe}')" style="display:inline-flex;align-items:center;gap:2px;">${emojis[f]||"🗂"} ${esc(f==="all"?"Tất cả":f)}${editBtns}</button>`;
-    }).join("")+
-    `<button class="folder-chip add-folder" onclick="addFolder()">＋ Thêm</button>`;
+      return `<button class="folder-chip${currentFolder===f?" active":""}" data-folder="${f}">${emojis[f]||"🗂"} ${esc(f==="all"?"Tất cả":f)}${actionBtns}</button>`;
+    }).join("") +
+    `<button class="folder-chip add-folder" id="btn-add-folder">＋ Thêm</button>`;
+
+  // Wire all events from inside module scope
+  bar.querySelectorAll(".folder-chip[data-folder]").forEach(btn => {
+    btn.addEventListener("click", e => {
+      if(e.target.classList.contains("fc-delete")) {
+        e.stopPropagation();
+        deleteFolder(e.target.dataset.folder);
+        return;
+      }
+      if(e.target.classList.contains("fc-rename")) {
+        e.stopPropagation();
+        renameFolder(e.target.dataset.folder);
+        return;
+      }
+      selectFolder(btn.dataset.folder);
+    });
+  });
+  bar.querySelector("#btn-add-folder")?.addEventListener("click", addFolder);
 }
 
-window.renameFolder = async function(oldName) {
-  const newName = prompt("Đổi tên thư mục:", oldName);
-  if (!newName?.trim() || newName.trim()===oldName) return;
+window.renameFolder = async function(f) {
+  if(!f || f==="all") return;
+  const newName = prompt("Đổi tên thư mục:", f);
+  if(!newName?.trim() || newName.trim()===f) return;
   const n = newName.trim();
-  if (folders.includes(n)) { showToast("⚠️ Tên đã tồn tại!"); return; }
+  if(folders.includes(n)) { showToast("⚠️ Tên đã tồn tại!"); return; }
   // Rename in folders list
-  const idx = folders.indexOf(oldName);
-  if (idx===-1) return;
+  const idx = folders.indexOf(f);
+  if(idx < 0) return;
   folders[idx] = n;
-  // Rename in all trades
-  const batch = trades.filter(t=>t.folder===oldName);
-  for (const t of batch) {
+  await saveFolders();
+  // Update all trades with this folder
+  const toUpdate = trades.filter(t=>(t.folder||"")===f);
+  for(const t of toUpdate) {
     try { await updateDoc(doc(db,"trades",t.id),{folder:n}); t.folder=n; } catch(e){}
   }
-  if (currentFolder===oldName) currentFolder=n;
-  await saveFolders();
+  if(currentFolder===f) currentFolder=n;
   renderFolderBar();
-  renderList();
-  showToast(`✅ Đã đổi tên: "${oldName}" → "${n}"`);
+  populateFolderSelects();
+  showToast(`✅ Đổi tên: "${f}" → "${n}"`);
 };
 
 // ══ COPY / MOVE TO THEORY ══
@@ -1677,7 +1709,28 @@ window.deleteFolder=async function(f){
 // ══ MOVE FOLDER MODAL ══
 
 // ══ RESULT FILTER ══
-window.setTagFilter = function(tag) { currentTagFilter = tag; renderList(); };
+window.toggleDayGroup = function(dateKey) {
+  const body = document.getElementById("dg-"+dateKey);
+  const arrow = document.getElementById("dg-arrow-"+dateKey);
+  if(!body) return;
+  const collapsed = body.classList.toggle("collapsed");
+  if(arrow) arrow.textContent = collapsed ? "▶" : "▼";
+};
+
+window.openNewForDate = function(ts) {
+  // Open new trade form pre-filled with the date
+  openNew();
+  setTimeout(() => {
+    const dateField = document.getElementById("f-date");
+    if(dateField && ts) {
+      const d = new Date(ts);
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,"0");
+      const day = String(d.getDate()).padStart(2,"0");
+      dateField.value = `${y}-${m}-${day}`;
+    }
+  }, 100);
+};
 window.setResultFilter = function(val, btn) {
   currentResultFilter = val;
   document.querySelectorAll(".rf-btn").forEach(b => b.classList.remove("active"));
@@ -1770,32 +1823,72 @@ function renderList() {
     return;
   }
 
-  el.innerHTML=list.map(t=>{
-    const cls=t.result==="Win"?"win":t.result==="Loss"?"loss":"be";
-    const tags=Array.isArray(t.tags)?t.tags.join(" · "):(t.tags||"");
-    const date=t.tradeDate?fmtDate(t.tradeDate):(t.createdAt?fmtDate(t.createdAt):"");
-    const fb=t.folder?`<span style="font-size:11px;color:var(--gold);opacity:1;background:var(--gold-faint);border-radius:4px;padding:6px 8px;margin-left:6px;">🗂 ${esc(t.folder)}</span>`:"";
-    const isNew = t.id === lastSavedId;
-    // Fix XSS: store thumbSrc in data attr, use event delegation instead of inline onclick
-    let thumbSrc = "";
-    if(t.images){ for(const tf of TFS){ const v=t.images[tf]; const src=Array.isArray(v)?v[0]:v; if(src){thumbSrc=src;break;} } }
-    const titleHl = search ? hlText(t.title||"—", search) : esc(t.title)||"—";
-    const symHl = search ? hlText(t.symbol||"", search) : esc(t.symbol)||"";
-    return `<div class="trade-item ${cls}-item${isNew?" newly-saved":""}" id="ti-${t.id}" onclick="openDetail('${t.id}')">
-      <div style="flex:1;min-width:0;">
-        <div class="trade-title">${titleHl}${fb}</div>
-        ${tags?`<div class="trade-tags">${esc(tags)}</div>`:""}
-        <div class="trade-date">${date}</div>
-      </div>
-      <div style="display:flex;align-items:center;flex-shrink:0;margin-left:10px;">
-        ${thumbSrc?`<img class="trade-thumb" src="${thumbSrc}" onclick="event.stopPropagation();viewImg(this.src)" loading="lazy"/>`:""}
-        <div style="text-align:right;">
-          <div class="trade-pnl ${cls}">${esc(t.pnl)||"—"}</div>
-          <div style="font-size:12px;color:var(--gold);opacity:0.85;margin-top:4px;font-weight:500;">${symHl}</div>
+  el.innerHTML = (() => {
+    // Group trades by date
+    const groups = {};
+    const groupOrder = [];
+    list.forEach(t => {
+      const ts = t.tradeDate || t.createdAt || 0;
+      const dateKey = ts ? new Date(ts).toDateString() : "unknown";
+      const dateLabel = ts ? fmtDate(ts) : "Không rõ ngày";
+      if (!groups[dateKey]) {
+        groups[dateKey] = {label: dateLabel, ts, trades: []};
+        groupOrder.push(dateKey);
+      }
+      groups[dateKey].trades.push(t);
+    });
+
+    return groupOrder.map(dateKey => {
+      const grp = groups[dateKey];
+      const dayTrades = grp.trades;
+      const dayWins = dayTrades.filter(t=>t.result==="Win").length;
+      const dayLoss = dayTrades.filter(t=>t.result==="Loss").length;
+      const dayPnl = dayTrades.map(t=>{const n=parseFloat((t.pnl||"").replace(/[^0-9.-]/g,""));return isNaN(n)?0:n;}).reduce((a,b)=>a+b,0);
+      const pnlColor = dayPnl>0?"var(--win)":dayPnl<0?"var(--loss)":"var(--text)";
+      const pnlStr = dayPnl!==0?(dayPnl>0?"+":"")+dayPnl.toFixed(1):"";
+
+      const tradeItems = dayTrades.map(t => {
+        const cls = t.result==="Win"?"win":t.result==="Loss"?"loss":"be";
+        const tags = Array.isArray(t.tags)?t.tags.join(" · "):(t.tags||"");
+        const isNew = t.id === lastSavedId;
+        let thumbSrc = "";
+        if(t.images){ for(const tf of TFS){ const v=t.images[tf]; const src=Array.isArray(v)?v[0]:v; if(src){thumbSrc=src;break;} } }
+        const titleHl = search ? hlText(t.title||"—", search) : esc(t.title)||"—";
+        const symHl = search ? hlText(t.symbol||"", search) : esc(t.symbol)||"";
+        const dirTag = t.direction
+          ? `<span style="font-size:10px;padding:2px 6px;border-radius:4px;margin-left:4px;background:${t.direction==="Buy"?"#1b4a2a":"#4a1b1b"};color:${t.direction==="Buy"?"var(--win)":"var(--loss)"};">${t.direction}</span>`
+          : "";
+        return `<div class="trade-item ${cls}-item${isNew?" newly-saved":""}" id="ti-${t.id}" onclick="openDetail('${t.id}')">
+          <div style="flex:1;min-width:0;">
+            <div class="trade-title">${titleHl}${dirTag}</div>
+            ${tags?`<div class="trade-tags">${esc(tags)}</div>`:""}
+          </div>
+          <div style="display:flex;align-items:center;flex-shrink:0;margin-left:10px;gap:8px;">
+            ${thumbSrc?`<img class="trade-thumb" src="${thumbSrc}" onclick="event.stopPropagation();viewImg(this.src)" loading="lazy"/>`:""}
+            <div style="text-align:right;">
+              <div class="trade-pnl ${cls}">${esc(t.pnl)||"—"}</div>
+              <div style="font-size:11px;color:var(--gold);opacity:0.85;margin-top:2px;">${symHl}</div>
+            </div>
+          </div>
+        </div>`;
+      }).join("");
+
+      return `<div class="day-group">
+        <div class="day-header" onclick="toggleDayGroup('${dateKey}')">
+          <div style="display:flex;align-items:center;gap:8px;flex:1;">
+            <span style="font-size:13px;font-weight:600;color:var(--text);">${grp.label}</span>
+            <span style="font-size:11px;background:var(--bg3);border-radius:10px;padding:2px 8px;color:var(--gold);">${dayTrades.length} lệnh</span>
+            ${dayWins?`<span style="font-size:11px;color:var(--win);">W:${dayWins}</span>`:""}
+            ${dayLoss?`<span style="font-size:11px;color:var(--loss);">L:${dayLoss}</span>`:""}
+            ${pnlStr?`<span style="font-size:12px;color:${pnlColor};font-weight:600;margin-left:auto;">${pnlStr}</span>`:""}
+          </div>
+          <button onclick="event.stopPropagation();openNewForDate(${grp.ts})" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);padding:4px 10px;color:var(--gold);font-size:12px;cursor:pointer;flex-shrink:0;margin-left:8px;">+ Thêm</button>
+          <span style="margin-left:8px;color:var(--gold);opacity:0.5;font-size:14px;" id="dg-arrow-${dateKey}">▼</span>
         </div>
-      </div>
-    </div>`;
-  }).join("");
+        <div class="day-group-body" id="dg-${dateKey}">${tradeItems}</div>
+      </div>`;
+    }).join("");
+  })();
 
   if(lastSavedId){
     setTimeout(()=>{
@@ -3174,48 +3267,59 @@ window.addTheoryImgSection = function(tf="", imgs=[], caption="") {
   const wrap = document.getElementById("te-img-sections");
   const sec = document.createElement("div");
   sec.id = "te-sec-"+idx;
-  sec.style.cssText = "background:var(--bg);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:12px;";
+  sec.style.cssText = "background:var(--bg);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:12px;margin-bottom:0;";
+
+  // Build HTML — no inline oninput/onclick to avoid scope issues
   sec.innerHTML = `
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-      <input class="te-tf-label" placeholder="Timeframe (H4, H1, M15...)" value="${esc(tf)}" oninput="teImgSections[${idx}].tf=this.value" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:6px 10px;color:var(--gold);font-size:12px;font-family:var(--sys);outline:none;letter-spacing:2px;font-weight:600;"/>
-      <button onclick="removeTeSec(${idx})" style="background:none;border:1px solid #ef535044;border-radius:6px;padding:8px 12px;color:var(--loss);font-size:11px;cursor:pointer;flex-shrink:0;">✕</button>
+      <input class="te-tf-input" data-idx="${idx}" placeholder="Timeframe (H4, H1, M15...)" value="${esc(tf)}" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:8px 10px;color:var(--gold);font-size:13px;font-weight:600;font-family:var(--sys);outline:none;"/>
+      <button class="te-sec-remove" data-idx="${idx}" style="background:none;border:1px solid #ef535044;border-radius:6px;padding:8px 12px;color:var(--loss);font-size:12px;cursor:pointer;flex-shrink:0;">✕</button>
     </div>
-    <div id="te-imgs-${idx}" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;min-height:48px;"></div>
-    <div style="display:flex;gap:6px;">
-      <button onclick="tePickImg(${idx})" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:6px 12px;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;flex-shrink:0;">+ Thêm ảnh</button>
-      <input type="file" accept="image/*" multiple style="display:none" id="te-file-${idx}" onchange="teHandleFiles(${idx},this)"/>
-      <textarea placeholder="Chú thích / Phân tích khung này..." oninput="teImgSections[${idx}].caption=this.value" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;resize:none;height:36px;line-height:1.4;">${esc(caption)}</textarea>
+    <div id="te-imgs-${idx}" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;min-height:44px;"></div>
+    <div style="display:flex;gap:6px;align-items:flex-start;">
+      <button class="te-pick-img" data-idx="${idx}" style="flex-shrink:0;background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:12px;font-family:var(--sys);cursor:pointer;white-space:nowrap;">+ Ảnh</button>
+      <input type="file" accept="image/*" multiple style="display:none" id="te-file-${idx}"/>
+      <textarea class="te-caption-input" data-idx="${idx}" placeholder="Chú thích / Phân tích khung này..." style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:8px 10px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;resize:vertical;min-height:60px;line-height:1.5;">${esc(caption)}</textarea>
     </div>`;
+
   wrap.appendChild(sec);
+
+  // Wire events inside module scope — no inline handlers
+  sec.querySelector(".te-tf-input").addEventListener("input", e => {
+    if(teImgSections[idx]) teImgSections[idx].tf = e.target.value;
+  });
+  sec.querySelector(".te-caption-input").addEventListener("input", e => {
+    if(teImgSections[idx]) teImgSections[idx].caption = e.target.value;
+  });
+  sec.querySelector(".te-sec-remove").addEventListener("click", () => removeTeSec(idx));
+  sec.querySelector(".te-pick-img").addEventListener("click", () => {
+    document.getElementById("te-file-"+idx)?.click();
+  });
+  document.getElementById("te-file-"+idx).addEventListener("change", function() {
+    teHandleFiles(idx, this);
+  });
+
   teRenderSecImgs(idx);
   attachTePaste();
 };
 
 function attachTePaste() {
-  // Remove old listener if any, then always re-attach fresh
-  const modal = document.getElementById("modal-theory-edit");
-  if (modal._tePasteHandler) {
-    modal.removeEventListener("paste", modal._tePasteHandler);
-  }
-  modal._tePasteHandler = function(e) {
+  if (window._tePasteAttached) return;
+  window._tePasteAttached = true;
+  document.getElementById("modal-theory-edit").addEventListener("paste", function(e) {
     const items = e.clipboardData?.items;
     if (!items) return;
     for (const item of items) {
       if (item.type.startsWith("image/")) {
         e.preventDefault();
-        // Find last visible section
-        const activeSections = teImgSections.filter(Boolean);
-        if (!activeSections.length) return;
-        const lastSec = activeSections[activeSections.length - 1];
-        const idx2 = teImgSections.indexOf(lastSec);
+        const idx2 = teImgSections.length - 1;
         if (idx2 < 0) return;
         const reader = new FileReader();
         reader.onload = async ev => { try { const c = await compressImage(ev.target.result); teImgSections[idx2].images.push(c); teRenderSecImgs(idx2); } catch(e2){} };
         reader.readAsDataURL(item.getAsFile()); return;
       }
     }
-  };
-  modal.addEventListener("paste", modal._tePasteHandler);
+  });
 }
 
 window.removeTeSec = function(idx) { teImgSections[idx] = null; const el=document.getElementById("te-sec-"+idx); if(el) el.style.display="none"; };
@@ -3250,7 +3354,7 @@ function populateTheoryCatSelect(selectedKey) {
 }
 
 window.openAddTheoryCard = function() {
-  theoryEditingId = null; teImgSections = [];
+  theoryEditingId = null; teImgSections = []; window._tePasteAttached = false;
   document.getElementById("theory-edit-modal-title").textContent = "THÊM THẺ MỚI";
   ["te-icon","te-title","te-tag","te-img","te-hl-text"].forEach(id=>document.getElementById(id).value="");
   document.getElementById("te-icon").value="📌";
@@ -3266,7 +3370,7 @@ window.openAddTheoryCard = function() {
 
 window.openEditTheoryCard = function(id) {
   const t = getMergedTheory().find(x=>x.id===id); if(!t) return;
-  theoryEditingId = id; teImgSections = [];
+  theoryEditingId = id; teImgSections = []; window._tePasteAttached = false;
   document.getElementById("theory-edit-modal-title").textContent = "CHỈNH SỬA THẺ";
   document.getElementById("te-icon").value = t.icon||"📌";
   populateTheoryCatSelect(t.cat||"");
