@@ -1489,13 +1489,34 @@ function renderFolderBar() {
   document.getElementById("folder-bar").innerHTML=
     folders.map(f=>{
       const safe=f.replace(/'/g,"\\'");
-      const delBtn = f!=="all"
-        ? `<span onclick="event.stopPropagation();deleteFolder('${safe}')" style="margin-left:6px;opacity:0.55;font-size:11px;padding:2px 3px;border-radius:3px;" title="Xóa thư mục">✕</span>`
+      const editBtns = f!=="all"
+        ? `<span onclick="event.stopPropagation();renameFolder('${safe}')" style="margin-left:4px;opacity:0.6;font-size:11px;padding:1px 4px;border-radius:3px;border:1px solid var(--gold-faint);" title="Đổi tên">✏️</span><span onclick="event.stopPropagation();deleteFolder('${safe}')" style="margin-left:2px;opacity:0.55;font-size:11px;padding:2px 3px;border-radius:3px;" title="Xóa thư mục">✕</span>`
         : "";
-      return `<button class="folder-chip${currentFolder===f?" active":""}" onclick="selectFolder('${safe}')">${emojis[f]||"🗂"} ${esc(f==="all"?"Tất cả":f)}${delBtn}</button>`;
+      return `<button class="folder-chip${currentFolder===f?" active":""}" onclick="selectFolder('${safe}')" style="display:inline-flex;align-items:center;gap:2px;">${emojis[f]||"🗂"} ${esc(f==="all"?"Tất cả":f)}${editBtns}</button>`;
     }).join("")+
     `<button class="folder-chip add-folder" onclick="addFolder()">＋ Thêm</button>`;
 }
+
+window.renameFolder = async function(oldName) {
+  const newName = prompt("Đổi tên thư mục:", oldName);
+  if (!newName?.trim() || newName.trim()===oldName) return;
+  const n = newName.trim();
+  if (folders.includes(n)) { showToast("⚠️ Tên đã tồn tại!"); return; }
+  // Rename in folders list
+  const idx = folders.indexOf(oldName);
+  if (idx===-1) return;
+  folders[idx] = n;
+  // Rename in all trades
+  const batch = trades.filter(t=>t.folder===oldName);
+  for (const t of batch) {
+    try { await updateDoc(doc(db,"trades",t.id),{folder:n}); t.folder=n; } catch(e){}
+  }
+  if (currentFolder===oldName) currentFolder=n;
+  await saveFolders();
+  renderFolderBar();
+  renderList();
+  showToast(`✅ Đã đổi tên: "${oldName}" → "${n}"`);
+};
 
 // ══ COPY / MOVE TO THEORY ══
 let _theoryTransferMode = "copy";
@@ -3171,22 +3192,30 @@ window.addTheoryImgSection = function(tf="", imgs=[], caption="") {
 };
 
 function attachTePaste() {
-  if (window._tePasteAttached) return;
-  window._tePasteAttached = true;
-  document.getElementById("modal-theory-edit").addEventListener("paste", function(e) {
+  // Remove old listener if any, then always re-attach fresh
+  const modal = document.getElementById("modal-theory-edit");
+  if (modal._tePasteHandler) {
+    modal.removeEventListener("paste", modal._tePasteHandler);
+  }
+  modal._tePasteHandler = function(e) {
     const items = e.clipboardData?.items;
     if (!items) return;
     for (const item of items) {
       if (item.type.startsWith("image/")) {
         e.preventDefault();
-        const idx2 = teImgSections.length - 1;
+        // Find last visible section
+        const activeSections = teImgSections.filter(Boolean);
+        if (!activeSections.length) return;
+        const lastSec = activeSections[activeSections.length - 1];
+        const idx2 = teImgSections.indexOf(lastSec);
         if (idx2 < 0) return;
         const reader = new FileReader();
         reader.onload = async ev => { try { const c = await compressImage(ev.target.result); teImgSections[idx2].images.push(c); teRenderSecImgs(idx2); } catch(e2){} };
         reader.readAsDataURL(item.getAsFile()); return;
       }
     }
-  });
+  };
+  modal.addEventListener("paste", modal._tePasteHandler);
 }
 
 window.removeTeSec = function(idx) { teImgSections[idx] = null; const el=document.getElementById("te-sec-"+idx); if(el) el.style.display="none"; };
@@ -3221,7 +3250,7 @@ function populateTheoryCatSelect(selectedKey) {
 }
 
 window.openAddTheoryCard = function() {
-  theoryEditingId = null; teImgSections = []; window._tePasteAttached = false;
+  theoryEditingId = null; teImgSections = [];
   document.getElementById("theory-edit-modal-title").textContent = "THÊM THẺ MỚI";
   ["te-icon","te-title","te-tag","te-img","te-hl-text"].forEach(id=>document.getElementById(id).value="");
   document.getElementById("te-icon").value="📌";
@@ -3237,7 +3266,7 @@ window.openAddTheoryCard = function() {
 
 window.openEditTheoryCard = function(id) {
   const t = getMergedTheory().find(x=>x.id===id); if(!t) return;
-  theoryEditingId = id; teImgSections = []; window._tePasteAttached = false;
+  theoryEditingId = id; teImgSections = [];
   document.getElementById("theory-edit-modal-title").textContent = "CHỈNH SỬA THẺ";
   document.getElementById("te-icon").value = t.icon||"📌";
   populateTheoryCatSelect(t.cat||"");
