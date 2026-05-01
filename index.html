@@ -931,71 +931,65 @@
 <div class="screen" id="screen-new">
   <div class="header">
     <button class="header-btn" onclick="confirmBack('list')" style="font-size:20px;">←</button>
-    <div class="header-title"><div class="label">Thêm</div><div class="name">Lệnh Mới</div></div>
+    <div class="header-title"><div class="label">Ghi Lại</div><div class="name" id="form-screen-title">Setup Mới</div></div>
     <div style="width:36px;"></div>
   </div>
   <div class="form-body">
+
+    <!-- DATE + TIMEFRAME -->
     <div class="field">
-      <label class="field-label">Ngày & Giờ Vào Lệnh</label>
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;">
-        <input id="f-date" type="date" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:11px 10px;color:var(--text);font-size:14px;font-family:var(--sys);outline:none;" oninput="formDirty=true"/>
-        <input id="f-hour" type="number" min="0" max="23" placeholder="Giờ" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:11px 8px;color:var(--text);font-size:14px;font-family:var(--sys);outline:none;text-align:center;" oninput="formDirty=true"/>
-        <input id="f-minute" type="number" min="0" max="59" placeholder="Phút" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:11px 8px;color:var(--text);font-size:14px;font-family:var(--sys);outline:none;text-align:center;" oninput="formDirty=true"/>
-        <button onclick="setNow()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);padding:11px 4px;color:var(--gold);font-size:11px;cursor:pointer;font-family:var(--sys);">Now</button>
+      <label class="field-label">Ngày</label>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:8px;">
+        <input id="f-date" type="date" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:12px 10px;color:var(--text);font-size:15px;font-family:var(--sys);outline:none;" oninput="formDirty=true"/>
+        <button id="btn-set-now" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);padding:12px 16px;color:var(--gold);font-size:12px;cursor:pointer;font-family:var(--sys);white-space:nowrap;">Hôm nay</button>
       </div>
     </div>
-    <div class="field"><label class="field-label">Tên lệnh / Câu hỏi</label><input id="f-title" type="text" placeholder="VD: Có tách thửa được ko..." oninput="formDirty=true"/></div>
-    <div class="field"><label class="field-label">Cặp tiền</label><input id="f-symbol" type="text" placeholder="VD: XAUUSD, EURUSD..." oninput="formDirty=true"/></div>
+
+    <!-- SETUP NAME -->
     <div class="field">
-      <label class="field-label">Kết quả</label>
-      <div class="toggle-group">
-        <button class="toggle-btn active" data-group="result" data-val="Win" onclick="toggleSelect(this)">✅ Win</button>
-        <button class="toggle-btn" data-group="result" data-val="Loss" onclick="toggleSelect(this)">❌ Loss</button>
-        <button class="toggle-btn" data-group="result" data-val="BE" onclick="toggleSelect(this)">➖ BE</button>
-      </div>
+      <label class="field-label">Tên Setup / Câu hỏi</label>
+      <input id="f-title" type="text" placeholder="VD: BPR H1 + SMT — Có vào được không?" oninput="formDirty=true"/>
     </div>
+
+    <!-- SYMBOL -->
     <div class="field">
-      <label class="field-label">P&amp;L <span style="font-size:11px;opacity:0.7;font-family:var(--sys);letter-spacing:0;">(hoặc dùng RR Calculator)</span></label>
-      <input id="f-pnl" type="text" placeholder="+2R hoặc -1R" oninput="formDirty=true"/>
-      <div style="display:flex;gap:6px;margin-top:8px;" id="rr-calc-row">
-        <input id="rr-entry" type="number" step="any" placeholder="Entry" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;"/>
-        <input id="rr-sl" type="number" step="any" placeholder="SL" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;"/>
-        <input id="rr-tp" type="number" step="any" placeholder="TP" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;"/>
-        <button onclick="calcRR()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:7px 10px;color:var(--gold);font-size:12px;font-family:var(--sys);cursor:pointer;white-space:nowrap;">= R</button>
-      </div>
-      <div id="rr-result" style="font-size:13px;color:var(--gold);margin-top:5px;font-family:var(--sys);display:none;"></div>
+      <label class="field-label">Cặp tiền</label>
+      <input id="f-symbol" type="text" placeholder="VD: NQ, ES, XAUUSD..." oninput="formDirty=true"/>
     </div>
+
+    <!-- TAGS -->
     <div class="field">
-      <label class="field-label">Vào đúng plan?</label>
-      <div class="toggle-group">
-        <button class="toggle-btn active" data-group="onplan" data-val="Đúng plan" onclick="toggleSelect(this)">✅ Đúng plan</button>
-        <button class="toggle-btn" data-group="onplan" data-val="Sai plan" onclick="toggleSelect(this)">❌ Sai plan</button>
-        <button class="toggle-btn" data-group="onplan" data-val="Một phần" onclick="toggleSelect(this)">⚡ Một phần</button>
-      </div>
-    </div>
-    <div class="field">
-      <label class="field-label">Thư mục</label>
-      <select id="f-folder" onchange="formDirty=true"></select>
-    </div>
-    <div class="field"><label class="field-label">Tags (cách nhau bằng dấu phẩy)</label>
-      <input id="f-tags" type="text" placeholder="VD: FVG, OB, BOLO, Kiền..." oninput="formDirty=true;suggestTags(this)" autocomplete="off" list=""/>
+      <label class="field-label">Tags</label>
+      <input id="f-tags" type="text" placeholder="VD: BPR, SMT, FVG, OB..." oninput="formDirty=true;suggestTags(this)" autocomplete="off"/>
       <div id="tag-suggestions" style="display:none;position:absolute;background:var(--bg2);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);z-index:500;width:calc(100% - 36px);max-height:150px;overflow-y:auto;box-shadow:0 4px 20px #00000055;"></div>
     </div>
+
+    <!-- FOLDER -->
     <div class="field">
-      <label class="field-label">Ảnh Biểu Đồ (D1 → M1)</label>
-      <div style="font-size:11px;color:var(--gold);opacity:0.9;margin-bottom:8px;">📋 Nhấn "+ Thêm ảnh" hoặc Ctrl+V để dán ảnh</div>
+      <label class="field-label">Thư mục</label>
+      <select id="f-folder" onchange="formDirty=true" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:12px 10px;color:var(--text);font-size:14px;font-family:var(--sys);outline:none;width:100%;"></select>
+    </div>
+
+    <!-- CHART IMAGES -->
+    <div class="field">
+      <label class="field-label">Ảnh Chart <span style="font-size:11px;opacity:0.6;">(Ctrl+V hoặc nhấn +)</span></label>
       <div id="tf-upload-row" style="display:flex;flex-direction:column;gap:12px;"></div>
     </div>
-    <div class="field"><label class="field-label">Ghi chú / Bài học</label><textarea id="f-note" placeholder="Mô tả setup, lý do vào lệnh, bài học rút ra..." oninput="formDirty=true"></textarea></div>
+
+    <!-- NOTES -->
+    <div class="field">
+      <label class="field-label">Phân tích / Bài học</label>
+      <textarea id="f-note" placeholder="Mô tả setup, điểm entry, lý do, bài học rút ra..." oninput="formDirty=true" style="min-height:100px;"></textarea>
+    </div>
+
+    <!-- HIDDEN fields kept for data compatibility -->
+    <input type="hidden" id="f-pnl" value=""/>
+    <input type="hidden" id="f-hour" value=""/>
+    <input type="hidden" id="f-minute" value=""/>
+
   </div>
   <div class="save-bar">
-    <!-- Fix 2: Quick save buttons -->
-    <div style="display:flex;gap:8px;margin-bottom:8px;">
-      <button class="quick-save-btn" onclick="quickSave('Win')">⚡ Win nhanh</button>
-      <button class="quick-save-btn" onclick="quickSave('Loss')">⚡ Loss nhanh</button>
-      <button class="quick-save-btn" onclick="quickSave('BE')">⚡ BE nhanh</button>
-    </div>
-    <button class="save-btn" id="save-btn" onclick="saveTrade()">LƯU LỆNH ĐẦY ĐỦ</button>
+    <button class="save-btn" id="save-btn" onclick="saveTrade()">💾 LƯU SETUP</button>
   </div>
 </div>
 
@@ -1006,45 +1000,49 @@
     <div class="header-title"><div class="label">Chi Tiết</div><div class="name" id="detail-header-title">—</div></div>
     <button class="header-btn" onclick="openMoveFolder()" title="Chuyển thư mục" style="font-size:18px;">🗂</button>
   </div>
-  <!-- Fix 5: Breadcrumb -->
   <div class="breadcrumb" style="justify-content:space-between;">
-    <span>📋 Danh sách <span style="opacity:0.5;">›</span> Chi tiết lệnh</span>
+    <span>📋 Danh sách <span style="opacity:0.5;">›</span> Chi tiết</span>
     <div style="display:flex;gap:4px;">
-      <button onclick="navTrade(-1)" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:14px;cursor:pointer;" title="Lệnh trước">‹</button>
-      <button onclick="navTrade(1)" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:14px;cursor:pointer;" title="Lệnh sau">›</button>
+      <button onclick="navTrade(-1)" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:14px;cursor:pointer;">‹</button>
+      <button onclick="navTrade(1)" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:14px;cursor:pointer;">›</button>
     </div>
   </div>
-  <div class="detail-banner" id="detail-banner"></div>
+
+  <!-- Info banner: date + folder + tags only -->
+  <div id="detail-banner" style="padding:12px 18px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:8px;align-items:center;"></div>
+
   <div class="detail-body">
-    <div class="section-label">Thông Tin Lệnh</div>
-    <div class="stats-grid" id="detail-grid"></div>
-    <div class="section-label">Ghi Chú</div>
+    <!-- Symbol + Tags row -->
+    <div id="detail-info-row" style="margin-bottom:16px;"></div>
+
+    <!-- Notes -->
+    <div class="section-label">Phân Tích</div>
     <div class="note-box" id="detail-note"></div>
-    <div class="section-label">Biểu Đồ Phân Tích</div>
-    <!-- Fix 6: Swipe hint -->
-    <div style="font-size:11px;color:var(--gold);opacity:0.75;font-family:var(--sys);letter-spacing:1px;margin-bottom:6px;">← vuốt để chuyển khung →</div>
+
+    <!-- Charts -->
+    <div class="section-label" style="margin-top:16px;">Biểu Đồ <span style="font-size:11px;opacity:0.6;font-family:var(--sys);">← vuốt để chuyển →</span></div>
     <div class="tf-tabs" id="detail-tf-tabs"></div>
     <div class="tf-preview" id="detail-tf-preview"></div>
-    <div class="section-label">Phân Tích AI</div>
+
+    <!-- AI -->
+    <div class="section-label" style="margin-top:16px;">Phân Tích AI</div>
     <button class="ai-btn" id="ai-btn" onclick="analyzeAI()">🤖 PHÂN TÍCH AI</button>
     <div class="ai-result" id="ai-result" style="display:none;"></div>
 
-    <!-- PRIMARY ACTION -->
-    <button onclick="openEdit()" style="width:100%;padding:16px;border-radius:var(--radius-lg);background:var(--gold-faint);border:1.5px solid var(--gold);color:var(--gold);font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;transition:all 0.2s;letter-spacing:0.5px;">✏️ Sửa lệnh này</button>
+    <!-- ACTIONS -->
+    <button onclick="openEdit()" style="width:100%;padding:16px;border-radius:var(--radius-lg);background:var(--gold-faint);border:1.5px solid var(--gold);color:var(--gold);font-size:15px;font-weight:600;cursor:pointer;margin-top:16px;transition:all 0.2s;">✏️ Sửa setup này</button>
 
-    <!-- SECONDARY ACTIONS -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
-      <button onclick="duplicateTrade()" style="padding:12px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--border);color:var(--text);font-size:13px;cursor:pointer;transition:all 0.2s;">📋 Nhân bản</button>
-      <button onclick="openMoveFolder()" style="padding:12px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--border);color:var(--text);font-size:13px;cursor:pointer;transition:all 0.2s;">🗂 Thư mục</button>
+      <button onclick="duplicateTrade()" style="padding:12px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--border);color:var(--text);font-size:13px;cursor:pointer;">📋 Nhân bản</button>
+      <button onclick="openMoveFolder()" style="padding:12px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--border);color:var(--text);font-size:13px;cursor:pointer;">🗂 Thư mục</button>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
-      <button id="share-btn" onclick="shareTrade()" style="padding:12px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--border);color:var(--text);font-size:13px;cursor:pointer;transition:all 0.2s;">📤 Chia sẻ</button>
-      <button onclick="moveSingleTradeToTheory()" style="padding:12px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--border);color:var(--text);font-size:13px;cursor:pointer;transition:all 0.2s;">📖 Lý Thuyết</button>
+      <button id="share-btn" onclick="shareTrade()" style="padding:12px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--border);color:var(--text);font-size:13px;cursor:pointer;">📤 Chia sẻ</button>
+      <button onclick="moveSingleTradeToTheory()" style="padding:12px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--border);color:var(--text);font-size:13px;cursor:pointer;">📖 Lý Thuyết</button>
     </div>
 
-    <!-- DESTRUCTIVE — separated, red -->
     <div style="height:1px;background:var(--border);margin:20px 0 16px;opacity:0.5;"></div>
-    <button class="delete-btn" onclick="deleteTrade()">🗑 Xóa lệnh này</button>
+    <button class="delete-btn" onclick="deleteTrade()">🗑 Xóa setup này</button>
   </div>
 </div>
 
@@ -1839,42 +1837,28 @@ function renderList() {
       const pnlStr = dayPnl!==0?(dayPnl>0?"+":"")+dayPnl.toFixed(1):"";
 
       const tradeItems = dayTrades.map(t => {
-        const cls = t.result==="Win"?"win":t.result==="Loss"?"loss":"be";
-        const tags = Array.isArray(t.tags)?t.tags.join(" · "):(t.tags||"");
+        const tags = Array.isArray(t.tags) ? t.tags.join(" · ") : (t.tags||"");
         const isNew = t.id === lastSavedId;
         let thumbSrc = "";
         if(t.images){ for(const tf of TFS){ const v=t.images[tf]; const src=Array.isArray(v)?v[0]:v; if(src){thumbSrc=src;break;} } }
         const titleHl = search ? hlText(t.title||"—", search) : esc(t.title)||"—";
-        const symHl = search ? hlText(t.symbol||"", search) : esc(t.symbol)||"";
-        const dirTag = t.direction
-          ? `<span style="font-size:10px;padding:2px 6px;border-radius:4px;margin-left:4px;background:${t.direction==="Buy"?"#1b4a2a":"#4a1b1b"};color:${t.direction==="Buy"?"var(--win)":"var(--loss)"};">${t.direction}</span>`
-          : "";
-        return `<div class="trade-item ${cls}-item${isNew?" newly-saved":""}" id="ti-${t.id}" onclick="openDetail('${t.id}')">
+        return `<div class="trade-item${isNew?" newly-saved":""}" id="ti-${t.id}" onclick="openDetail('${t.id}')">
           <div style="flex:1;min-width:0;">
-            <div class="trade-title">${titleHl}${dirTag}</div>
-            ${tags?`<div class="trade-tags">${esc(tags)}</div>`:""}
+            <div class="trade-title">${titleHl}</div>
+            ${tags ? `<div class="trade-tags">${esc(tags)}</div>` : ""}
+            ${t.symbol ? `<div style="font-size:11px;color:var(--gold);opacity:0.7;margin-top:2px;">${esc(t.symbol)}</div>` : ""}
           </div>
-          <div style="display:flex;align-items:center;flex-shrink:0;margin-left:10px;gap:8px;">
-            ${thumbSrc?`<img class="trade-thumb" src="${thumbSrc}" onclick="event.stopPropagation();viewImg(this.src)" loading="lazy"/>`:""}
-            <div style="text-align:right;">
-              <div class="trade-pnl ${cls}">${esc(t.pnl)||"—"}</div>
-              <div style="font-size:11px;color:var(--gold);opacity:0.85;margin-top:2px;">${symHl}</div>
-            </div>
-          </div>
+          ${thumbSrc ? `<img class="trade-thumb" src="${thumbSrc}" onclick="event.stopPropagation();viewImg(this.src)" loading="lazy" style="margin-left:10px;"/>` : ""}
         </div>`;
       }).join("");
 
       return `<div class="day-group">
         <div class="day-header" onclick="toggleDayGroup('${dateKey}')">
-          <div style="display:flex;align-items:center;gap:8px;flex:1;">
-            <span style="font-size:13px;font-weight:600;color:var(--text);">${grp.label}</span>
-            <span style="font-size:11px;background:var(--bg3);border-radius:10px;padding:2px 8px;color:var(--gold);">${dayTrades.length} lệnh</span>
-            ${dayWins?`<span style="font-size:11px;color:var(--win);">W:${dayWins}</span>`:""}
-            ${dayLoss?`<span style="font-size:11px;color:var(--loss);">L:${dayLoss}</span>`:""}
-            ${pnlStr?`<span style="font-size:12px;color:${pnlColor};font-weight:600;margin-left:auto;">${pnlStr}</span>`:""}
-          </div>
-          <button onclick="event.stopPropagation();openNewForDate(${grp.ts})" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);padding:4px 10px;color:var(--gold);font-size:12px;cursor:pointer;flex-shrink:0;margin-left:8px;">+ Thêm</button>
-          <span style="margin-left:8px;color:var(--gold);opacity:0.5;font-size:14px;" id="dg-arrow-${dateKey}">▼</span>
+          <span style="font-size:13px;font-weight:600;color:var(--text);">${grp.label}</span>
+          <span style="font-size:11px;background:var(--bg3);border-radius:10px;padding:2px 10px;color:var(--gold);margin-left:8px;">${dayTrades.length} setup</span>
+          <div style="flex:1;"></div>
+          <button onclick="event.stopPropagation();openNewForDate(${grp.ts})" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);padding:4px 12px;color:var(--gold);font-size:12px;cursor:pointer;flex-shrink:0;">+ Thêm</button>
+          <span style="margin-left:8px;color:var(--gold);opacity:0.4;font-size:13px;" id="dg-arrow-${dateKey}">▼</span>
         </div>
         <div class="day-group-body" id="dg-${dateKey}">${tradeItems}</div>
       </div>`;
@@ -1899,32 +1883,42 @@ function renderList() {
 window.openDetail=function(id){
   currentTrade=trades.find(t=>t.id===id); if(!currentTrade) return;
   currentTF="D1";
-  const cls=currentTrade.result==="Win"?"win":currentTrade.result==="Loss"?"loss":"be";
-  document.getElementById("detail-header-title").textContent=(currentTrade.title||"").substring(0,20);
-  const dd=currentTrade.tradeDate?fmtDate(currentTrade.tradeDate):(currentTrade.createdAt?fmtDate(currentTrade.createdAt):"");
-  document.getElementById("detail-banner").innerHTML=`
-    <span style="font-size:13px;color:var(--gold);opacity:0.85;font-style:italic;">${dd}${currentTrade.folder?" · 🗂 "+esc(currentTrade.folder):""}</span>
-    <span class="${cls}" style="font-family:var(--sys);font-size:15px;font-weight:600;">${esc(currentTrade.result)||""} ${esc(currentTrade.pnl)||""}</span>`;
-  document.getElementById("detail-grid").innerHTML=[
-    ["Symbol", `${esc(currentTrade.symbol||"—")} ${currentTrade.symbol?`<button class="copy-btn" onclick="copySymbol('${esc(currentTrade.symbol)}')" title="Copy">📋</button>`:""}`,],
-    ["P&L", esc(currentTrade.pnl||"—")],
-    ["Theo plan", esc(currentTrade.onplan||"—")]
-  ].map(([l,v])=>`<div class="stats-cell"><div class="lbl">${l}</div><div class="val">${v}</div></div>`).join("");
-  document.getElementById("detail-note").textContent=currentTrade.note||"Không có ghi chú.";
-  const imgs=currentTrade.images||{};
-  document.getElementById("detail-tf-tabs").innerHTML=TFS.map(tf=>{
+  const t = currentTrade;
+  document.getElementById("detail-header-title").textContent=(t.title||"—").substring(0,24);
+
+  // Banner: date + folder + tags
+  const dd = t.tradeDate ? fmtDate(t.tradeDate) : (t.createdAt ? fmtDate(t.createdAt) : "");
+  const tags = Array.isArray(t.tags) ? t.tags : (t.tags ? [t.tags] : []);
+  document.getElementById("detail-banner").innerHTML =
+    `<span style="font-size:13px;color:var(--gold);font-weight:500;">📅 ${dd}</span>` +
+    (t.folder ? `<span style="font-size:12px;background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:20px;padding:3px 10px;color:var(--gold);">🗂 ${esc(t.folder)}</span>` : "") +
+    tags.map(tg => `<span style="font-size:12px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px 10px;color:var(--text);">${esc(tg)}</span>`).join("");
+
+  // Info row: symbol
+  document.getElementById("detail-info-row").innerHTML = t.symbol
+    ? `<div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);">
+        <span style="font-size:12px;color:var(--gold);opacity:0.7;">Cặp tiền</span>
+        <span style="font-size:15px;font-weight:600;color:var(--gold);">${esc(t.symbol)}</span>
+        <button onclick="copySymbol('${esc(t.symbol)}')" style="background:none;border:none;color:var(--gold);opacity:0.6;cursor:pointer;font-size:14px;padding:4px;">📋</button>
+       </div>`
+    : "";
+
+  document.getElementById("detail-note").textContent = t.note || "Chưa có phân tích.";
+
+  const imgs = t.images||{};
+  document.getElementById("detail-tf-tabs").innerHTML = TFS.map(tf=>{
     const v=imgs[tf]; const hi=Array.isArray(v)?v.length>0:!!v;
     return `<button class="tf-tab${tf===currentTF?" active":""}${hi?" has-img":""}" onclick="switchTF('${tf}')" id="tab-${tf}">${tf}</button>`;
   }).join("");
   renderTFPreview();
+
   document.getElementById("ai-result").style.display="none";
   const ab=document.getElementById("ai-btn"); ab.disabled=false;
-  // Show cached AI result if recent
-  if(currentTrade.aiResult){
+  if(t.aiResult){
     const res=document.getElementById("ai-result");
-    res.style.display="block"; res.textContent=currentTrade.aiResult;
-    const age=Date.now()-(currentTrade.aiResultTs||0);
-    ab.textContent=age<86400000?"🔄 Phân Tích Lại (đã có kết quả)":"🤖 PHÂN TÍCH AI";
+    res.style.display="block"; res.textContent=t.aiResult;
+    const age=Date.now()-(t.aiResultTs||0);
+    ab.textContent=age<86400000?"🔄 Phân Tích Lại":"🤖 PHÂN TÍCH AI";
   } else {
     ab.textContent="🤖 PHÂN TÍCH AI";
   }
@@ -3398,7 +3392,7 @@ window.openEditTheoryCard = function(id) {
   document.getElementById("te-hl-text").value = t.highlight?.text||t.hlText||"";
   document.getElementById("te-delete-btn").style.display="block";
   document.getElementById("te-img-sections").innerHTML="";
-  buildRuleFields((t.rules||[]).map(r=>typeof r==="string"?r:r.t));
+  buildRuleFields(t.rules||[]);
   const sections=t.imgSections||[];
   if(sections.length) sections.forEach(s=>addTheoryImgSection(s.tf||"",s.images||[],s.caption||""));
   else addTheoryImgSection("H4");
@@ -3406,16 +3400,148 @@ window.openEditTheoryCard = function(id) {
   setTimeout(()=>document.getElementById("te-scroll-body").scrollTop=0,50);
 };
 
+// ── Rule items: each rule = {t: text, imgs: [base64...]} ──
+let teRuleItems = []; // [{t, imgs}]
+
 function buildRuleFields(rules) {
-  const list=document.getElementById("te-rules-list"); list.innerHTML="";
-  (rules.length?rules:[""]).forEach(r=>addRuleFieldWith(r));
+  teRuleItems = (rules.length ? rules : [""]).map(r =>
+    typeof r === "object" && r.imgs ? {t: r.t||"", imgs: [...(r.imgs||[])]} :
+    {t: typeof r === "string" ? r : (r.t||""), imgs: []}
+  );
+  const list = document.getElementById("te-rules-list");
+  list.innerHTML = "";
+  teRuleItems.forEach((_, i) => renderRuleField(i));
 }
-window.addTheoryRuleField=function(){addRuleFieldWith("");};
-function addRuleFieldWith(val) {
-  const list=document.getElementById("te-rules-list");
-  const row=document.createElement("div"); row.style.cssText="display:flex;gap:6px;align-items:flex-start;";
-  row.innerHTML=`<textarea class="te-rule-input" rows="2" placeholder="Nhập nội dung phân tích (tag &lt;b&gt; được phép)..." style="flex:1;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;resize:vertical;line-height:1.5;">${val}</textarea><button onclick="this.parentElement.remove()" style="background:none;border:1px solid #ef535044;border-radius:6px;padding:6px 8px;color:var(--loss);font-size:12px;cursor:pointer;flex-shrink:0;margin-top:2px;">✕</button>`;
+
+window.addTheoryRuleField = function() {
+  teRuleItems.push({t:"", imgs:[]});
+  renderRuleField(teRuleItems.length - 1);
+  const list = document.getElementById("te-rules-list");
+  list.lastElementChild?.querySelector("textarea")?.focus();
+};
+
+function renderRuleField(idx) {
+  const list = document.getElementById("te-rules-list");
+  // Remove existing if re-rendering
+  const existing = document.getElementById("te-rule-"+idx);
+  if (existing) existing.remove();
+
+  const item = teRuleItems[idx];
+  const row = document.createElement("div");
+  row.id = "te-rule-"+idx;
+  row.style.cssText = "display:flex;flex-direction:column;gap:6px;background:var(--bg);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:8px;";
+
+  // Text + delete row
+  const topRow = document.createElement("div");
+  topRow.style.cssText = "display:flex;gap:6px;align-items:flex-start;";
+
+  const ta = document.createElement("textarea");
+  ta.className = "te-rule-input";
+  ta.rows = 2;
+  ta.placeholder = "Nhập nội dung phân tích...";
+  ta.value = item.t;
+  ta.style.cssText = "flex:1;background:transparent;border:none;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;resize:vertical;line-height:1.5;padding:0;";
+  ta.addEventListener("input", () => { teRuleItems[idx].t = ta.value; });
+  // Track focus for paste
+  ta.addEventListener("focus", () => { window._teRuleFocusIdx = idx; });
+  ta.addEventListener("blur", () => { setTimeout(() => { if(window._teRuleFocusIdx===idx) window._teRuleFocusIdx=null; }, 200); });
+
+  const delBtn = document.createElement("button");
+  delBtn.textContent = "✕";
+  delBtn.style.cssText = "background:none;border:1px solid #ef535044;border-radius:6px;padding:6px 8px;color:var(--loss);font-size:12px;cursor:pointer;flex-shrink:0;margin-top:2px;";
+  delBtn.addEventListener("click", () => {
+    teRuleItems.splice(idx, 1);
+    row.remove();
+    // Re-index remaining
+    document.querySelectorAll("[id^='te-rule-']").forEach((el, i) => { el.id = "te-rule-"+i; });
+    teRuleItems.forEach((_, i) => { /* IDs already fixed */ });
+  });
+
+  topRow.appendChild(ta);
+  topRow.appendChild(delBtn);
+  row.appendChild(topRow);
+
+  // Image zone for this rule
+  const imgZone = document.createElement("div");
+  imgZone.id = "te-rule-imgs-"+idx;
+  imgZone.style.cssText = "display:flex;flex-wrap:wrap;gap:4px;min-height:0;";
+  row.appendChild(imgZone);
+
+  // Add image button
+  const addImgRow = document.createElement("div");
+  addImgRow.style.cssText = "display:flex;align-items:center;gap:6px;";
+
+  const addImgBtn = document.createElement("button");
+  addImgBtn.textContent = "📎 Dán/thêm ảnh";
+  addImgBtn.style.cssText = "background:transparent;border:1px dashed var(--gold-faint);border-radius:6px;padding:4px 10px;color:var(--gold);font-size:11px;cursor:pointer;";
+  const fileInput = document.createElement("input");
+  fileInput.type = "file"; fileInput.accept = "image/*"; fileInput.multiple = true;
+  fileInput.style.display = "none";
+  fileInput.id = "te-rule-file-"+idx;
+  addImgBtn.addEventListener("click", () => fileInput.click());
+  fileInput.addEventListener("change", async () => {
+    for (const f of Array.from(fileInput.files)) {
+      await new Promise(res => {
+        const r = new FileReader();
+        r.onload = async ev => { try { const c = await compressImage(ev.target.result); teRuleItems[idx].imgs.push(c); } catch(e){} res(); };
+        r.readAsDataURL(f);
+      });
+    }
+    renderRuleImgs(idx); fileInput.value = "";
+  });
+
+  addImgRow.appendChild(addImgBtn);
+  addImgRow.appendChild(fileInput);
+  row.appendChild(addImgRow);
+
   list.appendChild(row);
+  renderRuleImgs(idx);
+}
+
+function renderRuleImgs(idx) {
+  const zone = document.getElementById("te-rule-imgs-"+idx);
+  if (!zone || !teRuleItems[idx]) return;
+  const imgs = teRuleItems[idx].imgs || [];
+  if (!imgs.length) { zone.innerHTML = ""; return; }
+  zone.innerHTML = imgs.map((src, i) =>
+    `<div style="position:relative;flex:0 0 auto;">
+      <img src="${src}" onclick="openTeImgFull(teRuleItems[${idx}].imgs[${i}])" style="width:80px;height:60px;object-fit:cover;border-radius:6px;border:1px solid var(--gold-dim);cursor:zoom-in;display:block;"/>
+      <button onclick="teRuleItems[${idx}].imgs.splice(${i},1);renderRuleImgs(${idx})" style="position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:16px;height:16px;color:#ef5350;font-size:10px;cursor:pointer;line-height:1;">✕</button>
+    </div>`
+  ).join("");
+}
+
+// Updated paste handler — paste into focused rule OR last img section
+function attachTePaste() {
+  if (window._tePasteAttached) return;
+  window._tePasteAttached = true;
+  document.getElementById("modal-theory-edit").addEventListener("paste", async function(e) {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith("image/")) {
+        e.preventDefault();
+        const reader = new FileReader();
+        reader.onload = async ev => {
+          try {
+            const c = await compressImage(ev.target.result);
+            // Paste into focused rule if any
+            const ruleIdx = window._teRuleFocusIdx;
+            if (ruleIdx !== null && ruleIdx !== undefined && teRuleItems[ruleIdx]) {
+              teRuleItems[ruleIdx].imgs.push(c);
+              renderRuleImgs(ruleIdx);
+            } else {
+              // Fallback: paste into last img section
+              const idx2 = teImgSections.length - 1;
+              if (idx2 >= 0) { teImgSections[idx2].images.push(c); teRenderSecImgs(idx2); }
+            }
+          } catch(e2) {}
+        };
+        reader.readAsDataURL(item.getAsFile());
+        return;
+      }
+    }
+  });
 }
 
 window.saveTheoryCard = async function() {
@@ -3423,9 +3549,10 @@ window.saveTheoryCard = async function() {
   if(!title){try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
   showToast("⚠️ Nhập tiêu đề!");return;}
   const id=theoryEditingId||("tc_"+Date.now());
-  const rules=Array.from(document.querySelectorAll(".te-rule-input")).map(el=>el.value.trim()).filter(Boolean);
+  const rules = teRuleItems.filter(r => r.t.trim() || r.imgs?.length)
+    .map(r => ({t: r.t.trim(), imgs: r.imgs||[]}));
   const imgSections=teImgSections.filter(Boolean).filter(s=>s.images.length>0||s.caption||s.tf);
-  const card={id,icon:document.getElementById("te-icon").value.trim()||"📌",cat:document.getElementById("te-cat").value,title,tag:document.getElementById("te-tag").value.trim(),img:document.getElementById("te-img").value,rules:rules.map(r=>({t:r})),imgSections,highlight:{type:document.getElementById("te-hl-type").value,text:document.getElementById("te-hl-text").value.trim()}};
+  const card={id,icon:document.getElementById("te-icon").value.trim()||"📌",cat:document.getElementById("te-cat").value,title,tag:document.getElementById("te-tag").value.trim(),img:document.getElementById("te-img").value,rules,imgSections,highlight:{type:document.getElementById("te-hl-type").value,text:document.getElementById("te-hl-text").value.trim()}};
   const sizeKB = estimateKB(card);
   if(sizeKB>950){try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
   showToast("⚠️ Quá lớn ("+sizeKB+"KB)! Xóa bớt ảnh hoặc dùng ảnh nhỏ hơn.");return;}
@@ -3702,7 +3829,17 @@ function renderTheory() {
             if(t.img) return `<pre style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;font-size:11px;color:var(--gold);opacity:0.85;font-family:monospace;overflow-x:auto;white-space:pre;margin:14px 0;line-height:1.7;">${t.img}</pre>`;
             return "";
           })()}
-          ${rules.map(r=>`<div class="theory-rule"><div class="theory-rule-dot"></div><div class="theory-rule-text">${r}</div></div>`).join("")}
+          ${rules.map(r => {
+            const text = typeof r === "string" ? r : (r.t||"");
+            const imgs = (typeof r === "object" && r.imgs?.length) ? r.imgs : [];
+            return `<div class="theory-rule">
+              <div class="theory-rule-dot"></div>
+              <div style="flex:1;">
+                <div class="theory-rule-text">${text}</div>
+                ${imgs.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">${imgs.map(src=>`<img src="${src}" onclick="document.getElementById('theory-img-fullscreen').style.display='flex';document.getElementById('theory-img-fullscreen-img').src=this.src" style="max-width:100%;border-radius:8px;border:1px solid var(--gold-dim);cursor:zoom-in;display:block;"/>`).join("")}</div>` : ""}
+              </div>
+            </div>`;
+          }).join("")}
           ${highlight?.text?`<div class="theory-highlight ${highlight.type==="warn"?"warn":highlight.type==="info"?"info":""}">💡 ${highlight.text}</div>`:""}
           <button onclick="toggleMastered('${t.id}')" style="width:100%;margin-top:14px;padding:12px;border-radius:var(--radius-md);border:1px solid ${mastered?"var(--win)":"var(--gold-faint)"};background:${mastered?"#4caf5018":"transparent"};color:${mastered?"var(--win)":"var(--gold)"};font-family:var(--sys);font-size:11px;letter-spacing:0.5px;cursor:pointer;transition:all 0.2s;">
             ${mastered?"✓ ĐÃ THUỘC":"○ ĐÁNH DẤU ĐÃ THUỘC"}
@@ -4210,6 +4347,14 @@ renderTheoryFolderBar();
 populateFolderSelects();
 buildTFUploadRow();
 TFS.forEach(tf=>renderTFImages(tf));
+
+// Wire buttons inside module scope
+document.getElementById("btn-set-now")?.addEventListener("click", setNow);
+document.getElementById("ctt-copy-btn")?.addEventListener("click", () => setCopyMoveMode("copy"));
+document.getElementById("ctt-move-btn")?.addEventListener("click", () => setCopyMoveMode("move"));
+document.getElementById("folder-action-btn")?.addEventListener("click", () => copyFolderToTheory(currentFolder));
+document.getElementById("btn-modal-add-folder")?.addEventListener("click", () => addFolderFromModal());
+document.getElementById("btn-modal-move-cancel")?.addEventListener("click", () => { document.getElementById("modal-move").style.display="none"; });
 // Show skeleton while loading
 const _tl = document.getElementById("trade-list");
 if(_tl) _tl.innerHTML = Array(5).fill(0).map((_,i)=>`
