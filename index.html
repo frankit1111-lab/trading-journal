@@ -698,7 +698,7 @@
   <!-- Copy to theory bar — hiện khi đang xem 1 thư mục cụ thể -->
   <div id="folder-action-bar" style="display:none;padding:8px 16px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;align-items:center;gap:8px;">
     <span id="folder-action-label" style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold);flex:1;"></span>
-    <button onclick="copyFolderToTheory(currentFolder)" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:8px;padding:7px 14px;color:var(--gold);font-size:11px;font-family:'Cinzel',serif;cursor:pointer;letter-spacing:1px;">📖 Copy sang Lý Thuyết</button>
+    <button onclick="copyFolderToTheory(currentFolder)" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:8px;padding:7px 14px;color:var(--gold);font-size:11px;font-family:'Cinzel',serif;cursor:pointer;letter-spacing:1px;">📖 Di Chuyển / Copy → Lý Thuyết</button>
   </div>
   <div class="sort-bar">
     <span class="sort-label">Sắp xếp:</span>
@@ -708,11 +708,23 @@
   <div id="trade-list" style="flex:1;padding-bottom:80px;"></div>
 </div>
 
-<!-- COPY TO THEORY MODAL -->
+<!-- COPY/MOVE TO THEORY MODAL -->
 <div id="modal-copy-theory" style="display:none;" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
   <div class="modal-sheet">
-    <div class="modal-title" id="modal-copy-theory-title">COPY SANG LÝ THUYẾT</div>
-    <div id="modal-copy-theory-list"></div>
+    <div class="modal-title" id="modal-copy-theory-title">CHUYỂN SANG LÝ THUYẾT</div>
+
+    <!-- Copy vs Move toggle -->
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button id="ctt-copy-btn" onclick="setCopyMoveMode('copy')" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--gold);background:var(--gold-faint);color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;">
+        📋 COPY<br><span style="opacity:0.65;font-size:9px;">Giữ lại trong nhật ký</span>
+      </button>
+      <button id="ctt-move-btn" onclick="setCopyMoveMode('move')" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;opacity:0.6;">
+        🚀 DI CHUYỂN<br><span style="opacity:0.65;font-size:9px;">Xóa khỏi nhật ký</span>
+      </button>
+    </div>
+
+    <div style="font-size:10px;color:var(--gold);opacity:0.6;font-family:'Space Mono',monospace;letter-spacing:1px;margin-bottom:8px;">CHỌN THƯ MỤC LÝ THUYẾT:</div>
+    <div id="modal-copy-theory-list" style="max-height:45vh;overflow-y:auto;"></div>
     <button class="modal-cancel" onclick="document.getElementById('modal-copy-theory').style.display='none'">Huỷ</button>
   </div>
 </div>
@@ -1310,81 +1322,95 @@ function renderFolderBar() {
     `<button class="folder-chip add-folder" onclick="addFolder()">＋ Thêm</button>`;
 }
 
+// ══ COPY / MOVE TO THEORY ══
+let _theoryTransferMode = "copy";
+let _theoryTransferFolder = "";
+let _theoryTransferSingle = false;
+
+window.setCopyMoveMode = function(mode) {
+  _theoryTransferMode = mode;
+  const cb = document.getElementById("ctt-copy-btn");
+  const mb = document.getElementById("ctt-move-btn");
+  if (!cb||!mb) return;
+  if (mode==="copy") {
+    cb.style.cssText="flex:1;padding:10px;border-radius:10px;border:1px solid var(--gold);background:var(--gold-faint);color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;";
+    mb.style.cssText="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;opacity:0.55;";
+  } else {
+    mb.style.cssText="flex:1;padding:10px;border-radius:10px;border:1px solid var(--loss);background:#ef535014;color:var(--loss);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;";
+    cb.style.cssText="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;opacity:0.55;";
+  }
+};
+
+function _openTheoryTransferModal(title, folderName, isSingle) {
+  _theoryTransferFolder = folderName;
+  _theoryTransferSingle = isSingle;
+  setCopyMoveMode("copy");
+  document.getElementById("modal-copy-theory-title").textContent = title;
+  const nonFixed = theoryFolders.filter(f=>f.key!=="all");
+  document.getElementById("modal-copy-theory-list").innerHTML =
+    nonFixed.flatMap(f => {
+      const rows = [`<div class="modal-option" onclick="execTheoryTransfer('${f.key}')">${f.icon} ${esc(f.label)}</div>`];
+      (f.children||[]).forEach(c => rows.push(`<div class="modal-option" onclick="execTheoryTransfer('${f.key}/${c.key}')" style="padding-left:28px;font-size:13px;">└ ${esc(c.label||c.key)}</div>`));
+      return rows;
+    }).join("") +
+    `<div class="modal-option" onclick="execTheoryTransfer('__new__')" style="border-style:dashed;opacity:0.7;">＋ Tạo thư mục mới</div>`;
+  document.getElementById("modal-copy-theory").style.display = "flex";
+}
+
 window.copyFolderToTheory = async function(folderName) {
   const inFolder = trades.filter(t=>(t.folder||"")===folderName);
   if (!inFolder.length) { showToast("Thư mục trống!"); return; }
-
-  const nonFixed = theoryFolders.filter(f=>f.key!=="all");
-
-  // If no theory folders → auto create with same name and copy
-  if (nonFixed.length === 0) {
-    const key = "f_" + folderName.toLowerCase().replace(/\s+/g,"_").replace(/[^a-z0-9_]/g,"") + "_" + Date.now().toString().slice(-4);
-    theoryFolders.push({key, label:folderName, icon:"📁", children:[]});
+  if (theoryFolders.filter(f=>f.key!=="all").length===0) {
+    const key="f_"+folderName.toLowerCase().replace(/\s+/g,"_").replace(/[^a-z0-9_]/g,"")+"_"+Date.now().toString().slice(-4);
+    theoryFolders.push({key,label:folderName,icon:"📁",children:[]});
     await saveTheoryFolders();
-    await _doCopyToTheory(inFolder, key);
-    theoryCategory = key;
-    showScreen("theory");
-    return;
+    await _doCopyToTheory(inFolder,key);
+    showToast("📋 Đã copy "+inFolder.length+" lệnh → Lý Thuyết");
+    theoryCategory=key; showScreen("theory"); return;
   }
-
-  // Show picker modal
-  const modal = document.getElementById("modal-copy-theory");
-  const list  = document.getElementById("modal-copy-theory-list");
-  document.getElementById("modal-copy-theory-title").textContent = `Copy "${folderName}" (${inFolder.length} lệnh) → Lý Thuyết`;
-  list.innerHTML =
-    nonFixed.flatMap(f => {
-      const rows = [`<div class="modal-option" onclick="execCopyToTheory('${folderName.replace(/'/g,"\\'")}','${f.key}')">${f.icon} ${esc(f.label)}</div>`];
-      (f.children||[]).forEach(c => {
-        rows.push(`<div class="modal-option" onclick="execCopyToTheory('${folderName.replace(/'/g,"\\'")}','${f.key}/${c.key}')" style="padding-left:28px;font-size:13px;">└ ${esc(c.label||c.key)}</div>`);
-      });
-      return rows;
-    }).join("") +
-    `<div class="modal-option" onclick="execCopyToTheory('${folderName.replace(/'/g,"\\'")}','__new__')" style="border-style:dashed;opacity:0.7;">＋ Tạo thư mục mới "${esc(folderName)}"</div>`;
-  modal.style.display = "flex";
+  _openTheoryTransferModal(`"${folderName}" (${inFolder.length} lệnh)`, folderName, false);
 };
 
-window.execCopyToTheory = async function(folderName, destKey) {
+window.moveSingleTradeToTheory = async function() {
+  if (!currentTrade) return;
+  _openTheoryTransferModal(`"${currentTrade.title}"`, "", true);
+};
+
+window.execTheoryTransfer = async function(destKey) {
   document.getElementById("modal-copy-theory").style.display = "none";
-  const inFolder = trades.filter(t=>(t.folder||"")===folderName);
-  if (destKey === "__new__") {
-    const key = "f_" + folderName.toLowerCase().replace(/\s+/g,"_").replace(/[^a-z0-9_]/g,"") + "_" + Date.now().toString().slice(-4);
-    theoryFolders.push({key, label:folderName, icon:"📁", children:[]});
-    await saveTheoryFolders();
-    destKey = key;
+  const doMove = _theoryTransferMode==="move";
+  if (destKey==="__new__") {
+    const label=prompt("Tên thư mục lý thuyết mới:"); if(!label?.trim()) return;
+    const key="f_"+label.trim().toLowerCase().replace(/\s+/g,"_").replace(/[^a-z0-9_]/g,"")+"_"+Date.now().toString().slice(-4);
+    theoryFolders.push({key,label:label.trim(),icon:"📁",children:[]});
+    await saveTheoryFolders(); destKey=key;
   }
-  await _doCopyToTheory(inFolder, destKey);
-  theoryCategory = destKey;
-  showScreen("theory");
+  const tradeList = _theoryTransferSingle
+    ? (currentTrade?[currentTrade]:[])
+    : trades.filter(t=>(t.folder||"")===_theoryTransferFolder);
+  await _doCopyToTheory(tradeList, destKey);
+  if (doMove) {
+    for (const t of tradeList) { try{await deleteDoc(doc(db,"trades",t.id));}catch(e){} }
+    await loadTrades();
+    showToast("🚀 Đã di chuyển "+tradeList.length+" lệnh → Lý Thuyết");
+  } else {
+    showToast("📋 Đã copy "+tradeList.length+" lệnh → Lý Thuyết");
+  }
+  theoryCategory=destKey; showScreen("theory");
 };
 
 async function _doCopyToTheory(tradeList, destKey) {
-  let count = 0;
   for (const t of tradeList) {
-    const newId = "tc_trade_" + t.id;
-    if (theoryCustomData[newId] && !theoryCustomData[newId]._deleted) continue;
-    const secs = [];
-    if (t.images) {
-      for (const tf of TFS) {
-        const v = t.images[tf];
-        const imgs = Array.isArray(v)?v:(v?[v]:[]);
-        if (imgs.length) secs.push({tf, images:imgs, caption:(t.captions?.[tf]||"")});
-      }
-    }
-    theoryCustomData[newId] = {
-      id: newId, icon:"📋", cat: destKey,
-      title: t.title||"(Không tên)",
-      tag: (Array.isArray(t.tags)?t.tags.join(", "):(t.tags||""))||t.symbol||"",
-      img: "", rules: t.note?[{t:t.note}]:[],
-      imgSections: secs,
-      highlight:{type:t.result==="Win"?"tip":t.result==="Loss"?"warn":"info",
-        text:[t.result,t.pnl,t.onplan,t.symbol].filter(Boolean).join(" · ")},
-      _fromTrade: t.id
-    };
-    count++;
+    const newId="tc_trade_"+t.id;
+    const secs=[];
+    if(t.images){for(const tf of TFS){const v=t.images[tf];const imgs=Array.isArray(v)?v:(v?[v]:[]);if(imgs.length)secs.push({tf,images:imgs,caption:(t.captions?.[tf]||"")});}}
+    theoryCustomData[newId]={id:newId,icon:"📋",cat:destKey,title:t.title||"(Không tên)",tag:(Array.isArray(t.tags)?t.tags.join(", "):(t.tags||""))||t.symbol||"",img:"",rules:t.note?[{t:t.note}]:[],imgSections:secs,highlight:{type:t.result==="Win"?"tip":t.result==="Loss"?"warn":"info",text:[t.result,t.pnl,t.onplan,t.symbol].filter(Boolean).join(" · ")},_fromTrade:t.id};
   }
   await saveCustomTheory();
-  showToast(`✅ Đã copy ${count} lệnh → Lý Thuyết`);
 }
+
+window.execCopyToTheory=window.execTheoryTransfer;
+window.execMoveSingleToTheory=window.execTheoryTransfer;
 
 function populateFolderSelects(selected="") {
   ["f-folder","e-folder"].forEach(id=>{
@@ -1700,71 +1726,6 @@ window.duplicateTrade=async function(){
     showToast("📋 Đã nhân bản");await loadTrades();showScreen("list");
   }catch(e){alert("Lỗi: "+e.message);}
 };
-
-window.moveSingleTradeToTheory = async function() {
-  if (!currentTrade) return;
-  const nonFixed = theoryFolders.filter(f=>f.key!=="all");
-
-  // Show picker modal
-  const modal = document.getElementById("modal-copy-theory");
-  const list  = document.getElementById("modal-copy-theory-list");
-  const t = currentTrade;
-  document.getElementById("modal-copy-theory-title").textContent = `Chuyển "${t.title}" → Lý Thuyết`;
-
-  const safeTitle = (t.title||"").replace(/'/g,"\\'");
-  list.innerHTML =
-    (nonFixed.length ? nonFixed.flatMap(f => {
-      const rows = [`<div class="modal-option" onclick="execMoveSingleToTheory('${f.key}')">${f.icon} ${esc(f.label)}</div>`];
-      (f.children||[]).forEach(c => {
-        rows.push(`<div class="modal-option" onclick="execMoveSingleToTheory('${f.key}/${c.key}')" style="padding-left:28px;font-size:13px;">└ ${esc(c.label||c.key)}</div>`);
-      });
-      return rows;
-    }) : []) .join("") +
-    `<div class="modal-option" onclick="execMoveSingleToTheory('__new__')" style="border-style:dashed;opacity:0.7;">＋ Tạo thư mục mới</div>`;
-
-  modal.style.display = "flex";
-};
-
-window.execMoveSingleToTheory = async function(destKey) {
-  document.getElementById("modal-copy-theory").style.display = "none";
-  if (!currentTrade) return;
-  const t = currentTrade;
-
-  if (destKey === "__new__") {
-    const label = prompt("Tên thư mục lý thuyết mới:"); if (!label?.trim()) return;
-    const key = "f_" + label.trim().toLowerCase().replace(/\s+/g,"_").replace(/[^a-z0-9_]/g,"") + "_" + Date.now().toString().slice(-4);
-    theoryFolders.push({key, label:label.trim(), icon:"📁", children:[]});
-    await saveTheoryFolders();
-    destKey = key;
-  }
-
-  const newId = "tc_trade_" + t.id;
-  const secs = [];
-  if (t.images) {
-    for (const tf of TFS) {
-      const v = t.images[tf];
-      const imgs = Array.isArray(v)?v:(v?[v]:[]);
-      if (imgs.length) secs.push({tf, images:imgs, caption:(t.captions?.[tf]||"")});
-    }
-  }
-  theoryCustomData[newId] = {
-    id: newId, icon:"📋", cat: destKey,
-    title: t.title||"(Không tên)",
-    tag: (Array.isArray(t.tags)?t.tags.join(", "):(t.tags||""))||t.symbol||"",
-    img: "", rules: t.note?[{t:t.note}]:[],
-    imgSections: secs,
-    highlight:{
-      type: t.result==="Win"?"tip":t.result==="Loss"?"warn":"info",
-      text: [t.result, t.pnl, t.onplan, t.symbol].filter(Boolean).join(" · ")
-    },
-    _fromTrade: t.id
-  };
-  await saveCustomTheory();
-  showToast("✅ Đã chuyển sang Lý Thuyết");
-  theoryCategory = destKey;
-  showScreen("theory");
-};
-
 
 window.analyzeAI=async function(){
   if(!currentTrade) return;
