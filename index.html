@@ -1455,7 +1455,7 @@ window.selectFolder=function(f){
   if (f && f!=="all" && bar) {
     bar.style.display="flex";
     if(lbl) lbl.textContent = `🗂 ${f}`;
-    if(btn) btn.onclick = () => copyFolderToTheory(f);
+    if(btn) { btn.dataset.folder = f; btn.onclick = () => copyFolderToTheory(f); }
   } else if (bar) {
     bar.style.display="none";
   }
@@ -3788,10 +3788,18 @@ autoThemeByTime();
 await loadFolders();
 await loadTheoryData();
 
-// Wire modal buttons (inside module scope to avoid onclick scope issues)
-document.getElementById("ctt-copy-btn")?.addEventListener("click", () => setCopyMoveMode("copy"));
-document.getElementById("ctt-move-btn")?.addEventListener("click", () => setCopyMoveMode("move"));
-document.getElementById("folder-action-btn")?.addEventListener("click", () => copyFolderToTheory(currentFolder));
+// Event delegation - handles ALL dynamic buttons from inside module
+document.addEventListener("click", function(e) {
+  const btn = e.target.closest("button[id]");
+  if (!btn) return;
+  if (btn.id === "folder-action-btn") {
+    const f = btn.dataset.folder || currentFolder;
+    copyFolderToTheory(f);
+    return;
+  }
+  if (btn.id === "ctt-copy-btn") { setCopyMoveMode("copy"); return; }
+  if (btn.id === "ctt-move-btn") { setCopyMoveMode("move"); return; }
+});
 
 renderFolderBar();
 renderTheoryFolderBar();
