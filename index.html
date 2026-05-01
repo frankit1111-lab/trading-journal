@@ -949,7 +949,7 @@
   <div class="header">
     <button class="header-btn" onclick="showScreen('list')" style="font-size:20px;">←</button>
     <div class="header-title"><div class="label">Ôn Tập</div><div class="name">Lý Thuyết ICT</div></div>
-    <button class="header-btn" onclick="showScreen('settings')" style="font-size:18px;">⚙️</button>
+    <button class="header-btn" id="theory-edit-toggle" onclick="toggleTheoryEditMode()" style="font-size:16px;" title="Chỉnh sửa lý thuyết">✏️</button>
   </div>
 
   <!-- Daily Progress -->
@@ -976,8 +976,108 @@
     <input class="theory-search" placeholder="🔍  Tìm khái niệm..." oninput="searchTheory(this.value)"/>
   </div>
 
+  <!-- Edit Mode Bar -->
+  <div id="theory-edit-bar" style="display:none;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--gold-dim);flex-shrink:0;display:none;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:2px;flex:1;">✏️ CHẾ ĐỘ CHỈNH SỬA</div>
+      <button onclick="openAddTheoryCard()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:8px;padding:6px 14px;color:var(--gold);font-size:11px;font-family:'Cinzel',serif;cursor:pointer;letter-spacing:1px;">+ Thêm thẻ</button>
+      <button onclick="toggleTheoryEditMode()" style="background:none;border:1px solid #ef535055;border-radius:8px;padding:6px 14px;color:var(--loss);font-size:11px;font-family:'Cinzel',serif;cursor:pointer;opacity:0.8;">✕ Thoát</button>
+    </div>
+  </div>
+
   <!-- Cards -->
   <div id="theory-list" style="flex:1;padding:14px 18px 100px;overflow-y:auto;"></div>
+</div>
+
+<!-- THEORY EDIT MODAL -->
+<div id="modal-theory-edit" style="display:none;" class="modal-overlay" onclick="closeTheoryEditModal(event)">
+  <div class="modal-sheet" style="max-height:92vh;padding-bottom:20px;" onclick="event.stopPropagation()">
+    <div class="modal-title" id="theory-edit-modal-title">CHỈNH SỬA THẺ LÝ THUYẾT</div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:calc(92vh - 120px);padding-bottom:16px;">
+      <!-- Icon & Category row -->
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;">
+        <div>
+          <div style="font-size:10px;letter-spacing:2px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:5px;">ICON</div>
+          <input id="te-icon" type="text" placeholder="📌" style="width:100%;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:10px;color:var(--text);font-size:20px;text-align:center;outline:none;"/>
+        </div>
+        <div>
+          <div style="font-size:10px;letter-spacing:2px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:5px;">DANH MỤC</div>
+          <select id="te-cat" style="width:100%;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:10px;color:var(--text);font-size:13px;font-family:'Crimson Pro',serif;outline:none;">
+            <option value="basic">🧱 Cơ Bản</option>
+            <option value="pda">📐 PDA</option>
+            <option value="entry">🎯 Vào Lệnh</option>
+            <option value="drill">🏋️ Drill 2026</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <div>
+        <div style="font-size:10px;letter-spacing:2px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:5px;">TIÊU ĐỀ</div>
+        <input id="te-title" type="text" placeholder="VD: FVG — Fair Value Gap" style="width:100%;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:10px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;"/>
+      </div>
+
+      <!-- Tag -->
+      <div>
+        <div style="font-size:10px;letter-spacing:2px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:5px;">TAG</div>
+        <input id="te-tag" type="text" placeholder="VD: FVG, OB, Liquidity..." style="width:100%;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:10px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;"/>
+      </div>
+
+      <!-- Diagram / img -->
+      <div>
+        <div style="font-size:10px;letter-spacing:2px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:5px;">SƠ ĐỒ ASCII</div>
+        <textarea id="te-img" rows="5" placeholder="Vẽ sơ đồ bằng ký tự ASCII..." style="width:100%;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:10px;color:var(--text);font-size:12px;font-family:monospace;outline:none;resize:vertical;line-height:1.6;"></textarea>
+      </div>
+
+      <!-- Rules -->
+      <div>
+        <div style="font-size:10px;letter-spacing:2px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:5px;">CÁC QUY TẮC</div>
+        <div id="te-rules-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <button onclick="addTheoryRuleField()" style="margin-top:6px;background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:6px 14px;color:var(--gold);font-size:11px;font-family:'Cinzel',serif;cursor:pointer;letter-spacing:1px;">+ Thêm rule</button>
+      </div>
+
+      <!-- Highlight -->
+      <div>
+        <div style="font-size:10px;letter-spacing:2px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:5px;">HIGHLIGHT</div>
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;">
+          <select id="te-hl-type" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:10px;color:var(--text);font-size:13px;outline:none;">
+            <option value="tip">💡 Tip</option>
+            <option value="warn">⚠️ Warn</option>
+            <option value="info">ℹ️ Info</option>
+          </select>
+          <input id="te-hl-text" type="text" placeholder="Nội dung highlight..." style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:10px;color:var(--text);font-size:13px;font-family:'Crimson Pro',serif;outline:none;"/>
+        </div>
+      </div>
+
+      <!-- Quiz -->
+      <div>
+        <div style="font-size:10px;letter-spacing:2px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:5px;">QUIZ</div>
+        <input id="te-quiz-q" type="text" placeholder="Câu hỏi quiz..." style="width:100%;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:10px;color:var(--text);font-size:13px;font-family:'Crimson Pro',serif;outline:none;margin-bottom:6px;"/>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;" id="te-quiz-opts">
+          <input placeholder="Đáp án A" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:12px;outline:none;" id="te-opt-0"/>
+          <input placeholder="Đáp án B" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:12px;outline:none;" id="te-opt-1"/>
+          <input placeholder="Đáp án C" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:12px;outline:none;" id="te-opt-2"/>
+          <input placeholder="Đáp án D" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:12px;outline:none;" id="te-opt-3"/>
+        </div>
+        <div style="margin-top:6px;">
+          <div style="font-size:10px;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:4px;letter-spacing:1px;">ĐÁP ÁN ĐÚNG</div>
+          <select id="te-quiz-ans" style="width:100%;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:8px;padding:10px;color:var(--text);font-size:13px;outline:none;">
+            <option value="0">Đáp án A</option>
+            <option value="1">Đáp án B</option>
+            <option value="2">Đáp án C</option>
+            <option value="3">Đáp án D</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;border-top:1px solid var(--gold-faint);padding-top:12px;">
+      <button onclick="saveTheoryCard()" style="width:100%;padding:14px;border-radius:10px;background:var(--gold-faint);border:1px solid var(--gold);color:var(--gold);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;cursor:pointer;">💾 LƯU THẺ</button>
+      <button id="te-delete-btn" onclick="deleteTheoryCard()" style="display:none;width:100%;padding:10px;border-radius:10px;background:none;border:1px solid #ef535055;color:var(--loss);font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;opacity:0.7;">🗑 XÓA THẺ NÀY</button>
+    </div>
+  </div>
 </div>
 
 <!-- SETTINGS -->
@@ -2362,6 +2462,153 @@ let theoryCategory = "all";
 let theoryMastered = {};
 let theorySearchQ = "";
 let theoryQuizAnswered = {};
+let theoryEditMode = false;
+let theoryCustomData = {}; // Override map: id -> custom card data
+let theoryEditingId = null; // null = new card
+
+// ══ LOAD CUSTOM THEORY FROM FIREBASE ══
+async function loadCustomTheory() {
+  try {
+    const snap = await getDoc(doc(db,"app_config","theory_custom"));
+    if (snap.exists()) theoryCustomData = snap.data().cards || {};
+  } catch(e) {
+    const local = JSON.parse(localStorage.getItem("tl_theory_custom")||"null");
+    if (local) theoryCustomData = local;
+  }
+}
+async function saveCustomTheory() {
+  try { await setDoc(doc(db,"app_config","theory_custom"),{cards:theoryCustomData}); } catch(e){}
+  localStorage.setItem("tl_theory_custom", JSON.stringify(theoryCustomData));
+}
+
+// Merge: THEORY_DATA + custom overrides
+function getMergedTheory() {
+  // Start with THEORY_DATA, override with custom
+  const base = THEORY_DATA.map(t => theoryCustomData[t.id] ? theoryCustomData[t.id] : t);
+  // Add custom cards that are not in THEORY_DATA (new ones)
+  const baseIds = new Set(THEORY_DATA.map(t=>t.id));
+  Object.values(theoryCustomData).forEach(c => {
+    if (!baseIds.has(c.id)) base.push(c);
+  });
+  // Remove deleted ones (marked with _deleted)
+  return base.filter(t => !t._deleted);
+}
+
+window.toggleTheoryEditMode = function() {
+  theoryEditMode = !theoryEditMode;
+  const bar = document.getElementById("theory-edit-bar");
+  const btn = document.getElementById("theory-edit-toggle");
+  bar.style.display = theoryEditMode ? "block" : "none";
+  if (btn) btn.style.opacity = theoryEditMode ? "1" : "0.7";
+  showToast(theoryEditMode ? "✏️ Chế độ chỉnh sửa" : "✅ Đã thoát edit");
+  renderTheory();
+};
+
+window.openAddTheoryCard = function() {
+  theoryEditingId = null;
+  document.getElementById("theory-edit-modal-title").textContent = "THÊM THẺ MỚI";
+  document.getElementById("te-icon").value = "📌";
+  document.getElementById("te-cat").value = "basic";
+  document.getElementById("te-title").value = "";
+  document.getElementById("te-tag").value = "";
+  document.getElementById("te-img").value = "";
+  document.getElementById("te-hl-type").value = "tip";
+  document.getElementById("te-hl-text").value = "";
+  document.getElementById("te-quiz-q").value = "";
+  [0,1,2,3].forEach(i => document.getElementById("te-opt-"+i).value = "");
+  document.getElementById("te-quiz-ans").value = "0";
+  document.getElementById("te-delete-btn").style.display = "none";
+  buildRuleFields([]);
+  document.getElementById("modal-theory-edit").style.display = "flex";
+};
+
+window.openEditTheoryCard = function(id) {
+  const merged = getMergedTheory();
+  const t = merged.find(x=>x.id===id);
+  if (!t) return;
+  theoryEditingId = id;
+  document.getElementById("theory-edit-modal-title").textContent = "CHỈNH SỬA THẺ";
+  document.getElementById("te-icon").value = t.icon||"📌";
+  document.getElementById("te-cat").value = t.cat||"basic";
+  document.getElementById("te-title").value = t.title||"";
+  document.getElementById("te-tag").value = t.tag||"";
+  document.getElementById("te-img").value = t.img||"";
+  document.getElementById("te-hl-type").value = (t.highlight||t).type||t.hlType||"tip";
+  document.getElementById("te-hl-text").value = (t.highlight||{}).text||t.hlText||"";
+  const quiz = t.quiz||{};
+  document.getElementById("te-quiz-q").value = quiz.q||t.qQ||"";
+  const opts = quiz.opts||t.qOpts||["","","",""];
+  [0,1,2,3].forEach(i=>document.getElementById("te-opt-"+i).value=opts[i]||"");
+  document.getElementById("te-quiz-ans").value = String(quiz.ans!==undefined?quiz.ans:(t.qAns||0));
+  document.getElementById("te-delete-btn").style.display = "block";
+  // rules: support both {t:...} and plain string
+  const rules = (t.rules||[]).map(r=>typeof r==="string"?r:r.t);
+  buildRuleFields(rules);
+  document.getElementById("modal-theory-edit").style.display = "flex";
+};
+
+function buildRuleFields(rules) {
+  const list = document.getElementById("te-rules-list");
+  list.innerHTML = "";
+  (rules.length ? rules : [""]).forEach((r,i) => addRuleFieldWith(r));
+}
+
+window.addTheoryRuleField = function() { addRuleFieldWith(""); };
+function addRuleFieldWith(val) {
+  const list = document.getElementById("te-rules-list");
+  const idx = list.children.length;
+  const row = document.createElement("div");
+  row.style.cssText = "display:flex;gap:6px;align-items:flex-start;";
+  row.innerHTML = `<textarea class="te-rule-input" rows="2" placeholder="Nhập quy tắc (HTML tag <b> được phép)..." style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:13px;font-family:'Crimson Pro',serif;outline:none;resize:vertical;line-height:1.5;">${val}</textarea><button onclick="this.parentElement.remove()" style="background:none;border:1px solid #ef535044;border-radius:6px;padding:6px 8px;color:var(--loss);font-size:12px;cursor:pointer;flex-shrink:0;margin-top:2px;">✕</button>`;
+  list.appendChild(row);
+}
+
+window.saveTheoryCard = async function() {
+  const title = document.getElementById("te-title").value.trim();
+  if (!title) { showToast("⚠️ Nhập tiêu đề!"); return; }
+  const rules = Array.from(document.querySelectorAll(".te-rule-input")).map(el=>el.value.trim()).filter(Boolean);
+  if (!rules.length) { showToast("⚠️ Nhập ít nhất 1 rule!"); return; }
+  const id = theoryEditingId || ("tc_" + Date.now());
+  const card = {
+    id,
+    icon: document.getElementById("te-icon").value.trim()||"📌",
+    cat: document.getElementById("te-cat").value,
+    title,
+    tag: document.getElementById("te-tag").value.trim(),
+    img: document.getElementById("te-img").value,
+    rules: rules.map(r=>({t:r})),
+    highlight: {
+      type: document.getElementById("te-hl-type").value,
+      text: document.getElementById("te-hl-text").value.trim()
+    },
+    quiz: {
+      q: document.getElementById("te-quiz-q").value.trim(),
+      opts: [0,1,2,3].map(i=>document.getElementById("te-opt-"+i).value.trim()),
+      ans: parseInt(document.getElementById("te-quiz-ans").value)
+    }
+  };
+  theoryCustomData[id] = card;
+  await saveCustomTheory();
+  document.getElementById("modal-theory-edit").style.display = "none";
+  renderTheory();
+  showToast("✅ Đã lưu thẻ!");
+};
+
+window.deleteTheoryCard = async function() {
+  if (!theoryEditingId) return;
+  if (!confirm("Xóa thẻ này?")) return;
+  // Mark deleted or remove
+  theoryCustomData[theoryEditingId] = { id: theoryEditingId, _deleted: true };
+  await saveCustomTheory();
+  document.getElementById("modal-theory-edit").style.display = "none";
+  renderTheory();
+  showToast("🗑 Đã xóa thẻ");
+};
+
+window.closeTheoryEditModal = function(e) {
+  if (e.target === document.getElementById("modal-theory-edit"))
+    document.getElementById("modal-theory-edit").style.display = "none";
+};
 
 async function loadTheoryData() {
   try {
@@ -2374,6 +2621,7 @@ async function loadTheoryData() {
     const local = JSON.parse(localStorage.getItem("tl_theory") || "null");
     if (local) { theoryMastered = local.mastered||{}; theoryQuizAnswered = local.quizAnswered||{}; }
   }
+  await loadCustomTheory();
 }
 
 async function saveTheoryData() {
@@ -2503,17 +2751,18 @@ function getTheoryDiagramSVG(id) {
 }
 
 function renderTheory() {
-  let list = THEORY_DATA;
+  let list = getMergedTheory();
   if (theoryCategory === "quiz") {
     renderQuizMode(); return;
   }
   if (theoryCategory !== "all") list = list.filter(t => t.cat === theoryCategory);
   if (theorySearchQ) {
     const q = theorySearchQ.toLowerCase();
-    list = list.filter(t => t.title.toLowerCase().includes(q) || t.rules.some(r => r.t.toLowerCase().includes(q)) || t.tag.toLowerCase().includes(q));
+    list = list.filter(t => t.title.toLowerCase().includes(q) || (t.rules||[]).some(r => (typeof r==="string"?r:r.t).toLowerCase().includes(q)) || (t.tag||"").toLowerCase().includes(q));
   }
 
-  const total = THEORY_DATA.length;
+  const allCards = getMergedTheory();
+  const total = allCards.length;
   const masteredCount = Object.values(theoryMastered).filter(Boolean).length;
   const pct = total ? Math.round(masteredCount/total*100) : 0;
   document.getElementById("theory-progress").style.width = pct + "%";
@@ -2525,15 +2774,17 @@ function renderTheory() {
     return;
   }
 
-  // Fix 9: Today's card at top (only in "all" tab, no search)
+  // Today's card at top (only in "all" tab, no search, not edit mode)
   let todayHtml = "";
-  if (theoryCategory === "all" && !theorySearchQ) {
+  if (theoryCategory === "all" && !theorySearchQ && !theoryEditMode) {
     const todayCard = getTodayTheory();
     if (todayCard) {
+      const firstRule = (todayCard.rules||[])[0];
+      const ruleText = typeof firstRule==="string" ? firstRule : (firstRule?.t||"");
       todayHtml = `<div class="today-card" onclick="scrollToCard('${todayCard.id}')">
         <div class="today-label">📅 BÀI HỌC HÔM NAY</div>
         <div style="font-family:'Cinzel',serif;font-size:14px;color:var(--gold);margin-bottom:6px;">${todayCard.icon} ${todayCard.title}</div>
-        <div style="font-size:13px;color:var(--text);opacity:0.7;line-height:1.5;">${todayCard.rules[0].t.replace(/<[^>]+>/g,"").slice(0,80)}...</div>
+        <div style="font-size:13px;color:var(--text);opacity:0.7;line-height:1.5;">${ruleText.replace(/<[^>]+>/g,"").slice(0,80)}...</div>
         <div style="margin-top:10px;font-size:11px;color:var(--gold);opacity:0.85;font-family:'Cinzel',serif;letter-spacing:1px;">Nhấn để ôn bài →</div>
       </div>`;
     }
@@ -2541,20 +2792,25 @@ function renderTheory() {
 
   el.innerHTML = todayHtml + list.map(t => {
     const mastered = theoryMastered[t.id];
+    const highlight = t.highlight || (t.hlText ? {type:t.hlType||"tip",text:t.hlText} : null);
+    const quiz = t.quiz || (t.qQ ? {q:t.qQ,opts:t.qOpts||[],ans:t.qAns||0} : null);
+    const rules = (t.rules||[]).map(r=>typeof r==="string"?r:r.t);
+    const editBtn = theoryEditMode ? `<button onclick="event.stopPropagation();openEditTheoryCard('${t.id}')" style="margin-left:6px;background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:3px 10px;color:var(--gold);font-size:11px;font-family:'Cinzel',serif;cursor:pointer;flex-shrink:0;">✏️</button>` : "";
     return `<div class="theory-card${mastered?" theory-mastered":""}" id="tc-${t.id}">
       <div class="theory-card-header" onclick="toggleTheoryCard('${t.id}')">
         <span class="theory-card-icon">${t.icon}</span>
         <span class="theory-card-title">${t.title}</span>
         <span class="theory-card-tag">${t.tag}</span>
         ${mastered?'<span style="color:var(--win);font-size:14px;">✓</span>':''}
+        ${editBtn}
         <span class="theory-card-chevron">▼</span>
       </div>
       <div class="theory-card-body">
         <div class="theory-card-content">
-          ${(()=>{const svg=getTheoryDiagramSVG(t.id);return svg?`<div style="margin:14px 0;">${svg}<div class="theory-diagram-caption">${t.tag} — Sơ đồ minh họa</div></div>`:"";})()}
-          ${t.rules.map(r=>`<div class="theory-rule"><div class="theory-rule-dot"></div><div class="theory-rule-text">${r.t}</div></div>`).join("")}
-          ${t.highlight?`<div class="theory-highlight ${t.highlight.type==="warn"?"warn":t.highlight.type==="info"?"info":""}">💡 ${t.highlight.text}</div>`:""}
-          ${t.quiz?renderQuizCard(t):""}
+          ${(()=>{const svg=getTheoryDiagramSVG(t.id);return svg?`<div style="margin:14px 0;">${svg}<div class="theory-diagram-caption">${t.tag} — Sơ đồ minh họa</div></div>`:t.img?`<pre style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:11px;color:var(--gold);opacity:0.85;font-family:monospace;overflow-x:auto;white-space:pre;margin:14px 0;line-height:1.7;">${t.img}</pre>`:"";})()}
+          ${rules.map(r=>`<div class="theory-rule"><div class="theory-rule-dot"></div><div class="theory-rule-text">${r}</div></div>`).join("")}
+          ${highlight?`<div class="theory-highlight ${highlight.type==="warn"?"warn":highlight.type==="info"?"info":""}">💡 ${highlight.text}</div>`:""}
+          ${quiz?renderQuizCard({...t,quiz}):""}
           <button onclick="toggleMastered('${t.id}')" style="width:100%;margin-top:14px;padding:12px;border-radius:10px;border:1px solid ${mastered?"var(--win)":"var(--gold-faint)"};background:${mastered?"#4caf5018":"transparent"};color:${mastered?"var(--win)":"var(--gold)"};font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;cursor:pointer;transition:all 0.2s;">
             ${mastered?"✓ ĐÃ THUỘC":"○ ĐÁNH DẤU ĐÃ THUỘC"}
           </button>
@@ -2565,26 +2821,31 @@ function renderTheory() {
 }
 
 function renderQuizCard(t) {
+  const quiz = t.quiz || (t.qQ ? {q:t.qQ, opts:t.qOpts||[], ans:t.qAns||0} : null);
+  if (!quiz || !quiz.q) return "";
   const answered = theoryQuizAnswered[t.id];
-  if (!t.quiz) return "";
   return `<div class="theory-quiz">
-    <div class="theory-quiz-q">❓ ${esc(t.quiz.q)}</div>
+    <div class="theory-quiz-q">❓ ${esc(quiz.q)}</div>
     <div class="theory-quiz-opts">
-      ${t.quiz.opts.map((opt, i) => {
+      ${(quiz.opts||[]).map((opt, i) => {
         let cls = "";
-        if (answered !== undefined) cls = i === t.quiz.ans ? "correct" : (answered === i ? "wrong" : "");
+        if (answered !== undefined) cls = i === quiz.ans ? "correct" : (answered === i ? "wrong" : "");
         return `<button class="theory-quiz-opt ${cls}" onclick="answerQuiz('${t.id}',${i})" ${answered!==undefined?"disabled":""}>${opt}</button>`;
       }).join("")}
     </div>
-    ${answered !== undefined ? `<div style="margin-top:8px;font-size:12px;color:${answered===t.quiz.ans?"var(--win)":"var(--loss)"};">${answered===t.quiz.ans?"✅ Đúng rồi!":"❌ Sai — đáp án đúng: "+t.quiz.opts[t.quiz.ans]}</div>` : ""}
+    ${answered !== undefined ? `<div style="margin-top:8px;font-size:12px;color:${answered===quiz.ans?"var(--win)":"var(--loss)"};">${answered===quiz.ans?"✅ Đúng rồi!":"❌ Sai — đáp án đúng: "+(quiz.opts[quiz.ans]||"")}</div>` : ""}
   </div>`;
 }
 
 function renderQuizMode() {
-  const unanswered = THEORY_DATA.filter(t => t.quiz && theoryQuizAnswered[t.id] === undefined);
+  const merged = getMergedTheory();
+  const quizCards = merged.filter(t => t.quiz?.q || t.qQ);
   const el = document.getElementById("theory-list");
-  const correct = THEORY_DATA.filter(t => t.quiz && theoryQuizAnswered[t.id] === t.quiz.ans).length;
-  const total = THEORY_DATA.filter(t => t.quiz).length;
+  const correct = quizCards.filter(t => {
+    const ans = t.quiz?.ans ?? t.qAns ?? 0;
+    return theoryQuizAnswered[t.id] === ans;
+  }).length;
+  const total = quizCards.length;
 
   el.innerHTML = `
     <div style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:12px;padding:16px;margin-bottom:16px;text-align:center;">
@@ -2593,7 +2854,7 @@ function renderQuizMode() {
       <div class="theory-progress-bar"><div class="theory-progress-fill" style="width:${total?Math.round(correct/total*100):0}%"></div></div>
       <button onclick="resetQuiz()" style="margin-top:8px;padding:8px 20px;border-radius:20px;border:1px solid var(--gold-faint);background:transparent;color:var(--gold);font-size:11px;font-family:'Cinzel',serif;cursor:pointer;letter-spacing:1px;">↺ LÀM LẠI</button>
     </div>
-    ${THEORY_DATA.filter(t=>t.quiz).map(t=>`
+    ${quizCards.map(t=>`
     <div class="theory-card" id="tc-${t.id}">
       <div class="theory-card-header" onclick="toggleTheoryCard('${t.id}')">
         <span class="theory-card-icon">${t.icon}</span>
@@ -2670,15 +2931,15 @@ function autoThemeByTime() {
 
 // Fix 9: Today's Theory — spaced repetition pick
 function getTodayTheory() {
+  const merged = getMergedTheory();
   const today = new Date().toDateString();
   const stored = localStorage.getItem("tl_today_theory");
   if (stored) {
     const {date, id} = JSON.parse(stored);
-    if (date === today) return THEORY_DATA.find(t=>t.id===id)||THEORY_DATA[0];
+    if (date === today) return merged.find(t=>t.id===id)||merged[0];
   }
-  // Pick least-recently studied unmastered card
-  const unmastered = THEORY_DATA.filter(t=>!theoryMastered[t.id]);
-  const pool = unmastered.length > 0 ? unmastered : THEORY_DATA;
+  const unmastered = merged.filter(t=>!theoryMastered[t.id]);
+  const pool = unmastered.length > 0 ? unmastered : merged;
   const pick = pool[Math.floor(Math.random()*pool.length)];
   localStorage.setItem("tl_today_theory", JSON.stringify({date:today, id:pick.id}));
   return pick;
