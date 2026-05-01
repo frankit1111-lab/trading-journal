@@ -1132,16 +1132,7 @@
     <button class="header-btn" id="theory-edit-toggle" onclick="toggleTheoryEditMode()" style="font-size:16px;" title="Chỉnh sửa lý thuyết">✏️</button>
   </div>
 
-  <!-- Daily Progress -->
-  <div style="padding:12px 18px;background:var(--bg2);border-bottom:1px solid var(--gold-faint);flex-shrink:0;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <div id="theory-daily-badge" class="theory-daily-badge">📅 Hôm nay: 0/0 đã ôn</div>
-      <div id="theory-streak" style="font-family:var(--sys);font-size:11px;color:var(--gold);opacity:1;font-weight:600;">🔥 0 ngày liên tiếp</div>
-    </div>
-    <div class="theory-progress-bar"><div class="theory-progress-fill" id="theory-progress" style="width:0%"></div></div>
-  </div>
-
-  <!-- Theory Folder Bar (dynamic, replaces hard-coded tabs) -->
+  <!-- Theory Folder Bar (dynamic) -->
   <div id="theory-folder-bar" style="display:flex;gap:6px;overflow-x:auto;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;"></div>
 
   <!-- Category Sub-tabs (shown when inside a folder with subfolders) -->
@@ -2972,32 +2963,58 @@ function renderTheoryFolderBar() {
 
   const curParent = theoryCategory.split("/")[0];
 
+  // Build folder chips
   bar.innerHTML = theoryFolders.map(f => {
     const active = f.key===curParent || (f.key==="all" && theoryCategory==="all");
     const isFixed = f.key==="all";
     const editBtns = (theoryEditMode && !isFixed)
-      ? `<span onclick="event.stopPropagation();renameTheoryFolder('${f.key}')" style="margin-left:4px;opacity:0.6;font-size:11px;padding:1px 4px;border-radius:3px;border:1px solid var(--gold-faint);" title="Đổi tên">✏️</span>
-         <span onclick="event.stopPropagation();deleteTheoryFolder('${f.key}')" style="margin-left:2px;opacity:0.6;font-size:11px;padding:1px 3px;" title="Xóa">✕</span>`
+      ? `<span class="tf-rename" data-key="${f.key}" style="margin-left:5px;opacity:0.7;font-size:12px;cursor:pointer;" title="Đổi tên">✏️</span>
+         <span class="tf-delete" data-key="${f.key}" style="margin-left:2px;opacity:0.6;font-size:13px;cursor:pointer;" title="Xóa">✕</span>`
       : "";
-    return `<button class="folder-chip${active?" active":""}" onclick="setTheoryFolder('${f.key}')" style="display:inline-flex;align-items:center;gap:2px;">${f.icon} ${f.label}${editBtns}</button>`;
+    return `<button class="folder-chip${active?" active":""}" data-key="${f.key}" style="display:inline-flex;align-items:center;gap:2px;">${f.icon} ${f.label}${editBtns}</button>`;
   }).join("") +
-  (theoryEditMode ? `<button class="folder-chip add-folder" onclick="addTheoryFolder()" style="border-style:dashed;">＋ Thư mục</button>` : "");
+  (theoryEditMode ? `<button class="folder-chip add-folder" id="btn-add-theory-folder" style="border-style:dashed;">＋</button>` : "");
 
+  // Wire ALL events inside module scope
+  bar.querySelectorAll(".folder-chip[data-key]").forEach(btn => {
+    btn.addEventListener("click", e => {
+      const renameBtn = e.target.closest(".tf-rename");
+      const deleteBtn = e.target.closest(".tf-delete");
+      if (renameBtn) { e.stopPropagation(); renameTheoryFolder(renameBtn.dataset.key); return; }
+      if (deleteBtn) { e.stopPropagation(); deleteTheoryFolder(deleteBtn.dataset.key); return; }
+      setTheoryFolder(btn.dataset.key);
+    });
+  });
+  bar.querySelector("#btn-add-theory-folder")?.addEventListener("click", addTheoryFolder);
+
+  // Subfolder bar
   const parentFolder = theoryFolders.find(f=>f.key===curParent);
   const children = parentFolder?.children||[];
   if (children.length && curParent!=="all") {
     sub.style.display = "flex";
     sub.innerHTML =
-      `<button class="folder-chip${!theorySubfolder?" active":""}" onclick="setTheorySubfolder('')">📁 Tất cả</button>` +
+      `<button class="folder-chip${!theorySubfolder?" active":""}" id="btn-tf-sub-all">📁 Tất cả</button>` +
       children.map(c => {
         const active = theorySubfolder===c.key;
         const editBtns = theoryEditMode
-          ? `<span onclick="event.stopPropagation();renameTheorySubfolder('${curParent}','${c.key}')" style="margin-left:4px;opacity:0.6;font-size:11px;border:1px solid var(--gold-faint);border-radius:3px;padding:1px 4px;">✏️</span>
-             <span onclick="event.stopPropagation();deleteTheorySubfolder('${curParent}','${c.key}')" style="margin-left:2px;opacity:0.55;font-size:11px;">✕</span>`
+          ? `<span class="tfs-rename" data-parent="${curParent}" data-key="${c.key}" style="margin-left:5px;opacity:0.7;font-size:12px;cursor:pointer;">✏️</span>
+             <span class="tfs-delete" data-parent="${curParent}" data-key="${c.key}" style="margin-left:2px;opacity:0.6;font-size:13px;cursor:pointer;">✕</span>`
           : "";
-        return `<button class="folder-chip${active?" active":""}" onclick="setTheorySubfolder('${c.key}')" style="display:inline-flex;align-items:center;">${c.label||c.key}${editBtns}</button>`;
+        return `<button class="folder-chip${active?" active":""}" data-sub="${c.key}" style="display:inline-flex;align-items:center;">${c.label||c.key}${editBtns}</button>`;
       }).join("") +
-      (theoryEditMode ? `<button class="folder-chip add-folder" onclick="addTheorySubfolder('${curParent}')" style="border-style:dashed;font-size:11px;">＋ Thư mục con</button>` : "");
+      (theoryEditMode ? `<button class="folder-chip add-folder" id="btn-add-theory-sub" style="border-style:dashed;font-size:11px;">＋</button>` : "");
+
+    sub.querySelector("#btn-tf-sub-all")?.addEventListener("click", () => setTheorySubfolder(""));
+    sub.querySelectorAll("[data-sub]").forEach(btn => {
+      btn.addEventListener("click", e => {
+        const r = e.target.closest(".tfs-rename");
+        const d = e.target.closest(".tfs-delete");
+        if (r) { e.stopPropagation(); renameTheorySubfolder(r.dataset.parent, r.dataset.key); return; }
+        if (d) { e.stopPropagation(); deleteTheorySubfolder(d.dataset.parent, d.dataset.key); return; }
+        setTheorySubfolder(btn.dataset.sub);
+      });
+    });
+    sub.querySelector("#btn-add-theory-sub")?.addEventListener("click", () => addTheorySubfolder(curParent));
   } else {
     sub.style.display = "none";
     if (theorySubfolder) theorySubfolder = "";
@@ -3620,8 +3637,9 @@ function renderTheory() {
   const total = allCards.length;
   const masteredCount = Object.values(theoryMastered).filter(Boolean).length;
   const pct = total ? Math.round(masteredCount/total*100) : 0;
-  document.getElementById("theory-progress").style.width = pct + "%";
-  document.getElementById("theory-daily-badge").textContent = `📅 Đã thuộc: ${masteredCount}/${total}`;
+  // Progress tracking removed
+  // document.getElementById("theory-progress").style.width = pct + "%";
+  // document.getElementById("theory-daily-badge").textContent = ...;
 
   const el = document.getElementById("theory-list");
   if (!list.length) {
