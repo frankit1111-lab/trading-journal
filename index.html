@@ -1341,7 +1341,7 @@ window.setCopyMoveMode = function(mode) {
   }
 };
 
-function _openTheoryTransferModal(title, folderName, isSingle) {
+window._openTheoryTransferModal = function(title, folderName, isSingle) {
   _theoryTransferFolder = folderName;
   _theoryTransferSingle = isSingle;
   setCopyMoveMode("copy");
@@ -1360,17 +1360,22 @@ function _openTheoryTransferModal(title, folderName, isSingle) {
     `<div class="modal-option" onclick="execTheoryTransfer('__new__')" style="border:1px dashed var(--gold-dim);color:var(--gold);margin-top:${nonFixed.length?'4px':'0'};">＋ Tạo thư mục mới trong Lý Thuyết</div>`;
 
   document.getElementById("modal-copy-theory").style.display = "flex";
-}
+};
 
 window.copyFolderToTheory = async function(folderName) {
+  // Debug: show what we're working with
+  const allFolders = trades.map(t=>t.folder||"(none)");
   const inFolder = trades.filter(t=>(t.folder||"")===folderName);
-  if (!inFolder.length) { showToast("⚠️ Thư mục trống!"); return; }
-  _openTheoryTransferModal(`"${folderName}" (${inFolder.length} lệnh)`, folderName, false);
+  if (!inFolder.length) {
+    showToast(`⚠️ Không tìm thấy lệnh trong "${folderName}" (tổng: ${trades.length})`);
+    return;
+  }
+  window._openTheoryTransferModal(`"${folderName}" (${inFolder.length} lệnh)`, folderName, false);
 };
 
 window.moveSingleTradeToTheory = async function() {
   if (!currentTrade) return;
-  _openTheoryTransferModal(`"${currentTrade.title}"`, "", true);
+  window._openTheoryTransferModal(`"${currentTrade.title}"`, "", true);
 };
 
 window.execTheoryTransfer = async function(destKey) {
@@ -3758,18 +3763,24 @@ Phân tích CHUYÊN SÂU bằng tiếng Việt (thực tế, cụ thể):
 
 // ══ INIT ══
 await loadTheme();
-autoThemeByTime(); // Fix 10: auto theme by time of day
+autoThemeByTime();
 await loadFolders();
 await loadTheoryData();
+
+// Expose module-scoped variables to window so onclick handlers can access them
+window._getTheoryFolders = () => theoryFolders;
+window._getTheoryCustomData = () => theoryCustomData;
+window._getTradesArr = () => trades;
+window._getTFS = () => TFS;
+
 renderFolderBar();
+renderTheoryFolderBar();
 populateFolderSelects();
 buildTFUploadRow();
 TFS.forEach(tf=>renderTFImages(tf));
 await loadTrades();
-// Show FAB on initial list screen
 const _fab=document.getElementById("fab-btn");
 if(_fab) _fab.classList.add("visible");
-// Session indicator
 updateSessionBadge();
 setInterval(updateSessionBadge, 60000);
 </script>
