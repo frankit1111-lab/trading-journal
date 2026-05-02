@@ -111,7 +111,7 @@
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
   html,body{
-  scroll-behavior:smooth;height:100%;background:var(--bg);color:var(--text);font-family:var(--sys);overflow:hidden;font-size:15px;}
+  scroll-behavior:smooth;height:100%;background:var(--bg);color:var(--text);font-family:var(--sys);overflow:hidden;font-size:16px;}
   .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;}
   .screen.active{display:flex;}
   ::-webkit-scrollbar{display:none;}
@@ -132,18 +132,17 @@
   }
   .header-title{text-align:center;flex:1;}
   .header-title .label{
-    font-size:8px;letter-spacing:6px;color:var(--gold);
+    font-size:11px;letter-spacing:1.5px;color:var(--gold);
     text-transform:uppercase;font-family:var(--sys);
-    opacity:0.8;display:block;margin-bottom:2px;
+    opacity:0.7;display:block;margin-bottom:2px;font-weight:500;
   }
   .header-title .name{
-    font-family:var(--sys);font-size:18px;color:var(--gold);
-    letter-spacing:1px;font-weight:600;
-    text-shadow:0 0 30px var(--gold-dim);
+    font-family:var(--sys);font-size:19px;color:var(--gold);
+    letter-spacing:0.3px;font-weight:600;
   }
   .header-btn{
-    background:none;border:none;color:var(--gold);font-size:20px;
-    cursor:pointer;width:40px;height:40px;border-radius:var(--radius-md);
+    background:none;border:none;color:var(--gold);font-size:22px;
+    cursor:pointer;width:44px;height:44px;border-radius:var(--radius-md);
     display:flex;align-items:center;justify-content:center;
     transition:all 0.15s cubic-bezier(0.4,0,0.2,1);
   }
@@ -158,15 +157,15 @@
   }
   .stat{padding:12px 0;text-align:center;border-right:1px solid var(--border);}
   .stat:last-child{border-right:none;}
-  .stat-val{font-family:var(--sys);font-size:20px;font-weight:600;color:var(--gold);}
-  .stat-lbl{font-size:12px;letter-spacing:0.5px;color:var(--gold);opacity:0.7;text-transform:uppercase;margin-top:2px;font-family:var(--sys);}
+  .stat-val{font-family:var(--sys);font-size:22px;font-weight:700;color:var(--gold);}
+  .stat-lbl{font-size:11px;letter-spacing:0.3px;color:var(--gold);opacity:0.65;text-transform:uppercase;margin-top:2px;font-family:var(--sys);font-weight:600;}
 
   /* ── SEARCH ── */
   .search-bar{padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;}
   .search-input{
     width:100%;background:var(--bg3);
     border:1px solid var(--border);border-radius:24px;
-    padding:10px 18px;color:var(--text);font-size:14px;
+    padding:11px 18px;color:var(--text);font-size:15px;
     font-family:var(--sys);outline:none;
     transition:border-color 0.2s, box-shadow 0.2s;
   }
@@ -187,12 +186,12 @@
   .trade-item:active{background:var(--gold-faint);}
   .trade-item:active::before{background:var(--gold);}
   .trade-title{
-    font-family:var(--sys);font-size:14px;color:var(--gold);
-    margin-bottom:4px;font-weight:600;letter-spacing:0.4px;
+    font-family:var(--sys);font-size:15px;color:var(--gold);
+    margin-bottom:4px;font-weight:600;letter-spacing:0.1px;
   }
-  .trade-tags{font-size:12px;color:var(--gold);opacity:0.75;font-family:var(--sys);letter-spacing:0.4px;}
-  .trade-date{font-size:12px;color:var(--gold);opacity:0.55;margin-top:4px;font-family:var(--sys);}
-  .trade-pnl{font-family:var(--sys);font-size:14px;font-weight:700;}
+  .trade-tags{font-size:13px;color:var(--gold);opacity:0.7;font-family:var(--sys);}
+  .trade-date{font-size:12px;color:var(--gold);opacity:0.5;margin-top:4px;font-family:var(--sys);}
+  .trade-pnl{font-family:var(--sys);font-size:15px;font-weight:700;}
   .win{color:var(--win);} .loss{color:var(--loss);} .be{color:var(--be);}
   .newly-saved{animation:flashNew 2s ease forwards;}
   @keyframes flashNew{0%{background:var(--gold-faint);}100%{background:transparent;}}
@@ -206,14 +205,14 @@
   .form-body{padding:20px 20px 120px;flex:1;}
   .field{margin-bottom:18px;position:relative;}
   .field-label{
-    font-size:12px;letter-spacing:1px;color:var(--gold);
+    font-size:13px;letter-spacing:0.3px;color:var(--gold);
     text-transform:uppercase;font-family:var(--sys);
-    display:block;margin-bottom:8px;opacity:1;
+    display:block;margin-bottom:8px;opacity:0.85;font-weight:600;
   }
   .field input,.field textarea,.field select{
     width:100%;background:var(--bg3);
     border:1px solid var(--border);border-radius:var(--radius);
-    padding:12px 16px;color:var(--text);font-size:15px;
+    padding:13px 16px;color:var(--text);font-size:16px;
     font-family:var(--sys);outline:none;
     transition:border-color 0.2s, box-shadow 0.2s;
   }
@@ -245,9 +244,9 @@
   }
   .detail-body{padding:16px 20px 120px;flex:1;}
   .section-label{
-    font-size:12px;letter-spacing:1px;color:var(--gold);
+    font-size:13px;letter-spacing:0.3px;color:var(--gold);
     text-transform:uppercase;font-family:var(--sys);
-    margin-bottom:12px;opacity:1;
+    margin-bottom:12px;opacity:0.9;font-weight:600;
     display:flex;align-items:center;gap:10px;
   }
   .section-label::after{
@@ -306,8 +305,7 @@
   .note-box{
     background:var(--bg3);border:1px solid var(--border);
     border-radius:var(--radius-lg);padding:18px;margin-bottom:24px;
-    font-size:16px;color:var(--text);line-height:1.8;
-    font-style:italic;
+    font-size:15px;color:var(--text);line-height:1.7;
   }
 
   /* ── AI ── */
@@ -343,7 +341,7 @@
     width:100%;padding:16px;border-radius:var(--radius-lg);
     background:linear-gradient(135deg,var(--gold-faint),var(--gold-dim));
     border:1px solid var(--gold);color:var(--gold);
-    font-size:13px;font-family:var(--sys);letter-spacing:1px;
+    font-size:15px;font-family:var(--sys);letter-spacing:0.3px;font-weight:600;
     cursor:pointer;transition:all 0.2s;
     box-shadow:0 4px 20px var(--gold-faint);
   }
@@ -466,8 +464,8 @@
   .theory-card.expanded{border-color:var(--gold-dim);box-shadow:0 4px 24px var(--gold-faint);}
   .theory-card-header{padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;}
   .theory-card-icon{font-size:24px;flex-shrink:0;}
-  .theory-card-title{font-family:var(--sys);font-size:14px;color:var(--gold);letter-spacing:0.4px;flex:1;line-height:1.4;font-weight:600;}
-  .theory-card-tag{font-size:12px;letter-spacing:0.5px;font-family:var(--sys);padding:8px 12px;border-radius:var(--radius-xl);background:var(--gold-faint);color:var(--gold);opacity:1;flex-shrink:0;text-transform:uppercase;}
+  .theory-card-title{font-family:var(--sys);font-size:15px;color:var(--gold);letter-spacing:0.1px;flex:1;line-height:1.4;font-weight:600;}
+  .theory-card-tag{font-size:11px;letter-spacing:0.3px;font-family:var(--sys);padding:6px 10px;border-radius:var(--radius-xl);background:var(--gold-faint);color:var(--gold);opacity:0.9;flex-shrink:0;text-transform:uppercase;font-weight:600;}
   .theory-card-chevron{font-size:14px;color:var(--gold);opacity:0.7;transition:transform 0.3s;flex-shrink:0;}
   .theory-card.expanded .theory-card-chevron{transform:rotate(180deg);}
   .theory-card-body{max-height:0;overflow:hidden;transition:max-height 0.4s ease;}
@@ -481,7 +479,7 @@
   .theory-rule{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);align-items:flex-start;}
   .theory-rule:last-child{border-bottom:none;}
   .theory-rule-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:8px;}
-  .theory-rule-text{font-size:14px;color:var(--text);line-height:1.7;}
+  .theory-rule-text{font-size:15px;color:var(--text);line-height:1.7;}
   .theory-rule-text b{color:var(--gold);font-weight:600;}
   .theory-highlight{
     background:var(--gold-faint);border-left:4px solid var(--gold);
@@ -534,8 +532,8 @@
   }
   .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 8px;cursor:pointer;border:none;background:transparent;color:var(--gold);opacity:0.55;transition:all 0.2s;font-family:var(--sys);}
   .bn-item.active{opacity:1;}
-  .bn-item .bn-icon{font-size:20px;margin-bottom:4px;}
-  .bn-item .bn-label{font-size:12px;letter-spacing:1px;text-transform:uppercase;font-weight:700;}
+  .bn-item .bn-icon{font-size:22px;margin-bottom:3px;}
+  .bn-item .bn-label{font-size:11px;letter-spacing:0.3px;text-transform:uppercase;font-weight:700;}
 
   /* ── IMPORT ── */
   .import-drop{border:1px dashed var(--gold-dim);border-radius:var(--radius-lg);padding:44px 20px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:16px;background:var(--bg3);}
@@ -976,6 +974,13 @@
       <div id="tf-upload-row" style="display:flex;flex-direction:column;gap:12px;"></div>
     </div>
 
+    <!-- LỆNH -->
+    <div class="field">
+      <label class="field-label">Lệnh <span style="font-size:11px;opacity:0.6;">— Mỗi lệnh có các khung TF</span></label>
+      <div id="form-orders-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+      <button onclick="addFormOrder()" style="width:100%;margin-top:8px;padding:10px;border-radius:var(--radius-sm);border:1px dashed var(--gold-dim);background:transparent;color:var(--gold);font-size:12px;font-family:var(--sys);cursor:pointer;letter-spacing:0.5px;">+ Thêm lệnh</button>
+    </div>
+
     <!-- NOTES -->
     <div class="field">
       <label class="field-label">Phân tích / Bài học</label>
@@ -1023,6 +1028,12 @@
     <div class="section-label" style="margin-top:16px;">Biểu Đồ <span style="font-size:11px;opacity:0.6;font-family:var(--sys);">← vuốt để chuyển →</span></div>
     <div class="tf-tabs" id="detail-tf-tabs"></div>
     <div class="tf-preview" id="detail-tf-preview"></div>
+
+    <!-- LỆNH -->
+    <div id="detail-orders-section" style="display:none;margin-top:16px;">
+      <div class="section-label">Lệnh</div>
+      <div id="detail-orders-list"></div>
+    </div>
 
     <!-- AI -->
     <div class="section-label" style="margin-top:16px;">Phân Tích AI</div>
@@ -1094,6 +1105,13 @@
       <label class="field-label">Ảnh Biểu Đồ (D1 → M1)</label>
       <div style="font-size:11px;color:var(--gold);opacity:0.9;margin-bottom:8px;">📋 Nhấn "+ Thêm ảnh" hoặc Ctrl+V để dán ảnh</div>
       <div id="e-tf-upload-row" style="display:flex;flex-direction:column;gap:12px;"></div>
+    </div>
+
+    <!-- LỆNH (edit) -->
+    <div class="field">
+      <label class="field-label">Lệnh <span style="font-size:11px;opacity:0.6;">— Mỗi lệnh có các khung TF</span></label>
+      <div id="e-orders-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+      <button onclick="addEditOrder()" style="width:100%;margin-top:8px;padding:10px;border-radius:var(--radius-sm);border:1px dashed var(--gold-dim);background:transparent;color:var(--gold);font-size:12px;font-family:var(--sys);cursor:pointer;letter-spacing:0.5px;">+ Thêm lệnh</button>
     </div>
   </div>
   <div class="save-bar"><button class="save-btn" id="update-btn" onclick="updateTrade()">CẬP NHẬT LỆNH</button></div>
@@ -1388,6 +1406,22 @@ function compressImage(dataUrl, maxW=1200) {
 }
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function estimateKB(obj) { return Math.round(JSON.stringify(obj).length/1024); }
+
+// Global image fullscreen viewer
+window.viewImg = function(src) {
+  if(!src) return;
+  const o = document.createElement("div");
+  o.style.cssText = "position:fixed;inset:0;background:#000000ee;z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out;";
+  const img = document.createElement("img");
+  img.src = src;
+  img.style.cssText = "max-width:96vw;max-height:94vh;object-fit:contain;border-radius:var(--radius-sm);";
+  const close = document.createElement("button");
+  close.innerHTML = "✕";
+  close.style.cssText = "position:fixed;top:16px;right:16px;background:#ffffff22;border:none;border-radius:50%;width:36px;height:36px;color:#fff;font-size:20px;cursor:pointer;z-index:10000;";
+  o.appendChild(img); o.appendChild(close);
+  o.onclick = () => document.body.removeChild(o);
+  document.body.appendChild(o);
+};
 
 window.showScreen = function(name) {
   if(name !== 'import') { window._importParsed = null; } // clear stale import data
@@ -1838,11 +1872,15 @@ function renderList() {
         let thumbSrc = "";
         if(t.images){ for(const tf of TFS){ const v=t.images[tf]; const src=Array.isArray(v)?v[0]:v; if(src){thumbSrc=src;break;} } }
         const titleHl = search ? hlText(t.title||"—", search) : esc(t.title)||"—";
+        const orderCount = (t.orders||[]).filter(o=>o&&o.tfs?.length).length;
         return `<div class="trade-item${isNew?" newly-saved":""}" id="ti-${t.id}" onclick="openDetail('${t.id}')">
           <div style="flex:1;min-width:0;">
             <div class="trade-title">${titleHl}</div>
             ${tags ? `<div class="trade-tags">${esc(tags)}</div>` : ""}
-            ${t.symbol ? `<div style="font-size:11px;color:var(--gold);opacity:0.7;margin-top:2px;">${esc(t.symbol)}</div>` : ""}
+            <div style="display:flex;gap:8px;align-items:center;margin-top:3px;flex-wrap:wrap;">
+              ${t.symbol ? `<span style="font-size:12px;color:var(--gold);opacity:0.7;font-weight:600;">${esc(t.symbol)}</span>` : ""}
+              ${orderCount ? `<span style="font-size:11px;color:var(--gold);opacity:0.65;background:var(--gold-faint);padding:2px 8px;border-radius:8px;">${orderCount} lệnh</span>` : ""}
+            </div>
           </div>
           ${thumbSrc ? `<img class="trade-thumb" src="${thumbSrc}" onclick="event.stopPropagation();viewImg(this.src)" loading="lazy" style="margin-left:10px;"/>` : ""}
         </div>`;
@@ -1850,10 +1888,10 @@ function renderList() {
 
       return `<div class="day-group">
         <div class="day-header" onclick="toggleDayGroup('${dateKey}')">
-          <span style="font-size:13px;font-weight:600;color:var(--text);">${grp.label}</span>
-          <span style="font-size:11px;background:var(--bg3);border-radius:10px;padding:2px 10px;color:var(--gold);margin-left:8px;">${dayTrades.length} setup</span>
+          <span style="font-size:14px;font-weight:600;color:var(--text);">${grp.label}</span>
+          <span style="font-size:12px;background:var(--bg3);border-radius:10px;padding:3px 10px;color:var(--gold);margin-left:8px;font-weight:600;">${dayTrades.length} setup</span>
           <div style="flex:1;"></div>
-          <button onclick="event.stopPropagation();openNewForDate(${grp.ts})" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);padding:4px 12px;color:var(--gold);font-size:12px;cursor:pointer;flex-shrink:0;">+ Thêm</button>
+          <button onclick="event.stopPropagation();openNewForDate(${grp.ts})" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);padding:6px 14px;color:var(--gold);font-size:13px;cursor:pointer;flex-shrink:0;font-weight:600;">+ Thêm</button>
           <span style="margin-left:8px;color:var(--gold);opacity:0.4;font-size:13px;" id="dg-arrow-${dateKey}">▼</span>
         </div>
         <div class="day-group-body" id="dg-${dateKey}">${tradeItems}</div>
@@ -1918,6 +1956,40 @@ window.openDetail=function(id){
   } else {
     ab.textContent="🤖 PHÂN TÍCH AI";
   }
+
+  // Render LỆNH
+  const orders = (t.orders||[]).filter(o=>o&&o.tfs?.length);
+  const ordSec = document.getElementById("detail-orders-section");
+  const ordList = document.getElementById("detail-orders-list");
+  if(orders.length) {
+    ordSec.style.display = "block";
+    ordList.innerHTML = orders.map((o,oi) => `
+      <div style="border:1px solid var(--gold-dim);border-radius:var(--radius-md);overflow:hidden;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--bg2);">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px;color:#000;font-weight:700;flex-shrink:0;">${oi+1}</div>
+          ${o.label?`<div style="font-size:13px;color:var(--gold);font-weight:600;font-family:var(--sys);">${esc(o.label)}</div>`:""}
+        </div>
+        ${(o.tfs||[]).map((tf,fi)=>`
+          <div style="border-top:1px solid var(--border);padding:10px 12px;">
+            ${tf.tf?`<div style="display:inline-block;font-size:11px;color:var(--gold);font-weight:700;font-family:var(--sys);letter-spacing:0.5px;padding:2px 8px;background:var(--gold-faint);border-radius:4px;margin-bottom:8px;">${esc(tf.tf)}</div>`:""}
+            ${(tf.images||[]).map((src,si)=>`<img class="detail-order-img" data-oi="${oi}" data-fi="${fi}" data-si="${si}" style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);cursor:zoom-in;display:block;margin-bottom:8px;" loading="lazy"/>`).join("")}
+            ${tf.caption?`<div style="font-size:14px;color:var(--text);line-height:1.7;font-style:italic;">${esc(tf.caption)}</div>`:""}
+          </div>`).join("")}
+      </div>`).join("");
+    // Attach images via JS to avoid HTML escaping issues with base64
+    ordList.querySelectorAll(".detail-order-img").forEach(img => {
+      const oi = +img.dataset.oi, fi = +img.dataset.fi, si = +img.dataset.si;
+      const src = orders[oi]?.tfs[fi]?.images[si];
+      if(src) {
+        img.src = src;
+        img.addEventListener("click", () => viewImg(src));
+      }
+    });
+  } else {
+    ordSec.style.display = "none";
+    ordList.innerHTML = "";
+  }
+
   showScreen("detail");
   setTimeout(initTFSwipe, 100);
 };
@@ -1967,8 +2039,9 @@ window.saveTrade=async function(){
   TFS.forEach(tf=>{const c=document.getElementById("tf-caption-"+tf)?.value.trim();if(c) formCaptions[tf]=c;});
   const dateVal=document.getElementById("f-date").value, hour=document.getElementById("f-hour").value||"0", min=document.getElementById("f-minute").value||"0";
   let tradeDate=null; if(dateVal){const d=new Date(dateVal);d.setHours(+hour,+min,0);tradeDate=d.getTime();}
-  const trade={title,symbol:document.getElementById("f-symbol").value.trim(),pnl:"",note:document.getElementById("f-note").value.trim(),folder:document.getElementById("f-folder").value||"",result:"",onplan:"",tags:document.getElementById("f-tags").value.split(",").map(t=>t.trim()).filter(Boolean),...getFormImagesFromSections(),tradeDate,createdAt:Date.now()};
-  if(estimateKB(trade)>900){alert(`⚠️ Dữ liệu quá lớn. Xóa bớt ảnh trước.`);btn.disabled=false;btn.textContent="LƯU LỆNH ĐẦY ĐỦ";return;}
+  const trade={title,symbol:document.getElementById("f-symbol").value.trim(),pnl:"",note:document.getElementById("f-note").value.trim(),folder:document.getElementById("f-folder").value||"",result:"",onplan:"",tags:document.getElementById("f-tags").value.split(",").map(t=>t.trim()).filter(Boolean),...getFormImagesFromSections(),orders:getFormOrders(),tradeDate,createdAt:Date.now()};
+  const sizeKB = estimateKB(trade);
+  if(sizeKB>900){alert(`⚠️ Dữ liệu quá lớn (${sizeKB}KB). Hãy xoá bớt ảnh hoặc tách thành nhiều setup.`);btn.disabled=false;btn.textContent="💾 LƯU SETUP";return;}
   try{
     const ref=await addDoc(collection(db,"trades"),trade);
     window.formDirty=false;
@@ -2154,7 +2227,7 @@ window.openNew=function(){
   ["f-title","f-symbol","f-tags","f-note","f-pnl","f-date","f-hour","f-minute"].forEach(id=>{const el=document.getElementById(id);if(el) el.value="";});
   document.querySelectorAll('[data-group="result"]').forEach(b=>b.classList.toggle("active", b.dataset.val==="Win"));
   document.querySelectorAll('[data-group="onplan"]').forEach(b=>b.classList.toggle("active", b.dataset.val==="Đúng plan"));
-  buildTFUploadRow(); populateFolderSelects();
+  buildTFUploadRow(); _resetFormOrders(); populateFolderSelects();
   window.formDirty=false; showScreen("new");
 };
 
@@ -2315,6 +2388,240 @@ function getFormImagesFromSections() {
 
 window.renderTFImages = function(tf) {}; // kept for compat, no-op now
 
+// ══════════════════════════════════════════
+// ── LỆNH engine: dùng chung cho cả NEW & EDIT form
+// State: formOrders (new) hoặc editOrders (edit)
+// ══════════════════════════════════════════
+let formOrders = []; // for new form
+let editOrders = []; // for edit form
+
+// Generic context: returns the right state + DOM container for given mode
+function _ordersCtx(mode) {
+  // mode: "new" or "edit"
+  if(mode === "edit") return { state: editOrders, listId: "e-orders-list", prefix: "eo" };
+  return { state: formOrders, listId: "form-orders-list", prefix: "fo" };
+}
+function _setOrdersState(mode, arr) {
+  if(mode === "edit") editOrders = arr; else formOrders = arr;
+}
+
+function _resetOrders(mode="new") {
+  _setOrdersState(mode, []);
+  const ctx = _ordersCtx(mode);
+  const el = document.getElementById(ctx.listId);
+  if (el) el.innerHTML = "";
+}
+
+window._resetFormOrders = () => _resetOrders("new"); // back-compat alias
+
+function _addOrder(mode, label="", tfs=[]) {
+  const ctx = _ordersCtx(mode);
+  const oi = ctx.state.length;
+  ctx.state.push({label, tfs: tfs.map(t=>({...t, images:[...(t.images||[])]}) )});
+  _renderOrder(mode, oi);
+  if(!tfs.length) _addOrderTf(mode, oi);
+}
+
+window.addFormOrder = (label, tfs) => _addOrder("new", label, tfs);
+window.addEditOrder = (label, tfs) => _addOrder("edit", label, tfs);
+
+function _renumberOrders(mode) {
+  const ctx = _ordersCtx(mode);
+  // Compact array (remove nulls), then re-render all
+  const compact = ctx.state.filter(Boolean);
+  _setOrdersState(mode, compact);
+  document.getElementById(ctx.listId).innerHTML = "";
+  compact.forEach((_,i) => _renderOrder(mode, i));
+}
+
+function _renderOrder(mode, oi) {
+  const ctx = _ordersCtx(mode);
+  const list = document.getElementById(ctx.listId);
+  const wrapId = ctx.prefix+"-order-"+oi;
+  const existing = document.getElementById(wrapId);
+  if(existing) existing.remove();
+  const order = ctx.state[oi];
+  if(!order) return;
+  const num = oi + 1;
+
+  const wrap = document.createElement("div");
+  wrap.id = wrapId;
+  wrap.style.cssText = "border:1px solid var(--gold-dim);border-radius:var(--radius-md);overflow:hidden;";
+
+  const hdr = document.createElement("div");
+  hdr.style.cssText = "display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg2);";
+  hdr.innerHTML = `
+    <div style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px;color:#000;font-weight:700;">${num}</div>
+    <input class="fo-label" value="${esc(order.label)}" placeholder="Tên lệnh (tuỳ chọn)..."
+      style="flex:1;background:transparent;border:none;color:var(--gold);font-size:13px;font-weight:600;font-family:var(--sys);outline:none;"/>
+    <button class="fo-remove" style="background:none;border:1px solid #ef535044;border-radius:6px;padding:5px 9px;color:var(--loss);font-size:12px;cursor:pointer;">✕</button>`;
+  wrap.appendChild(hdr);
+
+  const tfList = document.createElement("div");
+  tfList.id = ctx.prefix+"-order-tfs-"+oi;
+  wrap.appendChild(tfList);
+
+  const tfBar = document.createElement("div");
+  tfBar.style.cssText = "display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;border-top:1px dashed var(--gold-faint);background:var(--bg3);";
+  ["H4","H1","M15","M5","M1"].forEach(tf => {
+    const b = document.createElement("button");
+    b.textContent = tf;
+    b.style.cssText = "padding:4px 12px;border-radius:20px;border:1px solid var(--gold-dim);background:transparent;color:var(--gold);font-size:11px;cursor:pointer;";
+    b.addEventListener("click", () => _addOrderTf(mode, oi, tf));
+    tfBar.appendChild(b);
+  });
+  const custom = document.createElement("button");
+  custom.textContent = "+ Khác";
+  custom.style.cssText = "padding:4px 12px;border-radius:20px;border:1px dashed var(--gold-dim);background:transparent;color:var(--gold);font-size:11px;cursor:pointer;";
+  custom.addEventListener("click", () => { const v=prompt("Khung thời gian:","M30"); if(v?.trim()) _addOrderTf(mode, oi, v.trim().toUpperCase()); });
+  tfBar.appendChild(custom);
+  wrap.appendChild(tfBar);
+
+  list.appendChild(wrap);
+
+  hdr.querySelector(".fo-label").addEventListener("input", e => { if(_ordersCtx(mode).state[oi]) _ordersCtx(mode).state[oi].label = e.target.value; window.formDirty=true; });
+  hdr.querySelector(".fo-remove").addEventListener("click", () => {
+    const cs = _ordersCtx(mode).state;
+    cs[oi] = null;
+    window.formDirty = true;
+    _renumberOrders(mode);
+  });
+
+  (order.tfs||[]).forEach((_,ti) => _renderOrderTf(mode, oi, ti));
+}
+
+function _addOrderTf(mode, oi, tf="", images=[], caption="") {
+  const cs = _ordersCtx(mode).state;
+  if(!cs[oi]) return;
+  const ti = cs[oi].tfs.length;
+  cs[oi].tfs.push({tf, images:[...images], caption});
+  _renderOrderTf(mode, oi, ti);
+  window.formDirty = true;
+}
+
+function _renderOrderTf(mode, oi, ti) {
+  const ctx = _ordersCtx(mode);
+  const container = document.getElementById(ctx.prefix+"-order-tfs-"+oi);
+  if(!container) return;
+  const tfId = ctx.prefix+"-order-tf-"+oi+"-"+ti;
+  const existing = document.getElementById(tfId);
+  if(existing) existing.remove();
+  const tfObj = ctx.state[oi]?.tfs[ti];
+  if(!tfObj) return;
+
+  const wrap = document.createElement("div");
+  wrap.id = tfId;
+  wrap.style.cssText = "padding:10px 12px;border-top:1px solid var(--border);";
+
+  const imgsZoneId = ctx.prefix+"-imgs-"+oi+"-"+ti;
+  const fileId = ctx.prefix+"-file-"+oi+"-"+ti;
+
+  wrap.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <input class="fo-tf-name" value="${esc(tfObj.tf)}" placeholder="H4 / H1 / M15..."
+        style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:5px 10px;color:var(--gold);font-size:12px;font-weight:700;font-family:var(--sys);outline:none;"/>
+      <button class="fo-tf-remove" style="background:none;border:none;color:var(--loss);font-size:14px;cursor:pointer;padding:2px 6px;opacity:0.7;">✕</button>
+    </div>
+    <div id="${imgsZoneId}" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+    <div style="display:flex;gap:8px;align-items:flex-start;">
+      <button class="fo-pick-img" style="flex-shrink:0;background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:6px 10px;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;white-space:nowrap;">📎 Ảnh</button>
+      <input type="file" accept="image/*" multiple style="display:none" id="${fileId}"/>
+      <textarea class="fo-caption" placeholder="Phân tích khung này..." rows="2"
+        style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;resize:vertical;line-height:1.5;">${esc(tfObj.caption)}</textarea>
+    </div>`;
+
+  container.appendChild(wrap);
+
+  wrap.querySelector(".fo-tf-name").addEventListener("input", e => { const cs=_ordersCtx(mode).state; if(cs[oi]?.tfs[ti]) cs[oi].tfs[ti].tf = e.target.value; window.formDirty=true; });
+  wrap.querySelector(".fo-caption").addEventListener("input", e => { const cs=_ordersCtx(mode).state; if(cs[oi]?.tfs[ti]) cs[oi].tfs[ti].caption = e.target.value; window.formDirty=true; });
+  wrap.querySelector(".fo-tf-remove").addEventListener("click", () => {
+    const cs = _ordersCtx(mode).state;
+    if(cs[oi]?.tfs) {
+      cs[oi].tfs.splice(ti,1);
+      // Re-render all TFs of this order
+      const c = document.getElementById(ctx.prefix+"-order-tfs-"+oi);
+      if(c) c.innerHTML = "";
+      cs[oi].tfs.forEach((_,i) => _renderOrderTf(mode, oi, i));
+      window.formDirty = true;
+    }
+  });
+  wrap.querySelector(".fo-pick-img").addEventListener("click", () => {
+    window._foLastMode = mode; window._foLastOi = oi; window._foLastTi = ti;
+    document.getElementById(fileId)?.click();
+  });
+  document.getElementById(fileId).addEventListener("change", async function() {
+    for(const f of Array.from(this.files)){
+      await new Promise(res=>{const r=new FileReader();r.onload=async ev=>{try{const c=await compressImage(ev.target.result);const cs=_ordersCtx(mode).state;if(cs[oi]?.tfs[ti])cs[oi].tfs[ti].images.push(c);}catch(e){}res();};r.readAsDataURL(f);});
+    }
+    _renderOrderTfImgs(mode, oi, ti); this.value=""; window.formDirty=true;
+  });
+  _renderOrderTfImgs(mode, oi, ti);
+}
+
+function _renderOrderTfImgs(mode, oi, ti) {
+  const ctx = _ordersCtx(mode);
+  const zone = document.getElementById(ctx.prefix+"-imgs-"+oi+"-"+ti);
+  if(!zone) return;
+  const tfObj = ctx.state[oi]?.tfs[ti];
+  zone.innerHTML = "";
+  if(!tfObj?.images?.length) {
+    zone.innerHTML = `<div style="color:var(--gold);opacity:0.35;font-size:11px;padding:4px;">Chưa có ảnh — nhấn "📎 Ảnh" hoặc Ctrl+V</div>`;
+    return;
+  }
+  tfObj.images.forEach((src,i) => {
+    const d = document.createElement("div"); d.style.cssText = "position:relative;flex:0 0 auto;";
+    const img = document.createElement("img"); img.src=src;
+    img.style.cssText = "width:88px;height:66px;object-fit:cover;border-radius:6px;border:1px solid var(--gold-dim);display:block;cursor:zoom-in;";
+    img.addEventListener("click", ()=>viewImg(src));
+    const del = document.createElement("button"); del.innerHTML="✕";
+    del.style.cssText = "position:absolute;top:2px;right:2px;background:#000000cc;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:bold;z-index:10;";
+    del.addEventListener("click", e=>{e.stopPropagation();const cs=_ordersCtx(mode).state;if(cs[oi]?.tfs[ti])cs[oi].tfs[ti].images.splice(i,1);_renderOrderTfImgs(mode,oi,ti);window.formDirty=true;});
+    d.appendChild(img); d.appendChild(del); zone.appendChild(d);
+  });
+}
+
+function _getOrders(mode) {
+  return _ordersCtx(mode).state.filter(Boolean).map(o=>({
+    label: o.label||"",
+    tfs: (o.tfs||[]).filter(tf=>tf.tf||tf.images?.length||tf.caption)
+  })).filter(o=>o.tfs.length);
+}
+function getFormOrders() { return _getOrders("new"); }
+function getEditOrders() { return _getOrders("edit"); }
+
+// Paste image into last-clicked order TF (if any)
+document.addEventListener("paste", async function(e) {
+  // Check if user is in form-new or screen-edit, and has clicked a paste target
+  const mode = window._foLastMode;
+  if(mode === undefined || mode === null) return;
+  const oi = window._foLastOi, ti = window._foLastTi;
+  const cs = _ordersCtx(mode).state;
+  if(!cs[oi]?.tfs[ti]) return;
+  // Only fire if relevant screen is active
+  const screen = document.getElementById(mode==="edit"?"screen-edit":"screen-new");
+  if(!screen?.classList.contains("active")) return;
+  const items = e.clipboardData?.items; if(!items) return;
+  for(const item of items) {
+    if(item.type.startsWith("image/")) {
+      e.preventDefault();
+      const f = item.getAsFile();
+      const r = new FileReader();
+      r.onload = async ev => {
+        try {
+          const c = await compressImage(ev.target.result);
+          const cs2 = _ordersCtx(mode).state;
+          if(cs2[oi]?.tfs[ti]) cs2[oi].tfs[ti].images.push(c);
+          _renderOrderTfImgs(mode, oi, ti);
+          window.formDirty = true;
+          showToast("📷 Dán vào "+(cs2[oi].tfs[ti].tf||"lệnh")+" #"+(oi+1));
+        } catch(e2){}
+      };
+      r.readAsDataURL(f);
+      return;
+    }
+  }
+});
+
 // ══ EDIT ══
 window.openEdit=function(){
   if(!currentTrade) return; const t=currentTrade;
@@ -2328,6 +2635,9 @@ window.openEdit=function(){
   const si=t.images||{}, sc=t.captions||{};
   TFS.forEach(tf=>{const v=si[tf];editImages[tf]=Array.isArray(v)?[...v]:(v?[v]:[]);editCaptions[tf]=sc[tf]||"";});
   buildEditTFUploadRow(); TFS.forEach(tf=>{renderEditTFImages(tf);const c=document.getElementById("e-tf-caption-"+tf);if(c) c.value=editCaptions[tf]||"";});
+  // Load LỆNH
+  _resetOrders("edit");
+  (t.orders||[]).forEach(o => addEditOrder(o.label||"", o.tfs||[]));
   window.formDirty=false; showScreen("edit");
 };
 function buildEditTFUploadRow(){
@@ -2377,8 +2687,9 @@ window.updateTrade=async function(){
   TFS.forEach(tf=>{const c=document.getElementById("e-tf-caption-"+tf)?.value.trim();if(c) editCaptions[tf]=c;});
   const dateVal=document.getElementById("e-date").value, hour=document.getElementById("e-hour").value||"0", min=document.getElementById("e-minute").value||"0";
   let tradeDate=currentTrade.tradeDate||null; if(dateVal){const d=new Date(dateVal);d.setHours(+hour,+min,0);tradeDate=d.getTime();}
-  const upd={title,symbol:document.getElementById("e-symbol").value.trim(),pnl:document.getElementById("e-pnl").value.trim(),note:document.getElementById("e-note").value.trim(),folder:document.getElementById("e-folder").value||"",result:document.querySelector('[data-group="e-result"].active')?.dataset.val||"Win",onplan:document.querySelector('[data-group="e-onplan"].active')?.dataset.val||"",tags:document.getElementById("e-tags").value.split(",").map(t=>t.trim()).filter(Boolean),images:{...editImages},captions:{...editCaptions},tradeDate,createdAt:currentTrade.createdAt||Date.now(),aiResult:null,aiResultTs:null};
-  if(estimateKB(upd)>900){alert("⚠️ Dữ liệu quá lớn. Xóa bớt ảnh.");btn.disabled=false;btn.textContent="CẬP NHẬT LỆNH";return;}
+  const upd={title,symbol:document.getElementById("e-symbol").value.trim(),pnl:document.getElementById("e-pnl").value.trim(),note:document.getElementById("e-note").value.trim(),folder:document.getElementById("e-folder").value||"",result:document.querySelector('[data-group="e-result"].active')?.dataset.val||"Win",onplan:document.querySelector('[data-group="e-onplan"].active')?.dataset.val||"",tags:document.getElementById("e-tags").value.split(",").map(t=>t.trim()).filter(Boolean),images:{...editImages},captions:{...editCaptions},orders:getEditOrders(),tradeDate,createdAt:currentTrade.createdAt||Date.now(),aiResult:null,aiResultTs:null};
+  const sizeKB = estimateKB(upd);
+  if(sizeKB>900){alert(`⚠️ Dữ liệu quá lớn (${sizeKB}KB). Hãy xoá bớt ảnh.`);btn.disabled=false;btn.textContent="CẬP NHẬT LỆNH";return;}
   try{
     await updateDoc(doc(db,"trades",currentTrade.id),upd);
     window.formDirty=false; showToast("✅ Đã cập nhật");
@@ -4247,10 +4558,16 @@ window.scrollToCard = function(id) {
 
 window.filterTheory = function(cat) { setTheoryFolder(cat); };
 
-window.searchTheory = function(q) {
-  theorySearchQ = q;
-  renderTheory();
-};
+window.searchTheory = (function() {
+  let timer;
+  return function(q) {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      theorySearchQ = q;
+      renderTheory();
+    }, 150);
+  };
+})();
 
 // Fix 10: Auto dark/light by time
 function autoThemeByTime() {
