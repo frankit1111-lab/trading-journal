@@ -112,36 +112,6 @@
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
   html,body{
   scroll-behavior:smooth;height:100%;background:var(--bg);color:var(--text);font-family:var(--sys);overflow:hidden;font-size:16px;}
-  body { position: relative; }
-  /* iOS PWA standalone: pad body for safe areas + style them with app colors */
-  @supports (-webkit-touch-callout: none) {
-    body {
-      padding-top: env(safe-area-inset-top, 0);
-      padding-bottom: env(safe-area-inset-bottom, 0);
-      /* Top safe-area: dark with gold faint glow (matches header gradient).
-         Bottom safe-area: bg2 with gold faint hint (matches bottom-nav).
-         Layered backgrounds:
-         1. Top stripe (header-like)
-         2. Bottom stripe (bottom-nav-like)
-         3. Base color
-      */
-      background:
-        linear-gradient(to bottom,
-          rgba(6,6,6,0.98) 0,
-          rgba(6,6,6,0.98) calc(env(safe-area-inset-top, 0) - 2px),
-          var(--gold-faint) calc(env(safe-area-inset-top, 0) - 2px),
-          var(--gold-faint) env(safe-area-inset-top, 0),
-          transparent env(safe-area-inset-top, 0)),
-        linear-gradient(to top,
-          var(--bg2) 0,
-          var(--bg2) calc(env(safe-area-inset-bottom, 0) - 2px),
-          var(--gold-faint) calc(env(safe-area-inset-bottom, 0) - 2px),
-          var(--gold-faint) env(safe-area-inset-bottom, 0),
-          transparent env(safe-area-inset-bottom, 0)),
-        var(--bg);
-    }
-    .screen { background: var(--bg); }
-  }
   .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;}
   .screen.active{display:flex;}
   ::-webkit-scrollbar{display:none;}
@@ -545,7 +515,7 @@
     background:linear-gradient(180deg,rgba(6,6,6,0.98) 0%,rgba(6,6,6,0.85) 100%);
     backdrop-filter:blur(20px) saturate(180%);
     border-bottom:1px solid var(--border);
-    padding:14px 20px 12px;
+    padding:calc(14px + env(safe-area-inset-top,0px)) 20px 12px;
     display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
   }
   .header::before{
