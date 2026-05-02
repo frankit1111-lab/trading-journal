@@ -518,10 +518,6 @@
     padding:14px 20px 12px;
     display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
   }
-  /* iOS PWA: pad header content down so it doesn't sit under status bar overlay */
-  @supports (-webkit-touch-callout: none) {
-    .header { padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
-  }
   .header::before{
     content:'';position:absolute;inset:0;
     background:linear-gradient(90deg,transparent,var(--gold-faint),transparent);
@@ -601,7 +597,7 @@
   .empty-text{font-family:var(--sys);font-size:13px;letter-spacing:0.5px;line-height:2.2;color:var(--gold);opacity:0.55;}
 
   /* ── FORM ── */
-  .form-body{padding:20px 20px calc(120px + env(safe-area-inset-bottom,0px));flex:1;}
+  .form-body{padding:20px 20px 120px;flex:1;}
   .field{margin-bottom:18px;position:relative;}
   .field-label{
     font-size:13px;letter-spacing:0.3px;color:var(--gold);
@@ -641,7 +637,7 @@
     display:flex;justify-content:space-between;align-items:center;flex-shrink:0;
     background:linear-gradient(135deg,var(--bg2),var(--bg));
   }
-  .detail-body{padding:16px 20px calc(40px + env(safe-area-inset-bottom,0px));flex:1;}
+  .detail-body{padding:16px 20px 120px;flex:1;}
   .section-label{
     font-size:13px;letter-spacing:0.3px;color:var(--gold);
     text-transform:uppercase;font-family:var(--sys);
@@ -1274,7 +1270,7 @@
     <button class="sort-btn active" id="sort-desc" onclick="setSort('desc')">↓ Mới nhất</button>
     <button class="sort-btn" id="sort-asc" onclick="setSort('asc')">↑ Cũ nhất</button>
   </div>
-  <div id="trade-list" role="main" aria-label="Danh sách lệnh" style="flex:1;padding-bottom:calc(90px + env(safe-area-inset-bottom,0));"></div>
+  <div id="trade-list" role="main" aria-label="Danh sách lệnh" style="flex:1;padding-bottom:80px;"></div>
 </div>
 
 <!-- COPY/MOVE TO THEORY MODAL -->
@@ -1493,7 +1489,7 @@
     <div class="header-title"><div class="label">Báo Cáo</div><div class="name">Thống Kê</div></div>
     <button class="header-btn" onclick="openNew()" style="font-size:20px;font-weight:700;" title="Thêm lệnh mới">+</button>
   </div>
-  <div id="stats-body" style="padding:16px 18px calc(90px + env(safe-area-inset-bottom,0));flex:1;overflow-y:auto;"></div>
+  <div id="stats-body" style="padding:16px 18px 40px;flex:1;overflow-y:auto;"></div>
 </div>
 
 <!-- NEW TRADE -->
@@ -1734,7 +1730,7 @@
   <div id="theory-edit-bar" style="display:none;"></div>
 
   <!-- Cards -->
-  <div id="theory-list" role="main" aria-label="Danh sách lý thuyết" style="flex:1;padding:14px 18px calc(110px + env(safe-area-inset-bottom,0));overflow-y:auto;"></div>
+  <div id="theory-list" role="main" aria-label="Danh sách lý thuyết" style="flex:1;padding:14px 18px 100px;overflow-y:auto;"></div>
 </div>
 
 <!-- THEORY EDIT MODAL -->
@@ -1859,7 +1855,7 @@
     <div class="header-title"><div class="label">Tuỳ Chỉnh</div><div class="name">Giao Diện</div></div>
     <div style="width:36px;"></div>
   </div>
-  <div style="padding:20px 18px calc(110px + env(safe-area-inset-bottom,0));flex:1;overflow-y:auto;">
+  <div style="padding:20px 18px 60px;flex:1;overflow-y:auto;">
 
     <!-- DARK / LIGHT MODE -->
     <div class="section-label" style="margin-top:4px;">Chế Độ Nền</div>
