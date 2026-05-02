@@ -6,9 +6,10 @@
 <!-- PWA META — must come BEFORE icon links for iOS to recognize -->
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 <meta name="apple-mobile-web-app-title" content="TradeLog"/>
-<meta name="theme-color" content="#0a0a0a"/>
+<meta name="theme-color" content="#f4f1ea" media="(prefers-color-scheme: light)"/>
+<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5.0, user-scalable=yes"/>
 
 <!-- iOS PWA icon -->
@@ -100,11 +101,26 @@
     --shadow:0 8px 32px #00000088;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  /* APPLE HIG: prevent text selection on UI controls (buttons, nav items, etc.) */
+  button, .bn-item, .header-btn, .ds-icon, .fab, [role="button"] {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
   html,body{
-  scroll-behavior:smooth;height:100%;background:var(--bg);color:var(--text);font-family:var(--sys);overflow:hidden;font-size:15px;}
-  .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;}
+  scroll-behavior:smooth;height:100%;background:var(--bg);color:var(--text);font-family:var(--sys);overflow:hidden;font-size:15px;overscroll-behavior:none;}
+  .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;-webkit-overflow-scrolling:touch;}
   .screen.active{display:flex;}
   ::-webkit-scrollbar{display:none;}
+
+  /* APPLE iOS FIX: prevent auto-zoom on input focus.
+     iOS zooms in when input font-size < 16px. Force min 16px on iOS-touch devices,
+     keep visual size via transform scale. Simpler: just enforce 16px on touch. */
+  @supports (-webkit-touch-callout: none) {
+    input, textarea, select {
+      font-size: 16px !important;
+    }
+  }
 
 
   /* ═══════════════════════════════════════
@@ -330,7 +346,7 @@
     background:linear-gradient(180deg,rgba(6,6,6,0.98) 0%,rgba(6,6,6,0.85) 100%);
     backdrop-filter:blur(20px) saturate(180%);
     border-bottom:1px solid var(--border);
-    padding:14px 20px 12px;
+    padding:14px max(20px, env(safe-area-inset-right, 0px)) 12px max(20px, env(safe-area-inset-left, 0px));
     display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
   }
   .header::before{
@@ -1597,7 +1613,7 @@
 
 <!-- THEORY IMAGE FULLSCREEN -->
 <div id="theory-img-fullscreen" style="display:none;position:fixed;inset:0;background:#000000ee;z-index:9000;align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
-  <img id="theory-img-fullscreen-img" style="max-width:98vw;max-height:96vh;border-radius:var(--radius-sm);object-fit:contain;touch-action:none;transition:transform 0.1s;transform-origin:center center;" />
+  <img alt="" id="theory-img-fullscreen-img" style="max-width:98vw;max-height:96vh;border-radius:var(--radius-sm);object-fit:contain;touch-action:none;transition:transform 0.1s;transform-origin:center center;" />
   <button onclick="document.getElementById('theory-img-fullscreen').style.display='none'" style="position:fixed;top:16px;right:16px;background:#ffffff22;border:none;border-radius:50%;width:36px;height:36px;color:#fff;font-size:20px;cursor:pointer;z-index:9001;">✕</button>
 </div>
 <script>
@@ -2323,7 +2339,7 @@ function renderList() {
               ${orderCount ? `<span style="font-size:11px;color:var(--gold);opacity:0.65;background:var(--gold-faint);padding:2px 8px;border-radius:8px;">${orderCount} lệnh</span>` : ""}
             </div>
           </div>
-          ${thumbSrc ? `<img class="trade-thumb" src="${thumbSrc}" onclick="event.stopPropagation();viewImg(this.src)" loading="lazy" style="margin-left:10px;"/>` : ""}
+          ${thumbSrc ? `<img alt="" class="trade-thumb" src="${thumbSrc}" onclick="event.stopPropagation();viewImg(this.src)" loading="lazy" style="margin-left:10px;"/>` : ""}
         </div>`;
       }).join("");
 
@@ -2423,7 +2439,7 @@ window.openDetail=function(id){
         ${(o.tfs||[]).map((tf,fi)=>`
           <div style="border-top:1px solid var(--border);padding:10px 12px;">
             ${tf.tf?`<div style="display:inline-block;font-size:11px;color:var(--gold);font-weight:700;font-family:var(--sys);letter-spacing:0.5px;padding:2px 8px;background:var(--gold-faint);border-radius:4px;margin-bottom:8px;">${esc(tf.tf)}</div>`:""}
-            ${(tf.images||[]).map((src,si)=>`<img class="detail-order-img" data-oi="${oi}" data-fi="${fi}" data-si="${si}" style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);cursor:zoom-in;display:block;margin-bottom:8px;" loading="lazy"/>`).join("")}
+            ${(tf.images||[]).map((src,si)=>`<img alt="" class="detail-order-img" data-oi="${oi}" data-fi="${fi}" data-si="${si}" style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);cursor:zoom-in;display:block;margin-bottom:8px;" loading="lazy"/>`).join("")}
             ${tf.caption?`<div style="font-size:14px;color:var(--text);line-height:1.7;font-style:italic;">${esc(tf.caption)}</div>`:""}
           </div>`).join("")}
       </div>`).join("");
@@ -2456,13 +2472,13 @@ function renderTFPreview(){
   const el=document.getElementById("detail-tf-preview"); el.style.height="auto";
   const list=Array.isArray(v)?v:(v?[v]:[]);
   if(list.length){
-    el.innerHTML=`<div style="width:100%;"><div style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;">${list.map((src,i)=>`<img src="${src}" onclick="openImgFull('${currentTF}',${i})" style="width:${list.length===1?"100%":"calc(50% - 4px)"};border-radius:var(--radius-sm);object-fit:cover;cursor:pointer;display:block;"/>`).join("")}</div>${cap?`<div style="padding:8px 12px 12px;font-size:16px;color:var(--text);font-style:italic;line-height:1.6;border-top:1px solid var(--gold-faint);">💬 ${cap}</div>`:""}</div>`;
+    el.innerHTML=`<div style="width:100%;"><div style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;">${list.map((src,i)=>`<img alt="" src="${src}" onclick="openImgFull('${currentTF}',${i})" style="width:${list.length===1?"100%":"calc(50% - 4px)"};border-radius:var(--radius-sm);object-fit:cover;cursor:pointer;display:block;"/>`).join("")}</div>${cap?`<div style="padding:8px 12px 12px;font-size:16px;color:var(--text);font-style:italic;line-height:1.6;border-top:1px solid var(--gold-faint);">💬 ${cap}</div>`:""}</div>`;
   } else { el.style.height="160px"; el.innerHTML=`<div class="no-img">📊<br><br>Chưa có ảnh ${currentTF}</div>`; }
 }
 window.openImgFull=function(tf,idx){
   const v=currentTrade?.images?.[tf]; const list=Array.isArray(v)?v:(v?[v]:[]); const src=list[idx]; if(!src) return;
   const o=document.createElement("div"); o.style.cssText="position:fixed;inset:0;background:#000000ee;z-index:999;display:flex;align-items:center;justify-content:center;cursor:pointer;";
-  o.innerHTML=`<img src="${src}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:var(--radius-sm);"/>`;
+  o.innerHTML=`<img alt="" src="${src}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:var(--radius-sm);"/>`;
   o.onclick=()=>document.body.removeChild(o); document.body.appendChild(o);
 };
 
@@ -3103,7 +3119,7 @@ window.clearEditTFImg=function(tf,i){if(!editImages[tf]) return;editImages[tf].s
 function renderEditTFImages(tf){
   const imgs=editImages[tf]||[]; const c=document.getElementById("e-tf-images-"+tf); if(!c) return;
   if(!imgs.length){c.innerHTML=`<div style="color:var(--gold);opacity:0.5;font-size:12px;padding:10px;">Chưa có ảnh</div>`;return;}
-  c.innerHTML=imgs.map((src,i)=>`<div style="position:relative;flex:0 0 auto;"><img src="${src}" style="width:90px;height:68px;object-fit:cover;border-radius:7px;border:1px solid var(--gold-dim);display:block;"/><button onclick="clearEditTFImg('${tf}',${i})" style="position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:11px;cursor:pointer;line-height:1;">✕</button></div>`).join("");
+  c.innerHTML=imgs.map((src,i)=>`<div style="position:relative;flex:0 0 auto;"><img alt="" src="${src}" style="width:90px;height:68px;object-fit:cover;border-radius:7px;border:1px solid var(--gold-dim);display:block;"/><button onclick="clearEditTFImg('${tf}',${i})" style="position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:11px;cursor:pointer;line-height:1;">✕</button></div>`).join("");
 }
 window.handleEditPaste=function(tf,event){
   const items=event.clipboardData?.items; if(!items) return;
@@ -3323,6 +3339,19 @@ function applyTheme(t) {
   document.querySelectorAll("input[type=date], select").forEach(el => {
     el.style.colorScheme = scheme;
   });
+
+  // ──────────────────────────────────────
+  // APPLE: Update theme-color meta dynamically so iOS status bar tinting
+  // matches current app theme (light → kem, dark → đen)
+  // ──────────────────────────────────────
+  const themeColor = isLight ? "#f4f1ea" : "#0a0a0a";
+  // Remove existing prefers-color-scheme variants (they override single static)
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.remove());
+  // Add single theme-color matching current state
+  const tc = document.createElement("meta");
+  tc.name = "theme-color";
+  tc.content = themeColor;
+  document.head.appendChild(tc);
 }
 
 function syncSettingsUI(t) {
@@ -4989,7 +5018,7 @@ function renderTheory() {
                 ${text ? `<div class="theory-rule-text">${text}</div>` : ""}
                 ${imgs.map((src,i)=>`
                   <div style="margin-top:8px;">
-                    <img src="${src}"
+                    <img alt="" src="${src}"
                       onclick="document.getElementById('theory-img-fullscreen').style.display='flex';document.getElementById('theory-img-fullscreen-img').src=this.src"
                       style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);cursor:zoom-in;display:block;"
                       loading="lazy"/>
@@ -5004,7 +5033,7 @@ function renderTheory() {
             const legacySecs = (t.imgSections||[]).filter(s=>s&&(s.images?.length||s.caption));
             const legacyTf  = (t.tfSections||[]).filter(s=>s&&(s.tf||s.notes||s.images?.length));
             if(!exs.length && !legacySecs.length && !legacyTf.length) return "";
-            const _img = src => `<img src="${src}" onclick="document.getElementById('theory-img-fullscreen').style.display='flex';document.getElementById('theory-img-fullscreen-img').src=this.src" style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);cursor:zoom-in;display:block;margin-bottom:8px;" loading="lazy"/>`;
+            const _img = src => `<img alt="" src="${src}" onclick="document.getElementById('theory-img-fullscreen').style.display='flex';document.getElementById('theory-img-fullscreen-img').src=this.src" style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);cursor:zoom-in;display:block;margin-bottom:8px;" loading="lazy"/>`;
             if(exs.length) {
               return `<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;">
                 <div style="font-size:10px;letter-spacing:1px;color:var(--gold);opacity:0.7;font-family:var(--sys);margin-bottom:10px;">VÍ DỤ</div>
