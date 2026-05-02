@@ -1965,7 +1965,7 @@ window.saveTrade=async function(){
   TFS.forEach(tf=>{const c=document.getElementById("tf-caption-"+tf)?.value.trim();if(c) formCaptions[tf]=c;});
   const dateVal=document.getElementById("f-date").value, hour=document.getElementById("f-hour").value||"0", min=document.getElementById("f-minute").value||"0";
   let tradeDate=null; if(dateVal){const d=new Date(dateVal);d.setHours(+hour,+min,0);tradeDate=d.getTime();}
-  const trade={title,symbol:document.getElementById("f-symbol").value.trim(),pnl:document.getElementById("f-pnl").value.trim(),note:document.getElementById("f-note").value.trim(),folder:document.getElementById("f-folder").value||"",result:document.querySelector('[data-group="result"].active')?.dataset.val||"Win",onplan:document.querySelector('[data-group="onplan"].active')?.dataset.val||"",tags:document.getElementById("f-tags").value.split(",").map(t=>t.trim()).filter(Boolean),images:{...formImages},captions:{...formCaptions},tradeDate,createdAt:Date.now()};
+  const trade={title,symbol:document.getElementById("f-symbol").value.trim(),pnl:"",note:document.getElementById("f-note").value.trim(),folder:document.getElementById("f-folder").value||"",result:"",onplan:"",tags:document.getElementById("f-tags").value.split(",").map(t=>t.trim()).filter(Boolean),...getFormImagesFromSections(),tradeDate,createdAt:Date.now()};
   if(estimateKB(trade)>900){alert(`⚠️ Dữ liệu quá lớn. Xóa bớt ảnh trước.`);btn.disabled=false;btn.textContent="LƯU LỆNH ĐẦY ĐỦ";return;}
   try{
     const ref=await addDoc(collection(db,"trades"),trade);
@@ -2152,56 +2152,166 @@ window.openNew=function(){
   ["f-title","f-symbol","f-tags","f-note","f-pnl","f-date","f-hour","f-minute"].forEach(id=>{const el=document.getElementById(id);if(el) el.value="";});
   document.querySelectorAll('[data-group="result"]').forEach(b=>b.classList.toggle("active", b.dataset.val==="Win"));
   document.querySelectorAll('[data-group="onplan"]').forEach(b=>b.classList.toggle("active", b.dataset.val==="Đúng plan"));
-  Object.keys(formImages).forEach(k=>delete formImages[k]);
-  Object.keys(formCaptions).forEach(k=>delete formCaptions[k]);
-  populateFolderSelects(); buildTFUploadRow(); TFS.forEach(tf=>renderTFImages(tf));
+  buildTFUploadRow(); populateFolderSelects();
   window.formDirty=false; showScreen("new");
 };
 
 // ══ IMAGE UPLOAD (NEW) ══
-function buildTFUploadRow(){
-  document.getElementById("tf-upload-row").innerHTML=TFS.map(tf=>`
-    <div style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:12px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <div style="font-family:var(--sys);font-size:12px;color:var(--gold);letter-spacing:2px;">${tf}</div>
-        <button onclick="addTFImg('${tf}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:11px;cursor:pointer;font-family:var(--sys);">+ Thêm ảnh</button>
-      </div>
-      <div id="tf-images-${tf}" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;min-height:60px;"></div>
-      <div style="font-size:11px;letter-spacing:2px;color:var(--gold);opacity:0.9;font-family:var(--sys);margin-bottom:5px;">CHÚ THÍCH</div>
-      <textarea id="tf-caption-${tf}" placeholder="Ghi chú cho khung ${tf}..." style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:16px;font-family:var(--sys);outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;" onpaste="handlePaste('${tf}',event)"></textarea>
-      <input type="file" accept="image/*" multiple style="display:none" id="tf-input-${tf}" onchange="handleImgMulti('${tf}',this)"/>
-    </div>`).join("");
-}
-window.addTFImg=tf=>document.getElementById("tf-input-"+tf).click();
-window.clearTFImg=function(tf,i){if(!formImages[tf]) return;formImages[tf].splice(i,1);renderTFImages(tf);};
-function renderTFImages(tf){
-  const imgs=formImages[tf]||[]; const c=document.getElementById("tf-images-"+tf); if(!c) return;
-  if(!imgs.length){c.innerHTML=`<div style="color:var(--gold);opacity:0.5;font-size:12px;padding:10px;">Chưa có ảnh</div>`;return;}
-  c.innerHTML=imgs.map((src,i)=>`<div style="position:relative;flex:0 0 auto;"><img src="${src}" style="width:90px;height:68px;object-fit:cover;border-radius:7px;border:1px solid var(--gold-dim);display:block;cursor:pointer;" onclick="viewFormImg('${tf}',${i})"/><button onclick="clearTFImg('${tf}',${i})" style="position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:11px;cursor:pointer;line-height:1;">✕</button></div>`).join("");
-}
-window.viewFormImg=function(tf,idx){const src=(formImages[tf]||[])[idx];if(src) viewImg(src);};
-window.viewImg=function(src){const o=document.createElement("div");o.style.cssText="position:fixed;inset:0;background:#000e;z-index:999;display:flex;align-items:center;justify-content:center;cursor:pointer;";o.innerHTML=`<img src="${src}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:var(--radius-sm);"/>`;o.onclick=()=>document.body.removeChild(o);document.body.appendChild(o);};
-window.handlePaste=function(tf,event){
-  const items=event.clipboardData?.items; if(!items) return;
-  for(const item of items){if(item.type.startsWith("image/")){event.preventDefault();const reader=new FileReader();reader.onload=async e=>{try{const c=await compressImage(e.target.result);if(!formImages[tf])formImages[tf]=[];formImages[tf].push(c);window.formDirty=true;renderTFImages(tf);}catch(err){try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
-  showToast("⚠️ Không thể đọc ảnh");}};reader.readAsDataURL(item.getAsFile());return;}}
-};
-window.handleImgMulti=function(tf,input){
-  const files=Array.from(input.files); if(!files.length) return;
-  if(!formImages[tf]) formImages[tf]=[];
-  // parallel compression
-  const readers=files.map(file=>new Promise(res=>{
-    const r=new FileReader();
-    r.onload=async e=>{try{res(await compressImage(e.target.result));}catch{try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
-  showToast("⚠️ Không thể đọc ảnh");res(null);}};
-    r.readAsDataURL(file);
-  }));
-  Promise.all(readers).then(results=>{
-    results.filter(Boolean).forEach(c=>formImages[tf].push(c));
-    window.formDirty=true; renderTFImages(tf);
+// ── Dynamic TF sections for new trade form ──
+let formTFSections = []; // [{tf, images[], caption}]
+
+function buildTFUploadRow() {
+  formTFSections = [];
+  formImages = {};
+  formCaptions = {};
+  const row = document.getElementById("tf-upload-row");
+  if (!row) return;
+  row.innerHTML = `
+    <div id="form-tf-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+    <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;" id="form-tf-quick-add">
+      ${["H4","H1","M15","M5","M1"].map(tf =>
+        `<button data-tf="${tf}" style="padding:6px 14px;border-radius:20px;border:1px solid var(--gold-dim);background:transparent;color:var(--gold);font-size:12px;cursor:pointer;">${tf}</button>`
+      ).join("")}
+      <button id="form-tf-custom" style="padding:6px 14px;border-radius:20px;border:1px dashed var(--gold-dim);background:transparent;color:var(--gold);font-size:12px;cursor:pointer;">+ Khác</button>
+    </div>`;
+
+  // Wire quick-add buttons inside module scope
+  row.querySelectorAll("[data-tf]").forEach(btn => {
+    btn.addEventListener("click", () => addFormTFSection(btn.dataset.tf));
   });
-  input.value="";
-};
+  row.querySelector("#form-tf-custom")?.addEventListener("click", () => {
+    const tf = prompt("Nhập tên khung thời gian:", "M30");
+    if (tf?.trim()) addFormTFSection(tf.trim().toUpperCase());
+  });
+}
+
+function addFormTFSection(tf) {
+  const idx = formTFSections.length;
+  formTFSections.push({tf, images: [], caption: ""});
+  if (!formImages[tf]) formImages[tf] = [];
+
+  const list = document.getElementById("form-tf-list");
+  const sec = document.createElement("div");
+  sec.id = "form-tf-sec-" + idx;
+  sec.style.cssText = "background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:12px;";
+  sec.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:600;color:var(--gold);">${tf}</div>
+      <button data-remove="${idx}" style="background:none;border:1px solid #ef535044;border-radius:6px;padding:4px 10px;color:var(--loss);font-size:12px;cursor:pointer;">✕ Xóa</button>
+    </div>
+    <div id="form-tf-imgs-${idx}" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;min-height:40px;"></div>
+    <button data-add="${idx}" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:6px 12px;color:var(--gold);font-size:12px;cursor:pointer;margin-bottom:8px;">+ Thêm ảnh</button>
+    <input type="file" accept="image/*" multiple style="display:none" id="form-tf-file-${idx}"/>
+    <textarea data-caption="${idx}" placeholder="Phân tích khung ${tf}..." style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:14px;font-family:var(--sys);outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;"></textarea>`;
+
+  list.appendChild(sec);
+
+  // Wire events
+  sec.querySelector("[data-remove]").addEventListener("click", () => {
+    formTFSections[idx] = null;
+    sec.remove();
+  });
+  sec.querySelector("[data-add]").addEventListener("click", () => {
+    document.getElementById("form-tf-file-"+idx)?.click();
+  });
+  sec.querySelector("[data-caption]").addEventListener("input", e => {
+    if (formTFSections[idx]) formTFSections[idx].caption = e.target.value;
+  });
+  document.getElementById("form-tf-file-"+idx).addEventListener("change", async function() {
+    for (const f of Array.from(this.files)) {
+      await new Promise(res => {
+        const r = new FileReader();
+        r.onload = async ev => {
+          try {
+            const c = await compressImage(ev.target.result);
+            if (formTFSections[idx]) formTFSections[idx].images.push(c);
+          } catch(e){}
+          res();
+        };
+        r.readAsDataURL(f);
+      });
+    }
+    renderFormTFImgs(idx);
+    this.value = "";
+  });
+
+  renderFormTFImgs(idx);
+}
+
+function renderFormTFImgs(idx) {
+  const zone = document.getElementById("form-tf-imgs-"+idx);
+  if (!zone) return;
+  const sec = formTFSections[idx];
+  zone.innerHTML = "";
+  if (!sec || !sec.images.length) {
+    zone.innerHTML = `<div style="color:var(--gold);opacity:0.4;font-size:12px;padding:6px;">Chưa có ảnh — nhấn "+ Thêm ảnh" hoặc Ctrl+V</div>`;
+    return;
+  }
+  sec.images.forEach((src, i) => {
+    const div = document.createElement("div");
+    div.style.cssText = "position:relative;flex:0 0 auto;";
+    const img = document.createElement("img");
+    img.src = src;
+    img.style.cssText = "width:90px;height:68px;object-fit:cover;border-radius:6px;border:1px solid var(--gold-dim);display:block;cursor:zoom-in;";
+    img.addEventListener("click", () => viewImg(src));
+    const del = document.createElement("button");
+    del.innerHTML = "✕";
+    del.dataset.secIdx = idx;
+    del.dataset.imgIdx = i;
+    del.style.cssText = "position:absolute;top:2px;right:2px;background:#000000cc;border:none;border-radius:50%;width:20px;height:20px;color:#ef5350;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:bold;z-index:10;";
+    del.addEventListener("click", function(e) {
+      e.stopPropagation();
+      const si = parseInt(this.dataset.secIdx);
+      const ii = parseInt(this.dataset.imgIdx);
+      if (formTFSections[si]) { formTFSections[si].images.splice(ii,1); renderFormTFImgs(si); }
+    });
+    div.appendChild(img); div.appendChild(del);
+    zone.appendChild(div);
+  });
+}
+
+// Paste into form TF section
+document.addEventListener("paste", async function(e) {
+  // Only when new trade form is active
+  const screen = document.getElementById("screen-new");
+  if (!screen?.classList.contains("active")) return;
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith("image/")) {
+      e.preventDefault();
+      const reader = new FileReader();
+      reader.onload = async ev => {
+        try {
+          const c = await compressImage(ev.target.result);
+          // Paste into last non-null section
+          const lastIdx = formTFSections.findLastIndex(s => s !== null);
+          if (lastIdx >= 0) {
+            formTFSections[lastIdx].images.push(c);
+            renderFormTFImgs(lastIdx);
+            showToast("📷 Dán ảnh vào " + formTFSections[lastIdx].tf);
+          } else {
+            showToast("⚠️ Thêm khung thời gian trước");
+          }
+        } catch(e2){}
+      };
+      reader.readAsDataURL(item.getAsFile());
+      return;
+    }
+  }
+});
+
+// Update saveTrade to use formTFSections
+function getFormImagesFromSections() {
+  const images = {}, captions = {};
+  formTFSections.filter(Boolean).forEach(s => {
+    if (s.images.length) images[s.tf] = s.images;
+    if (s.caption) captions[s.tf] = s.caption;
+  });
+  return {images, captions};
+}
+
+window.renderTFImages = function(tf) {}; // kept for compat, no-op now
 
 // ══ EDIT ══
 window.openEdit=function(){
@@ -3331,30 +3441,40 @@ window.teHandleFiles = async function(idx, input) {
   }
   teRenderSecImgs(idx); input.value="";
 };
-function teRenderSecImgs(idx) {
-  const wrap = document.getElementById("te-imgs-"+idx);
-  if (!wrap || !teImgSections[idx]) return;
-  const imgs = teImgSections[idx].images;
+function teRenderSecImgs(secIdx) {
+  const wrap = document.getElementById("te-imgs-"+secIdx);
+  if (!wrap) return;
+  const sec = teImgSections[secIdx];
   wrap.innerHTML = "";
-  if (!imgs.length) {
+  if (!sec || !sec.images || !sec.images.length) {
     wrap.innerHTML = `<div style="color:var(--gold);opacity:0.35;font-size:11px;padding:10px;">Chưa có ảnh — nhấn "+ Ảnh" hoặc Ctrl+V</div>`;
     return;
   }
-  imgs.forEach((src, i) => {
+  sec.images.forEach((src, imgIdx) => {
     const div = document.createElement("div");
-    div.style.cssText = "position:relative;flex:0 0 auto;";
+    div.style.cssText = "position:relative;flex:0 0 auto;display:inline-block;margin:2px;";
+
     const img = document.createElement("img");
     img.src = src;
     img.style.cssText = "width:90px;height:68px;object-fit:cover;border-radius:6px;border:1px solid var(--gold-dim);display:block;cursor:zoom-in;";
     img.addEventListener("click", () => openTeImgFull(src));
+
     const del = document.createElement("button");
-    del.textContent = "✕";
-    del.style.cssText = "position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:11px;cursor:pointer;line-height:1;";
-    del.addEventListener("click", (e) => {
+    del.innerHTML = "✕";
+    del.dataset.secIdx = secIdx;
+    del.dataset.imgIdx = imgIdx;
+    del.style.cssText = "position:absolute;top:2px;right:2px;background:#000000cc;border:none;border-radius:50%;width:20px;height:20px;color:#ef5350;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:bold;z-index:10;";
+    del.addEventListener("click", function(e) {
       e.stopPropagation();
-      teImgSections[idx].images.splice(i, 1);
-      teRenderSecImgs(idx);
+      e.preventDefault();
+      const si = parseInt(this.dataset.secIdx);
+      const ii = parseInt(this.dataset.imgIdx);
+      if (teImgSections[si] && teImgSections[si].images) {
+        teImgSections[si].images.splice(ii, 1);
+        teRenderSecImgs(si);
+      }
     });
+
     div.appendChild(img);
     div.appendChild(del);
     wrap.appendChild(div);
@@ -3525,27 +3645,38 @@ function renderRuleField(idx) {
   renderRuleImgs(idx);
 }
 
-function renderRuleImgs(idx) {
-  const zone = document.getElementById("te-rule-imgs-"+idx);
-  if (!zone || !teRuleItems[idx]) return;
-  const imgs = teRuleItems[idx].imgs || [];
+function renderRuleImgs(ruleIdx) {
+  const zone = document.getElementById("te-rule-imgs-"+ruleIdx);
+  if (!zone) return;
+  const item = teRuleItems[ruleIdx];
   zone.innerHTML = "";
-  if (!imgs.length) return;
-  imgs.forEach((src, i) => {
+  if (!item || !item.imgs || !item.imgs.length) return;
+
+  item.imgs.forEach((src, imgIdx) => {
     const wrap = document.createElement("div");
-    wrap.style.cssText = "position:relative;flex:0 0 auto;";
+    wrap.style.cssText = "position:relative;flex:0 0 auto;display:inline-block;margin:2px;";
+
     const img = document.createElement("img");
     img.src = src;
     img.style.cssText = "width:80px;height:60px;object-fit:cover;border-radius:6px;border:1px solid var(--gold-dim);cursor:zoom-in;display:block;";
     img.addEventListener("click", () => openTeImgFull(src));
+
     const del = document.createElement("button");
-    del.textContent = "✕";
-    del.style.cssText = "position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:10px;cursor:pointer;line-height:1;";
-    del.addEventListener("click", (e) => {
+    del.innerHTML = "✕";
+    del.dataset.ruleIdx = ruleIdx;
+    del.dataset.imgIdx = imgIdx;
+    del.style.cssText = "position:absolute;top:2px;right:2px;background:#000000cc;border:none;border-radius:50%;width:20px;height:20px;color:#ef5350;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:bold;z-index:10;";
+    del.addEventListener("click", function(e) {
       e.stopPropagation();
-      teRuleItems[idx].imgs.splice(i, 1);
-      renderRuleImgs(idx);
+      e.preventDefault();
+      const ri = parseInt(this.dataset.ruleIdx);
+      const ii = parseInt(this.dataset.imgIdx);
+      if (teRuleItems[ri] && teRuleItems[ri].imgs) {
+        teRuleItems[ri].imgs.splice(ii, 1);
+        renderRuleImgs(ri);
+      }
     });
+
     wrap.appendChild(img);
     wrap.appendChild(del);
     zone.appendChild(wrap);
