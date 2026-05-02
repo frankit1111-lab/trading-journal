@@ -112,11 +112,6 @@
     --border:#c9a84c22;
     --radius:12px;
     --shadow:0 8px 32px #00000088;
-    /* Apple HIG safe areas */
-    --sat: env(safe-area-inset-top, 0px);
-    --sab: env(safe-area-inset-bottom, 0px);
-    --tab-bar: 78px;       /* bottom-nav content height (without sab) */
-    --tab-total: calc(var(--tab-bar) + var(--sab));  /* total bottom-nav height */
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
   html,body{
@@ -125,253 +120,18 @@
   .screen.active{display:flex;}
   ::-webkit-scrollbar{display:none;}
 
+
   /* ═══════════════════════════════════════
-     RESPONSIVE LAYOUTS
-     - Mobile (≤767px): 1 column, bottom nav (default)
-     - Tablet (768-1199px): 2 columns (list | detail)
-     - Desktop (≥1200px): 3 columns (sidebar nav | list | detail)
+     LAYOUT MODES
+     - Default: mobile (1 column) on ALL devices
+     - body.desktop-mode: 3 columns (sidebar + list + detail), only togglable via "Bật Laptop" button (≥1200px)
      ═══════════════════════════════════════ */
 
-  /* Desktop sidebar nav (only visible ≥1200px) */
+  /* Desktop sidebar — hidden by default, shown only when desktop-mode is on */
   .desktop-sidebar { display: none; }
 
-  /* ── TABLET: 2-column layout ── */
-  @media (min-width: 768px) and (max-width: 1199px) {
-    body { background: var(--bg); }
-    /* List screen → left column */
-    #screen-list, #screen-stats, #screen-theory, #screen-aichat, #screen-settings, #screen-import {
-      width: 380px !important;
-      right: auto !important;
-      border-right: 1px solid var(--gold-faint);
-    }
-    #screen-list.active, #screen-stats.active, #screen-theory.active,
-    #screen-aichat.active, #screen-settings.active, #screen-import.active {
-      display: flex !important;
-    }
-    /* Detail/new/edit → right column */
-    #screen-detail, #screen-new, #screen-edit {
-      left: 380px !important;
-    }
-    /* When detail/new/edit active, also keep list visible */
-    #screen-detail.active, #screen-new.active, #screen-edit.active {
-      display: flex !important;
-    }
-    /* When detail not active, show empty state — handled by #empty-right-pane HTML */
-    /* Bottom nav stays at bottom of left column */
-    .bottom-nav {
-      left: 0 !important;
-      transform: none !important;
-      width: 380px !important;
-      max-width: 380px !important;
-    }
-    /* Save bar in right column */
-    .save-bar {
-      left: 380px !important;
-      transform: none !important;
-      width: calc(100vw - 380px) !important;
-      max-width: none !important;
-    }
-    /* Hide back arrow on detail (always visible alongside list) */
-    body.tablet-mode .detail-back-mobile-only { display: none; }
-  }
-
-  /* ── DESKTOP: 3-column layout ── */
-  @media (min-width: 1200px) {
-    body { background: var(--bg); }
-    /* Sidebar */
-    .desktop-sidebar {
-      display: flex !important;
-      position: fixed;
-      top: 0; left: 0; bottom: 0;
-      width: 220px;
-      background: var(--bg2);
-      border-right: 1px solid var(--gold-faint);
-      flex-direction: column;
-      padding: 20px 0;
-      z-index: 200;
-    }
-    .desktop-sidebar-brand {
-      padding: 0 24px 20px;
-      border-bottom: 1px solid var(--gold-faint);
-      margin-bottom: 14px;
-    }
-    .desktop-sidebar-brand-title {
-      font-family: 'Cinzel', serif;
-      font-size: 20px;
-      color: var(--gold);
-      letter-spacing: 1px;
-    }
-    .desktop-sidebar-brand-sub {
-      font-family: var(--sys);
-      font-size: 10px;
-      color: var(--gold);
-      opacity: 0.6;
-      letter-spacing: 2px;
-      margin-top: 4px;
-    }
-    .desktop-sidebar-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px 24px;
-      cursor: pointer;
-      color: var(--gold);
-      opacity: 0.65;
-      font-family: var(--sys);
-      font-size: 14px;
-      border: none; background: transparent;
-      transition: all 0.15s;
-      text-align: left;
-    }
-    .desktop-sidebar-item:hover { opacity: 1; background: var(--bg3); }
-    .desktop-sidebar-item.active {
-      opacity: 1;
-      background: var(--gold-faint);
-      border-left: 3px solid var(--gold);
-      padding-left: 21px;
-    }
-    .desktop-sidebar-item .ds-icon { font-size: 18px; width: 24px; }
-
-    /* Hide mobile bottom nav on desktop */
-    .bottom-nav { display: none !important; }
-
-    /* List/stats/theory/etc → 2nd column */
-    #screen-list, #screen-stats, #screen-theory, #screen-aichat, #screen-settings, #screen-import {
-      left: 220px !important;
-      width: 420px !important;
-      right: auto !important;
-      border-right: 1px solid var(--gold-faint);
-    }
-    #screen-list.active, #screen-stats.active, #screen-theory.active,
-    #screen-aichat.active, #screen-settings.active, #screen-import.active {
-      display: flex !important;
-    }
-    /* Detail/new/edit → 3rd column */
-    #screen-detail, #screen-new, #screen-edit {
-      left: calc(220px + 420px) !important;
-    }
-    #screen-detail.active, #screen-new.active, #screen-edit.active {
-      display: flex !important;
-    }
-    /* Empty state in right column — replaced by HTML panel below */
-    body.desktop-no-detail #empty-right-pane,
-    body.tablet-no-detail #empty-right-pane {
-      display: flex !important;
-    }
-    /* Save bar in right column */
-    .save-bar {
-      left: calc(220px + 420px) !important;
-      transform: none !important;
-      width: calc(100vw - 220px - 420px) !important;
-      max-width: none !important;
-    }
-    /* Detail content max-width for readability */
-    .detail-body, .form-body { max-width: 720px; margin: 0 auto; }
-  }
-
-  /* ════════════════════════════════════════════
-     FORCE LAYOUT MODE — user override via settings
-     Adds body class:
-     - body.force-mobile  → ép giao diện iPhone
-     - body.force-tablet  → ép giao diện iPad (2 cột)
-     - body.force-desktop → ép giao diện laptop (3 cột)
-     Default (no class): auto theo viewport
-     ════════════════════════════════════════════ */
-
-  /* FORCE MOBILE: undo all tablet/desktop rules */
-  body.force-mobile .desktop-sidebar { display: none !important; }
-  body.force-mobile #screen-list,
-  body.force-mobile #screen-stats,
-  body.force-mobile #screen-theory,
-  body.force-mobile #screen-aichat,
-  body.force-mobile #screen-settings,
-  body.force-mobile #screen-import,
-  body.force-mobile #screen-detail,
-  body.force-mobile #screen-new,
-  body.force-mobile #screen-edit {
-    left: 0 !important;
-    right: 0 !important;
-    width: auto !important;
-    border-right: none !important;
-  }
-  body.force-mobile #screen-list:not(.active),
-  body.force-mobile #screen-stats:not(.active),
-  body.force-mobile #screen-theory:not(.active),
-  body.force-mobile #screen-aichat:not(.active),
-  body.force-mobile #screen-settings:not(.active),
-  body.force-mobile #screen-import:not(.active),
-  body.force-mobile #screen-detail:not(.active),
-  body.force-mobile #screen-new:not(.active),
-  body.force-mobile #screen-edit:not(.active) {
-    display: none !important;
-  }
-  body.force-mobile .bottom-nav {
-    display: flex !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: 100% !important;
-    max-width: 480px !important;
-  }
-  body.force-mobile .save-bar {
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: 100% !important;
-    max-width: 480px !important;
-  }
-  body.force-mobile #empty-right-pane { display: none !important; }
-  body.force-mobile .detail-body,
-  body.force-mobile .form-body { max-width: none !important; margin: 0 !important; }
-
-  /* FORCE TABLET: 2 columns regardless of viewport */
-  body.force-tablet .desktop-sidebar { display: none !important; }
-  body.force-tablet #screen-list,
-  body.force-tablet #screen-stats,
-  body.force-tablet #screen-theory,
-  body.force-tablet #screen-aichat,
-  body.force-tablet #screen-settings,
-  body.force-tablet #screen-import {
-    left: 0 !important;
-    width: 380px !important;
-    right: auto !important;
-    border-right: 1px solid var(--gold-faint);
-  }
-  body.force-tablet #screen-list.active,
-  body.force-tablet #screen-stats.active,
-  body.force-tablet #screen-theory.active,
-  body.force-tablet #screen-aichat.active,
-  body.force-tablet #screen-settings.active,
-  body.force-tablet #screen-import.active {
-    display: flex !important;
-  }
-  body.force-tablet #screen-detail,
-  body.force-tablet #screen-new,
-  body.force-tablet #screen-edit {
-    left: 380px !important;
-  }
-  body.force-tablet #screen-detail.active,
-  body.force-tablet #screen-new.active,
-  body.force-tablet #screen-edit.active {
-    display: flex !important;
-  }
-  body.force-tablet .bottom-nav {
-    left: 0 !important;
-    transform: none !important;
-    width: 380px !important;
-    max-width: 380px !important;
-    display: flex !important;
-  }
-  body.force-tablet .save-bar {
-    left: 380px !important;
-    transform: none !important;
-    width: calc(100vw - 380px) !important;
-    max-width: none !important;
-  }
-  body.force-tablet #empty-right-pane { left: 380px !important; }
-  body.force-tablet.tablet-no-detail #empty-right-pane,
-  body.force-tablet.desktop-no-detail #empty-right-pane {
-    display: flex !important;
-  }
-
-  /* FORCE DESKTOP: 3 columns regardless of viewport */
-  body.force-desktop .desktop-sidebar {
+  /* DESKTOP MODE (manually enabled via button on wide screens) */
+  body.desktop-mode .desktop-sidebar {
     display: flex !important;
     position: fixed;
     top: 0; left: 0; bottom: 0;
@@ -382,51 +142,117 @@
     padding: 20px 0;
     z-index: 200;
   }
-  body.force-desktop .bottom-nav { display: none !important; }
-  body.force-desktop #screen-list,
-  body.force-desktop #screen-stats,
-  body.force-desktop #screen-theory,
-  body.force-desktop #screen-aichat,
-  body.force-desktop #screen-settings,
-  body.force-desktop #screen-import {
+  body.desktop-mode .bottom-nav { display: none !important; }
+  body.desktop-mode #screen-list,
+  body.desktop-mode #screen-stats,
+  body.desktop-mode #screen-theory,
+  body.desktop-mode #screen-aichat,
+  body.desktop-mode #screen-settings,
+  body.desktop-mode #screen-import {
     left: 220px !important;
     width: 420px !important;
     right: auto !important;
     border-right: 1px solid var(--gold-faint);
   }
-  body.force-desktop #screen-list.active,
-  body.force-desktop #screen-stats.active,
-  body.force-desktop #screen-theory.active,
-  body.force-desktop #screen-aichat.active,
-  body.force-desktop #screen-settings.active,
-  body.force-desktop #screen-import.active {
+  body.desktop-mode #screen-list.active,
+  body.desktop-mode #screen-stats.active,
+  body.desktop-mode #screen-theory.active,
+  body.desktop-mode #screen-aichat.active,
+  body.desktop-mode #screen-settings.active,
+  body.desktop-mode #screen-import.active {
     display: flex !important;
   }
-  body.force-desktop #screen-detail,
-  body.force-desktop #screen-new,
-  body.force-desktop #screen-edit {
+  body.desktop-mode #screen-detail,
+  body.desktop-mode #screen-new,
+  body.desktop-mode #screen-edit {
     left: calc(220px + 420px) !important;
   }
-  body.force-desktop #screen-detail.active,
-  body.force-desktop #screen-new.active,
-  body.force-desktop #screen-edit.active {
+  body.desktop-mode #screen-detail.active,
+  body.desktop-mode #screen-new.active,
+  body.desktop-mode #screen-edit.active {
     display: flex !important;
   }
-  body.force-desktop .save-bar {
+  body.desktop-mode .save-bar {
     left: calc(220px + 420px) !important;
     transform: none !important;
     width: calc(100vw - 220px - 420px) !important;
     max-width: none !important;
   }
-  body.force-desktop #empty-right-pane { left: calc(220px + 420px) !important; }
-  body.force-desktop.desktop-no-detail #empty-right-pane,
-  body.force-desktop.tablet-no-detail #empty-right-pane {
-    display: flex !important;
-  }
-  body.force-desktop .detail-body,
-  body.force-desktop .form-body { max-width: 720px; margin: 0 auto; }
+  body.desktop-mode #empty-right-pane { left: calc(220px + 420px) !important; }
+  body.desktop-mode.no-detail #empty-right-pane { display: flex !important; }
+  body.desktop-mode .detail-body,
+  body.desktop-mode .form-body { max-width: 720px; margin: 0 auto; }
 
-  /* Welcome panel (right column when no trade selected) */
+  /* Floating toggle button — visible only on wide screens */
+  #desktop-toggle-btn {
+    display: none;
+    position: fixed;
+    top: 12px; right: 12px;
+    z-index: 300;
+    background: var(--bg2);
+    border: 1px solid var(--gold-faint);
+    color: var(--gold);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: var(--sys);
+    font-size: 12px;
+    cursor: pointer;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  #desktop-toggle-btn:hover { background: var(--bg3); border-color: var(--gold); }
+  @media (min-width: 1024px) {
+    #desktop-toggle-btn { display: block; }
+  }
+  body.desktop-mode #desktop-toggle-btn {
+    top: 12px; right: 12px;
+    background: var(--gold-faint);
+    border-color: var(--gold);
+  }
+
+  /* Sidebar item styles — used only in desktop-mode */
+  .desktop-sidebar-brand {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--gold-faint);
+    margin-bottom: 14px;
+  }
+  .desktop-sidebar-brand-title {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+  .desktop-sidebar-brand-sub {
+    font-family: var(--sys);
+    font-size: 10px;
+    color: var(--gold);
+    opacity: 0.6;
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+  .desktop-sidebar-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 24px;
+    cursor: pointer;
+    color: var(--gold);
+    opacity: 0.65;
+    font-family: var(--sys);
+    font-size: 14px;
+    border: none; background: transparent;
+    transition: all 0.15s;
+    text-align: left;
+  }
+  .desktop-sidebar-item:hover { opacity: 1; background: var(--bg3); }
+  .desktop-sidebar-item.active {
+    opacity: 1;
+    background: var(--gold-faint);
+    border-left: 3px solid var(--gold);
+    padding-left: 21px;
+  }
+  .desktop-sidebar-item .ds-icon { font-size: 18px; width: 24px; }
+
+
+  /* Welcome panel (right column when no trade selected — desktop-mode only) */
   #empty-right-pane {
     display: none;
     position: fixed;
@@ -437,12 +263,6 @@
     z-index: 1;
     background: var(--bg);
     text-align: center;
-  }
-  @media (min-width: 768px) and (max-width: 1199px) {
-    #empty-right-pane { left: 380px; }
-  }
-  @media (min-width: 1200px) {
-    #empty-right-pane { left: calc(220px + 420px); }
   }
   .empty-pane-icon {
     font-size: 64px;
@@ -524,7 +344,7 @@
     background:linear-gradient(180deg,rgba(6,6,6,0.98) 0%,rgba(6,6,6,0.85) 100%);
     backdrop-filter:blur(20px) saturate(180%);
     border-bottom:1px solid var(--border);
-    padding:calc(14px + var(--sat)) 20px 12px;
+    padding:14px 20px 12px;
     display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
   }
   .header::before{
@@ -606,7 +426,7 @@
   .empty-text{font-family:var(--sys);font-size:13px;letter-spacing:0.5px;line-height:2.2;color:var(--gold);opacity:0.55;}
 
   /* ── FORM ── */
-  .form-body{padding:20px 20px calc(120px + var(--sab));flex:1;}
+  .form-body{padding:20px 20px 120px;flex:1;}
   .field{margin-bottom:18px;position:relative;}
   .field-label{
     font-size:13px;letter-spacing:0.3px;color:var(--gold);
@@ -646,7 +466,7 @@
     display:flex;justify-content:space-between;align-items:center;flex-shrink:0;
     background:linear-gradient(135deg,var(--bg2),var(--bg));
   }
-  .detail-body{padding:16px 20px calc(40px + var(--sab));flex:1;}
+  .detail-body{padding:16px 20px 120px;flex:1;}
   .section-label{
     font-size:13px;letter-spacing:0.3px;color:var(--gold);
     text-transform:uppercase;font-family:var(--sys);
@@ -931,7 +751,7 @@
     background:var(--bg2);
     border-top:1px solid var(--border);
     display:flex;z-index:200;
-    padding-bottom:var(--sab);
+    padding-bottom:env(safe-area-inset-bottom,0);
     backdrop-filter:blur(20px);
   }
   .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 8px;cursor:pointer;border:none;background:transparent;color:var(--gold);opacity:0.55;transition:all 0.2s;font-family:var(--sys);}
@@ -1178,7 +998,12 @@
 <body>
 <a href="#trade-list" style="position:absolute;top:-100px;left:0;background:var(--gold);color:#000;padding:8px 16px;z-index:9999;border-radius:0 0 8px 0;font-size:13px;transition:top 0.2s;" onfocus="this.style.top='0'" onblur="this.style.top='-100px'">Bỏ qua đến nội dung chính</a>
 
-<!-- DESKTOP SIDEBAR (only visible ≥1200px) -->
+<!-- DESKTOP TOGGLE BUTTON (floating, only visible ≥1200px) -->
+<button id="desktop-toggle-btn" onclick="toggleDesktopMode()" title="Bật/Tắt giao diện Laptop">
+  <span id="desktop-toggle-label">💻 Bật Laptop</span>
+</button>
+
+<!-- DESKTOP SIDEBAR (only visible when desktop-mode is on) -->
 <aside class="desktop-sidebar">
   <div class="desktop-sidebar-brand">
     <div class="desktop-sidebar-brand-title">TradeLog</div>
@@ -1232,10 +1057,7 @@
       <div class="label">NHẬT KÝ GIAO DỊCH · ICT</div>
       <div class="name" style="font-family:'Cinzel',serif;letter-spacing:2px">TradeLog</div>
     </div>
-    <div style="display:flex;gap:2px;">
-      <button class="header-btn" onclick="openLayoutModal()" style="font-size:16px;opacity:0.7;" title="Bố cục giao diện">📐</button>
-      <button class="header-btn" onclick="navSidebar('settings')" style="font-size:16px;opacity:0.7;" title="Cài đặt">⚙️</button>
-    </div>
+    <button class="header-btn" onclick="navSidebar('settings')" style="font-size:16px;opacity:0.7;" title="Cài đặt">⚙️</button>
   </div>
   <!-- Fix 7: streak row -->
   <div id="streak-row" style="display:flex;justify-content:space-between;align-items:center;padding:7px 18px;background:var(--bg2);border-bottom:1px solid var(--gold-faint);flex-shrink:0;cursor:pointer;gap:8px;" onclick="toggleSessionInfo()">
@@ -1279,7 +1101,7 @@
     <button class="sort-btn active" id="sort-desc" onclick="setSort('desc')">↓ Mới nhất</button>
     <button class="sort-btn" id="sort-asc" onclick="setSort('asc')">↑ Cũ nhất</button>
   </div>
-  <div id="trade-list" role="main" aria-label="Danh sách lệnh" style="flex:1;padding-bottom:var(--tab-total);"></div>
+  <div id="trade-list" role="main" aria-label="Danh sách lệnh" style="flex:1;padding-bottom:80px;"></div>
 </div>
 
 <!-- COPY/MOVE TO THEORY MODAL -->
@@ -1320,38 +1142,6 @@
   <button class="bn-item" id="bn-settings" onclick="navSidebar('settings')">
     <div class="bn-icon">⚙️</div><div class="bn-label">CÀI ĐẶT</div>
   </button>
-</div>
-
-<!-- LAYOUT MODAL (quick switcher from header) -->
-<div id="modal-layout" style="display:none;position:fixed;inset:0;background:#000a;z-index:1000;align-items:flex-end;justify-content:center;" onclick="if(event.target===this)closeLayoutModal()">
-  <div style="background:var(--bg2);width:100%;max-width:480px;border-radius:var(--radius-xl) var(--radius-xl) 0 0;padding:20px 18px 28px;" onclick="event.stopPropagation()">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-      <div style="font-size:15px;color:var(--gold);font-weight:700;">📐 Bố Cục Giao Diện</div>
-      <button onclick="closeLayoutModal()" style="background:transparent;border:none;color:var(--gold);font-size:20px;cursor:pointer;">✕</button>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
-      <button class="layout-quick-btn" onclick="setLayoutMode('auto');closeLayoutModal()" id="ql-auto" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:18px 12px;color:var(--text);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;">
-        <div style="font-size:28px;">✨</div>
-        <div style="font-size:13px;font-weight:600;color:var(--gold);">Tự Động</div>
-        <div style="font-size:10px;opacity:0.65;">Theo thiết bị</div>
-      </button>
-      <button class="layout-quick-btn" onclick="setLayoutMode('mobile');closeLayoutModal()" id="ql-mobile" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:18px 12px;color:var(--text);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;">
-        <div style="font-size:28px;">📱</div>
-        <div style="font-size:13px;font-weight:600;color:var(--gold);">iPhone</div>
-        <div style="font-size:10px;opacity:0.65;">1 cột</div>
-      </button>
-      <button class="layout-quick-btn" onclick="setLayoutMode('tablet');closeLayoutModal()" id="ql-tablet" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:18px 12px;color:var(--text);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;">
-        <div style="font-size:28px;">📱</div>
-        <div style="font-size:13px;font-weight:600;color:var(--gold);">iPad</div>
-        <div style="font-size:10px;opacity:0.65;">2 cột</div>
-      </button>
-      <button class="layout-quick-btn" onclick="setLayoutMode('desktop');closeLayoutModal()" id="ql-desktop" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:18px 12px;color:var(--text);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;">
-        <div style="font-size:28px;">💻</div>
-        <div style="font-size:13px;font-weight:600;color:var(--gold);">Laptop</div>
-        <div style="font-size:10px;opacity:0.65;">3 cột</div>
-      </button>
-    </div>
-  </div>
 </div>
 
 <!-- IMPORT SCREEN -->
@@ -1498,7 +1288,7 @@
     <div class="header-title"><div class="label">Báo Cáo</div><div class="name">Thống Kê</div></div>
     <button class="header-btn" onclick="openNew()" style="font-size:20px;font-weight:700;" title="Thêm lệnh mới">+</button>
   </div>
-  <div id="stats-body" style="padding:16px 18px var(--tab-total);flex:1;overflow-y:auto;"></div>
+  <div id="stats-body" style="padding:16px 18px 40px;flex:1;overflow-y:auto;"></div>
 </div>
 
 <!-- NEW TRADE -->
@@ -1739,7 +1529,7 @@
   <div id="theory-edit-bar" style="display:none;"></div>
 
   <!-- Cards -->
-  <div id="theory-list" role="main" aria-label="Danh sách lý thuyết" style="flex:1;padding:14px 18px var(--tab-total);overflow-y:auto;"></div>
+  <div id="theory-list" role="main" aria-label="Danh sách lý thuyết" style="flex:1;padding:14px 18px 100px;overflow-y:auto;"></div>
 </div>
 
 <!-- THEORY EDIT MODAL -->
@@ -1864,7 +1654,7 @@
     <div class="header-title"><div class="label">Tuỳ Chỉnh</div><div class="name">Giao Diện</div></div>
     <div style="width:36px;"></div>
   </div>
-  <div style="padding:20px 18px var(--tab-total);flex:1;overflow-y:auto;">
+  <div style="padding:20px 18px 60px;flex:1;overflow-y:auto;">
 
     <!-- DARK / LIGHT MODE -->
     <div class="section-label" style="margin-top:4px;">Chế Độ Nền</div>
@@ -1898,30 +1688,6 @@
         <div style="font-size:26px;margin-bottom:4px;font-family:var(--sys);">Aa</div>
         <div style="font-size:11px;letter-spacing:1px;font-family:var(--sys);">LỚN</div>
       </button>
-    </div>
-
-    <!-- LAYOUT MODE -->
-    <div class="section-label">Bố Cục Giao Diện</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
-      <button class="theme-size-btn active" id="layout-auto" onclick="setLayoutMode('auto')">
-        <div style="font-size:20px;margin-bottom:4px;">✨</div>
-        <div style="font-size:10px;letter-spacing:0.5px;font-family:var(--sys);">TỰ ĐỘNG</div>
-      </button>
-      <button class="theme-size-btn" id="layout-mobile" onclick="setLayoutMode('mobile')">
-        <div style="font-size:20px;margin-bottom:4px;">📱</div>
-        <div style="font-size:10px;letter-spacing:0.5px;font-family:var(--sys);">iPHONE</div>
-      </button>
-      <button class="theme-size-btn" id="layout-tablet" onclick="setLayoutMode('tablet')">
-        <div style="font-size:20px;margin-bottom:4px;">📱</div>
-        <div style="font-size:10px;letter-spacing:0.5px;font-family:var(--sys);">iPAD</div>
-      </button>
-      <button class="theme-size-btn" id="layout-desktop" onclick="setLayoutMode('desktop')">
-        <div style="font-size:20px;margin-bottom:4px;">💻</div>
-        <div style="font-size:10px;letter-spacing:0.5px;font-family:var(--sys);">LAPTOP</div>
-      </button>
-    </div>
-    <div style="font-size:11px;color:var(--gold);opacity:0.6;margin-bottom:24px;font-family:var(--sys);line-height:1.5;">
-      💡 Tự động: chọn theo kích thước màn hình. Bạn có thể ép giao diện iPhone/iPad/Laptop bất kể thiết bị.
     </div>
 
     <!-- PREVIEW -->
@@ -2027,104 +1793,72 @@ window.viewImg = function(src) {
 };
 
 window.showScreen = function(name) {
-  if(name !== 'import') { window._importParsed = null; } // clear stale import data
+  if(name !== 'import') { window._importParsed = null; }
   if(window.resetPasteTarget) window.resetPasteTarget();
 
-  const isWide = window.innerWidth >= 768;
-  const isDesktop = window.innerWidth >= 1200;
-
-  // Categorize screens: "left-pane" (list/stats/theory/etc) vs "right-pane" (detail/new/edit)
+  const isDesktopMode = document.body.classList.contains("desktop-mode");
   const leftPanes = ["list","stats","theory","aichat","settings","import"];
   const rightPanes = ["detail","new","edit"];
   const isLeftPane = leftPanes.includes(name);
   const isRightPane = rightPanes.includes(name);
 
-  if(isWide && isLeftPane) {
-    // On wide screens, switching left-pane: deactivate other left-panes only
+  if(isDesktopMode && isLeftPane) {
     leftPanes.forEach(s => {
       const el = document.getElementById("screen-"+s);
       if(el) el.classList.toggle("active", s===name);
     });
-    // Right-pane stays as-is. If no right-pane active, show empty state.
     const anyRightActive = rightPanes.some(s => document.getElementById("screen-"+s)?.classList.contains("active"));
-    document.body.classList.toggle("tablet-no-detail", isWide && !isDesktop && !anyRightActive);
-    document.body.classList.toggle("desktop-no-detail", isDesktop && !anyRightActive);
-  } else if(isWide && isRightPane) {
-    // Right-pane: deactivate other right-panes only, keep left-pane
+    document.body.classList.toggle("no-detail", !anyRightActive);
+  } else if(isDesktopMode && isRightPane) {
     rightPanes.forEach(s => {
       const el = document.getElementById("screen-"+s);
       if(el) el.classList.toggle("active", s===name);
     });
-    document.body.classList.remove("tablet-no-detail", "desktop-no-detail");
+    document.body.classList.remove("no-detail");
   } else {
     // Mobile: standard single-screen behavior
     document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
     const el=document.getElementById("screen-"+name);
     if(el){el.classList.add("active");el.scrollTop=0;}
-    document.body.classList.remove("tablet-no-detail", "desktop-no-detail");
+    document.body.classList.remove("no-detail");
   }
 
   // Reset scroll
   const el = document.getElementById("screen-"+name);
   if(el) el.scrollTop = 0;
 
-  // Render content based on screen
   if(name==="stats") { renderStats(); setTimeout(renderStatsExtra, 100); }
   if(name==="settings") syncSettingsUI(themeSettings);
   if(name==="theory") { renderTheoryFolderBar(); renderTheory(); }
   if(name==="aichat") { initAIChat(); }
 
-  // FAB: show only on list screen (mobile/tablet)
+  // FAB: show only on list screen + not in desktop-mode
   const fab=document.getElementById("fab-btn");
-  if(fab) fab.classList.toggle("visible", name==="list" && !isDesktop);
+  if(fab) fab.classList.toggle("visible", name==="list" && !isDesktopMode);
 
-  // Bottom nav active state (mobile only)
+  // Nav active states (bottom-nav for mobile, sidebar for desktop)
   ["list","stats","theory","aichat","settings"].forEach(s=>{
     const bn=document.getElementById("bn-"+s);
     if(bn) bn.classList.toggle("active", s===name);
-    // Desktop sidebar
     const ds=document.getElementById("ds-"+s);
     if(ds) ds.classList.toggle("active", s===name);
   });
 
-  // Bottom nav visibility:
-  // - Desktop: never (sidebar replaces it)
-  // - Tablet: always show (list always visible in left column)
-  // - Mobile: hide on form/detail screens only
+  // Bottom-nav visibility (mobile only — desktop hides via CSS)
   const bnEl=document.getElementById("bottom-nav");
-  if(bnEl) {
-    if(isDesktop) bnEl.style.display = "none";
-    else if(isWide) bnEl.style.display = "flex"; // tablet
-    else bnEl.style.display = isRightPane ? "none" : "flex"; // mobile
+  if(bnEl && !isDesktopMode) {
+    bnEl.style.display = isRightPane ? "none" : "flex";
   }
 };
 
-// Update body class + nav visibility on resize
+// On resize: if user shrinks below 1024px while in desktop-mode, fall back gracefully
 window.addEventListener("resize", () => {
-  const isWide = window.innerWidth >= 768;
-  const isDesktop = window.innerWidth >= 1200;
-  const rightPanes = ["detail","new","edit"];
-  const anyRightActive = rightPanes.some(s => document.getElementById("screen-"+s)?.classList.contains("active"));
-  document.body.classList.toggle("tablet-no-detail", isWide && !isDesktop && !anyRightActive);
-  document.body.classList.toggle("desktop-no-detail", isDesktop && !anyRightActive);
-
-  // Re-apply bottom-nav visibility based on new viewport
-  const bnEl = document.getElementById("bottom-nav");
-  if(bnEl) {
-    if(isDesktop) bnEl.style.display = "none";
-    else if(isWide) bnEl.style.display = "flex"; // tablet
-    else {
-      // mobile: depends on current screen
-      const onRightPane = rightPanes.some(s => document.getElementById("screen-"+s)?.classList.contains("active"));
-      bnEl.style.display = onRightPane ? "none" : "flex";
-    }
-  }
-
-  // FAB visibility
-  const fab = document.getElementById("fab-btn");
-  if(fab) {
-    const listActive = document.getElementById("screen-list")?.classList.contains("active");
-    fab.classList.toggle("visible", listActive && !isDesktop);
+  if(document.body.classList.contains("desktop-mode") && window.innerWidth < 1024) {
+    // Auto-disable desktop-mode if window becomes too narrow
+    document.body.classList.remove("desktop-mode", "no-detail");
+    const lbl = document.getElementById("desktop-toggle-label");
+    if(lbl) lbl.textContent = "💻 Bật Laptop";
+    try { localStorage.setItem("tl_desktop_mode", "0"); } catch(e){}
   }
 });
 window.confirmBack = function(target) {
@@ -2835,8 +2569,7 @@ window.deleteTrade=async function(){
         const el = document.getElementById("screen-"+s);
         if(el) el.classList.remove("active");
       });
-      document.body.classList.toggle("tablet-no-detail", window.innerWidth < 1200);
-      document.body.classList.toggle("desktop-no-detail", window.innerWidth >= 1200);
+      document.body.classList.toggle("no-detail", document.body.classList.contains("desktop-mode"));
     } else {
       showScreen("list");
     }
@@ -3643,103 +3376,50 @@ window.setFontSize = async function(size) {
   await saveTheme();
 };
 
-// Layout mode: 'auto' | 'mobile' | 'tablet' | 'desktop'
-window.setLayoutMode = function(mode) {
-  // Safety: warn if forcing desktop/tablet on a phone-sized screen (user may get stuck)
-  if((mode === "desktop" || mode === "tablet") && window.innerWidth < 600) {
-    if(!confirm(`Màn hình của bạn nhỏ (${window.innerWidth}px). Chọn "${mode === 'desktop' ? 'Laptop' : 'iPad'}" có thể khó dùng. Vẫn tiếp tục?`)) return;
-  }
-  // Update body class
-  document.body.classList.remove("force-mobile", "force-tablet", "force-desktop");
-  if(mode !== "auto") document.body.classList.add("force-" + mode);
-  // Update button active states (settings + quick modal)
-  ["auto","mobile","tablet","desktop"].forEach(m => {
-    const btn = document.getElementById("layout-" + m);
-    if(btn) btn.classList.toggle("active", m === mode);
-    const qbtn = document.getElementById("ql-" + m);
-    if(qbtn) {
-      qbtn.style.borderColor = (m === mode) ? "var(--gold)" : "var(--gold-faint)";
-      qbtn.style.background = (m === mode) ? "var(--gold-faint)" : "var(--bg3)";
-    }
-  });
+// ═══════════════════════════════════════
+// DESKTOP MODE TOGGLE — only for wide screens (≥1200px)
+// ═══════════════════════════════════════
+window.toggleDesktopMode = function() {
+  const isOn = document.body.classList.toggle("desktop-mode");
+  // Update button label
+  const lbl = document.getElementById("desktop-toggle-label");
+  if(lbl) lbl.textContent = isOn ? "📱 Tắt Laptop" : "💻 Bật Laptop";
   // Persist
-  try { localStorage.setItem("tl_layout_mode", mode); } catch(e){}
-  // Re-apply screen logic so empty-state etc updates
-  if(typeof showScreen === "function") {
+  try { localStorage.setItem("tl_desktop_mode", isOn ? "1" : "0"); } catch(e){}
+  // Update no-detail class for empty state
+  const rightPanes = ["detail","new","edit"];
+  const anyRightActive = rightPanes.some(s => document.getElementById("screen-"+s)?.classList.contains("active"));
+  document.body.classList.toggle("no-detail", isOn && !anyRightActive);
+  // Update sidebar nav active state
+  if(isOn) {
     const active = document.querySelector(".screen.active");
-    if(active) {
-      const name = active.id.replace("screen-", "");
-      // Recalculate body classes & screen visibility for new mode
-      const isWide = mode === "tablet" || mode === "desktop" || (mode === "auto" && window.innerWidth >= 768);
-      const isDesktop = mode === "desktop" || (mode === "auto" && window.innerWidth >= 1200);
-      const rightPanes = ["detail","new","edit"];
-      const anyRightActive = rightPanes.some(s => document.getElementById("screen-"+s)?.classList.contains("active"));
-      document.body.classList.toggle("tablet-no-detail", isWide && !isDesktop && !anyRightActive);
-      document.body.classList.toggle("desktop-no-detail", isDesktop && !anyRightActive);
-      // Update FAB + bottom-nav
-      const fab = document.getElementById("fab-btn");
-      if(fab) {
-        const listActive = document.getElementById("screen-list")?.classList.contains("active");
-        fab.classList.toggle("visible", listActive && !isDesktop);
-      }
-      const bnEl = document.getElementById("bottom-nav");
-      if(bnEl) {
-        if(isDesktop) bnEl.style.display = "none";
-        else if(isWide) bnEl.style.display = "flex";
-        else {
-          const onRightPane = rightPanes.some(s => document.getElementById("screen-"+s)?.classList.contains("active"));
-          bnEl.style.display = onRightPane ? "none" : "flex";
-        }
-      }
-    }
+    const name = active ? active.id.replace("screen-","") : "list";
+    ["list","stats","theory","aichat","settings"].forEach(s => {
+      const ds = document.getElementById("ds-"+s);
+      if(ds) ds.classList.toggle("active", s === name);
+    });
   }
-  showToast("✅ Đã đổi giao diện: " + (mode === "auto" ? "Tự động" : mode === "mobile" ? "iPhone" : mode === "tablet" ? "iPad" : "Laptop"));
+  showToast(isOn ? "💻 Đã bật giao diện Laptop" : "📱 Đã tắt giao diện Laptop");
 };
 
-// Apply persisted layout mode on load
-function applyPersistedLayoutMode() {
-  // URL escape hatch: ?reset=layout clears layout setting (in case user got stuck)
-  if(location.search.includes("reset=layout") || location.hash.includes("reset")) {
-    try { localStorage.setItem("tl_layout_mode", "auto"); } catch(e){}
-    document.body.classList.remove("force-mobile", "force-tablet", "force-desktop");
-    // Clean URL
-    try { history.replaceState({}, "", location.pathname); } catch(e){}
+// Apply persisted desktop mode on load
+function applyPersistedDesktopMode() {
+  let isOn = false;
+  try { isOn = localStorage.getItem("tl_desktop_mode") === "1"; } catch(e){}
+  // Only apply on wide screens
+  if(isOn && window.innerWidth >= 1024) {
+    document.body.classList.add("desktop-mode");
+    const lbl = document.getElementById("desktop-toggle-label");
+    if(lbl) lbl.textContent = "📱 Tắt Laptop";
+    // Set no-detail state
+    const rightPanes = ["detail","new","edit"];
+    const anyRightActive = rightPanes.some(s => document.getElementById("screen-"+s)?.classList.contains("active"));
+    document.body.classList.toggle("no-detail", !anyRightActive);
   }
-  let mode = "auto";
-  try { mode = localStorage.getItem("tl_layout_mode") || "auto"; } catch(e){}
-  if(mode !== "auto") document.body.classList.add("force-" + mode);
-  // Update button active states
-  ["auto","mobile","tablet","desktop"].forEach(m => {
-    const btn = document.getElementById("layout-" + m);
-    if(btn) btn.classList.toggle("active", m === mode);
-    const qbtn = document.getElementById("ql-" + m);
-    if(qbtn) {
-      qbtn.style.borderColor = (m === mode) ? "var(--gold)" : "var(--gold-faint)";
-      qbtn.style.background = (m === mode) ? "var(--gold-faint)" : "var(--bg3)";
-    }
-  });
 }
-// Run after DOM ready
-if(document.readyState !== "loading") applyPersistedLayoutMode();
-else document.addEventListener("DOMContentLoaded", applyPersistedLayoutMode);
+if(document.readyState !== "loading") applyPersistedDesktopMode();
+else document.addEventListener("DOMContentLoaded", applyPersistedDesktopMode);
 
-// Open/close layout quick modal (from main screen header)
-window.openLayoutModal = function() {
-  // Sync active state for quick buttons
-  let mode = "auto";
-  try { mode = localStorage.getItem("tl_layout_mode") || "auto"; } catch(e){}
-  ["auto","mobile","tablet","desktop"].forEach(m => {
-    const qbtn = document.getElementById("ql-" + m);
-    if(qbtn) {
-      qbtn.style.borderColor = (m === mode) ? "var(--gold)" : "var(--gold-faint)";
-      qbtn.style.background = (m === mode) ? "var(--gold-faint)" : "var(--bg3)";
-    }
-  });
-  document.getElementById("modal-layout").style.display = "flex";
-};
-window.closeLayoutModal = function() {
-  document.getElementById("modal-layout").style.display = "none";
-};
 
 
 window.resetTheme = async function() {
@@ -5908,7 +5588,7 @@ if(_tl) _tl.innerHTML = Array(5).fill(0).map((_,i)=>`
 
 await loadTrades();
 const _fab=document.getElementById("fab-btn");
-if(_fab && window.innerWidth < 1200) _fab.classList.add("visible");
+if(_fab && !document.body.classList.contains("desktop-mode")) _fab.classList.add("visible");
 updateSessionBadge();
 setInterval(updateSessionBadge, 60000);
 
@@ -6115,8 +5795,7 @@ window.contextDelete = async function(tradeId) {
           const el = document.getElementById("screen-"+s);
           if(el) el.classList.remove("active");
         });
-        document.body.classList.toggle("tablet-no-detail", window.innerWidth < 1200);
-        document.body.classList.toggle("desktop-no-detail", window.innerWidth >= 1200);
+        document.body.classList.toggle("no-detail", document.body.classList.contains("desktop-mode"));
       } else {
         showScreen("list");
       }
@@ -6272,8 +5951,7 @@ window.addEventListener('popstate', function(e) {
       const el = document.getElementById("screen-"+s);
       if(el) el.classList.remove("active");
     });
-    document.body.classList.toggle("tablet-no-detail", window.innerWidth < 1200);
-    document.body.classList.toggle("desktop-no-detail", window.innerWidth >= 1200);
+    document.body.classList.toggle("no-detail", document.body.classList.contains("desktop-mode"));
   }
   _origShowScreen(prev === 'list' ? 'list' : 'list');
 });
@@ -6317,12 +5995,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if(el) _rippleObserver.observe(el, {childList: true, subtree: true});
   });
   applyRipples();
-
-  // Tablet/Desktop: show empty state in right column on first load
-  const isWide = window.innerWidth >= 768;
-  const isDesktop = window.innerWidth >= 1200;
-  if(isWide && !isDesktop) document.body.classList.add("tablet-no-detail");
-  if(isDesktop) document.body.classList.add("desktop-no-detail");
 });
 // Also run on showScreen
 const _origShowScreen2 = window.showScreen;
