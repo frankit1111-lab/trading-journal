@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TradeLog">
 <meta name="theme-color" content="#0a0a0a">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5.0, user-scalable=yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="TradeLog"/>
@@ -115,6 +115,168 @@
   .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;}
   .screen.active{display:flex;}
   ::-webkit-scrollbar{display:none;}
+
+  /* ═══════════════════════════════════════
+     RESPONSIVE LAYOUTS
+     - Mobile (≤767px): 1 column, bottom nav (default)
+     - Tablet (768-1199px): 2 columns (list | detail)
+     - Desktop (≥1200px): 3 columns (sidebar nav | list | detail)
+     ═══════════════════════════════════════ */
+
+  /* Desktop sidebar nav (only visible ≥1200px) */
+  .desktop-sidebar { display: none; }
+
+  /* ── TABLET: 2-column layout ── */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    body { background: var(--bg); }
+    /* List screen → left column */
+    #screen-list, #screen-stats, #screen-theory, #screen-aichat, #screen-settings, #screen-import {
+      width: 380px !important;
+      right: auto !important;
+      border-right: 1px solid var(--gold-faint);
+    }
+    #screen-list.active, #screen-stats.active, #screen-theory.active,
+    #screen-aichat.active, #screen-settings.active, #screen-import.active {
+      display: flex !important;
+    }
+    /* Detail/new/edit → right column */
+    #screen-detail, #screen-new, #screen-edit {
+      left: 380px !important;
+    }
+    /* When detail/new/edit active, also keep list visible */
+    #screen-detail.active, #screen-new.active, #screen-edit.active {
+      display: flex !important;
+    }
+    /* When detail not active, show empty state in right column */
+    body.tablet-no-detail::before {
+      content: "← Chọn 1 lệnh để xem chi tiết";
+      position: fixed;
+      top: 50%; left: calc(380px + (100vw - 380px) / 2);
+      transform: translate(-50%, -50%);
+      color: var(--gold);
+      opacity: 0.4;
+      font-size: 16px;
+      font-family: var(--sys);
+      z-index: 1;
+      pointer-events: none;
+    }
+    /* Bottom nav stays at bottom of left column */
+    .bottom-nav {
+      left: 0 !important;
+      transform: none !important;
+      width: 380px !important;
+      max-width: 380px !important;
+    }
+    /* Save bar in right column */
+    .save-bar {
+      left: 380px !important;
+      transform: none !important;
+      width: calc(100vw - 380px) !important;
+      max-width: none !important;
+    }
+    /* Hide back arrow on detail (always visible alongside list) */
+    body.tablet-mode .detail-back-mobile-only { display: none; }
+  }
+
+  /* ── DESKTOP: 3-column layout ── */
+  @media (min-width: 1200px) {
+    body { background: var(--bg); }
+    /* Sidebar */
+    .desktop-sidebar {
+      display: flex !important;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 220px;
+      background: var(--bg2);
+      border-right: 1px solid var(--gold-faint);
+      flex-direction: column;
+      padding: 20px 0;
+      z-index: 200;
+    }
+    .desktop-sidebar-brand {
+      padding: 0 24px 20px;
+      border-bottom: 1px solid var(--gold-faint);
+      margin-bottom: 14px;
+    }
+    .desktop-sidebar-brand-title {
+      font-family: 'Cinzel', serif;
+      font-size: 20px;
+      color: var(--gold);
+      letter-spacing: 1px;
+    }
+    .desktop-sidebar-brand-sub {
+      font-family: var(--sys);
+      font-size: 10px;
+      color: var(--gold);
+      opacity: 0.6;
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+    .desktop-sidebar-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 24px;
+      cursor: pointer;
+      color: var(--gold);
+      opacity: 0.65;
+      font-family: var(--sys);
+      font-size: 14px;
+      border: none; background: transparent;
+      transition: all 0.15s;
+      text-align: left;
+    }
+    .desktop-sidebar-item:hover { opacity: 1; background: var(--bg3); }
+    .desktop-sidebar-item.active {
+      opacity: 1;
+      background: var(--gold-faint);
+      border-left: 3px solid var(--gold);
+      padding-left: 21px;
+    }
+    .desktop-sidebar-item .ds-icon { font-size: 18px; width: 24px; }
+
+    /* Hide mobile bottom nav on desktop */
+    .bottom-nav { display: none !important; }
+
+    /* List/stats/theory/etc → 2nd column */
+    #screen-list, #screen-stats, #screen-theory, #screen-aichat, #screen-settings, #screen-import {
+      left: 220px !important;
+      width: 420px !important;
+      right: auto !important;
+      border-right: 1px solid var(--gold-faint);
+    }
+    #screen-list.active, #screen-stats.active, #screen-theory.active,
+    #screen-aichat.active, #screen-settings.active, #screen-import.active {
+      display: flex !important;
+    }
+    /* Detail/new/edit → 3rd column */
+    #screen-detail, #screen-new, #screen-edit {
+      left: calc(220px + 420px) !important;
+    }
+    #screen-detail.active, #screen-new.active, #screen-edit.active {
+      display: flex !important;
+    }
+    /* Empty state in right column */
+    body.desktop-no-detail::before {
+      content: "← Chọn 1 lệnh để xem chi tiết";
+      position: fixed;
+      top: 50%; left: calc(220px + 420px + (100vw - 640px) / 2);
+      transform: translate(-50%, -50%);
+      color: var(--gold);
+      opacity: 0.4;
+      font-size: 18px;
+      font-family: var(--sys);
+      z-index: 1;
+      pointer-events: none;
+    }
+    /* Save bar in right column */
+    .save-bar {
+      left: calc(220px + 420px) !important;
+      transform: none !important;
+      width: calc(100vw - 220px - 420px) !important;
+      max-width: none !important;
+    }
+    /* Detail content max-width for readability */
+    .detail-body, .form-body { max-width: 720px; margin: 0 auto; }
+  }
 
   /* ── HEADER ── */
   .header{
@@ -555,6 +717,10 @@
   .fab:active{transform:scale(0.93);}
   .fab.visible{display:flex;}
   .fab:hover{box-shadow:0 6px 30px var(--gold-dim), 0 0 0 8px var(--gold-faint);}
+  /* Tablet: FAB inside left column */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .fab { left: calc(380px - 78px) !important; right: auto !important; bottom: 90px; }
+  }
 
   /* ── PREMIUM UPGRADES ── */
 
@@ -770,6 +936,33 @@
 <body>
 <a href="#trade-list" style="position:absolute;top:-100px;left:0;background:var(--gold);color:#000;padding:8px 16px;z-index:9999;border-radius:0 0 8px 0;font-size:13px;transition:top 0.2s;" onfocus="this.style.top='0'" onblur="this.style.top='-100px'">Bỏ qua đến nội dung chính</a>
 
+<!-- DESKTOP SIDEBAR (only visible ≥1200px) -->
+<aside class="desktop-sidebar">
+  <div class="desktop-sidebar-brand">
+    <div class="desktop-sidebar-brand-title">TradeLog</div>
+    <div class="desktop-sidebar-brand-sub">NHẬT KÝ ICT</div>
+  </div>
+  <button class="desktop-sidebar-item active" id="ds-list" onclick="navSidebar('list')">
+    <span class="ds-icon">📋</span><span>Nhật ký lệnh</span>
+  </button>
+  <button class="desktop-sidebar-item" id="ds-stats" onclick="navSidebar('stats')">
+    <span class="ds-icon">📊</span><span>Thống kê</span>
+  </button>
+  <button class="desktop-sidebar-item" id="ds-theory" onclick="navSidebar('theory')">
+    <span class="ds-icon">📚</span><span>Lý thuyết</span>
+  </button>
+  <button class="desktop-sidebar-item" id="ds-aichat" onclick="navSidebar('aichat')">
+    <span class="ds-icon">🤖</span><span>AI Chat</span>
+  </button>
+  <button class="desktop-sidebar-item" id="ds-settings" onclick="navSidebar('settings')">
+    <span class="ds-icon">⚙️</span><span>Cài đặt</span>
+  </button>
+  <div style="flex:1"></div>
+  <button class="desktop-sidebar-item" onclick="navSidebar('new')" style="border-top:1px solid var(--gold-faint);margin-top:auto;color:var(--gold);font-weight:600;">
+    <span class="ds-icon">➕</span><span>Lệnh mới</span>
+  </button>
+</aside>
+
 
 <!-- LIST -->
 <div class="screen active" id="screen-list">
@@ -779,13 +972,7 @@
       <div class="label">NHẬT KÝ GIAO DỊCH · ICT</div>
       <div class="name" style="font-family:'Cinzel',serif;letter-spacing:2px">TradeLog</div>
     </div>
-    <button class="header-btn" onclick="showScreen('settings')" style="font-size:16px;opacity:0.7;" title="Cài đặt">⚙️</button>
-  </div>
-  <div class="stats-bar">
-    <div class="stat"><div class="stat-val" id="stat-total">0</div><div class="stat-lbl">Tổng</div></div>
-    <div class="stat"><div class="stat-val win" id="stat-win">0</div><div class="stat-lbl">Win</div></div>
-    <div class="stat"><div class="stat-val loss" id="stat-loss">0</div><div class="stat-lbl">Loss</div></div>
-    <div class="stat"><div class="stat-val" id="stat-wr">0%</div><div class="stat-lbl">WR</div></div>
+    <button class="header-btn" onclick="navSidebar('settings')" style="font-size:16px;opacity:0.7;" title="Cài đặt">⚙️</button>
   </div>
   <!-- Fix 7: streak row -->
   <div id="streak-row" style="display:flex;justify-content:space-between;align-items:center;padding:7px 18px;background:var(--bg2);border-bottom:1px solid var(--gold-faint);flex-shrink:0;cursor:pointer;gap:8px;" onclick="toggleSessionInfo()">
@@ -815,13 +1002,6 @@
   </div>
   <div class="search-bar">
     <input class="search-input" id="search-input" placeholder="🔍  Tìm tên, symbol, tags..." oninput="debouncedSearch(this.value)"/>
-  </div>
-  <!-- Fix 8: result filter -->
-  <div class="result-filter">
-    <button class="rf-btn active" id="rf-all" onclick="setResultFilter('all',this)">📋 Tất cả</button>
-    <button class="rf-btn win-f" id="rf-win" onclick="setResultFilter('Win',this)">✅ Win</button>
-    <button class="rf-btn loss-f" id="rf-loss" onclick="setResultFilter('Loss',this)">❌ Loss</button>
-    <button class="rf-btn be-f" id="rf-be" onclick="setResultFilter('BE',this)">➖ BE</button>
   </div>
   <div class="folder-bar" id="folder-bar"></div>
   <!-- Copy to theory bar — hiện khi đang xem 1 thư mục cụ thể -->
@@ -862,19 +1042,19 @@
 
 <!-- BOTTOM NAV (global) -->
 <div class="bottom-nav" id="bottom-nav">
-  <button class="bn-item active" id="bn-list" onclick="showScreen('list')" aria-label="Nhật ký lệnh">
+  <button class="bn-item active" id="bn-list" onclick="navSidebar('list')" aria-label="Nhật ký lệnh">
     <div class="bn-icon" aria-hidden="true">📋</div><div class="bn-label">LỆNH</div>
   </button>
-  <button class="bn-item" id="bn-stats" onclick="showScreen('stats')" aria-label="Thống kê">
+  <button class="bn-item" id="bn-stats" onclick="navSidebar('stats')" aria-label="Thống kê">
     <div class="bn-icon" aria-hidden="true">📊</div><div class="bn-label">THỐNG KÊ</div>
   </button>
-  <button class="bn-item" id="bn-theory" onclick="showScreen('theory')" aria-label="Lý thuyết">
+  <button class="bn-item" id="bn-theory" onclick="navSidebar('theory')" aria-label="Lý thuyết">
     <div class="bn-icon" aria-hidden="true">📚</div><div class="bn-label">LÝ THUYẾT</div>
   </button>
-  <button class="bn-item" id="bn-aichat" onclick="showScreen('aichat')" aria-label="AI Hỏi đáp">
+  <button class="bn-item" id="bn-aichat" onclick="navSidebar('aichat')" aria-label="AI Hỏi đáp">
     <div class="bn-icon" aria-hidden="true">💬</div><div class="bn-label">AI CHAT</div>
   </button>
-  <button class="bn-item" id="bn-settings" onclick="showScreen('settings')">
+  <button class="bn-item" id="bn-settings" onclick="navSidebar('settings')">
     <div class="bn-icon">⚙️</div><div class="bn-label">CÀI ĐẶT</div>
   </button>
 </div>
@@ -1102,7 +1282,7 @@
 <!-- DETAIL -->
 <div class="screen" id="screen-detail">
   <div class="header">
-    <button class="header-btn" onclick="showScreen('list')" style="font-size:20px;">←</button>
+    <button class="header-btn" onclick="confirmBack('list')" style="font-size:20px;">←</button>
     <div class="header-title"><div class="label">Chi Tiết</div><div class="name" id="detail-header-title">—</div></div>
     <button class="header-btn" onclick="openMoveFolder()" title="Chuyển thư mục" style="font-size:18px;">🗂</button>
   </div>
@@ -1244,7 +1424,7 @@
 <!-- THEORY SCREEN -->
 <div class="screen" id="screen-theory">
   <div class="header">
-    <button class="header-btn" onclick="showScreen('list')" style="font-size:20px;">←</button>
+    <button class="header-btn" onclick="confirmBack('list')" style="font-size:20px;">←</button>
     <div class="header-title"><div class="label">Ôn Tập</div><div class="name">Lý Thuyết ICT</div></div>
     <button class="header-btn" id="theory-edit-toggle" onclick="openAddTheoryCard()" style="font-size:18px;font-weight:700;" title="Thêm thẻ mới">+</button>
   </div>
@@ -1385,7 +1565,7 @@
 <!-- SETTINGS -->
 <div class="screen" id="screen-settings">
   <div class="header">
-    <button class="header-btn" onclick="showScreen('list')" style="font-size:20px;">←</button>
+    <button class="header-btn" onclick="confirmBack('list')" style="font-size:20px;">←</button>
     <div class="header-title"><div class="label">Tuỳ Chỉnh</div><div class="name">Giao Diện</div></div>
     <div style="width:36px;"></div>
   </div>
@@ -1529,30 +1709,132 @@ window.viewImg = function(src) {
 
 window.showScreen = function(name) {
   if(name !== 'import') { window._importParsed = null; } // clear stale import data
-  if(window.resetPasteTarget) window.resetPasteTarget(); // clear paste target on screen change
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  const el=document.getElementById("screen-"+name);
-  if(el){el.classList.add("active");el.scrollTop=0;}
+  if(window.resetPasteTarget) window.resetPasteTarget();
+
+  const isWide = window.innerWidth >= 768;
+  const isDesktop = window.innerWidth >= 1200;
+
+  // Categorize screens: "left-pane" (list/stats/theory/etc) vs "right-pane" (detail/new/edit)
+  const leftPanes = ["list","stats","theory","aichat","settings","import"];
+  const rightPanes = ["detail","new","edit"];
+  const isLeftPane = leftPanes.includes(name);
+  const isRightPane = rightPanes.includes(name);
+
+  if(isWide && isLeftPane) {
+    // On wide screens, switching left-pane: deactivate other left-panes only
+    leftPanes.forEach(s => {
+      const el = document.getElementById("screen-"+s);
+      if(el) el.classList.toggle("active", s===name);
+    });
+    // Right-pane stays as-is. If no right-pane active, show empty state.
+    const anyRightActive = rightPanes.some(s => document.getElementById("screen-"+s)?.classList.contains("active"));
+    document.body.classList.toggle("tablet-no-detail", isWide && !isDesktop && !anyRightActive);
+    document.body.classList.toggle("desktop-no-detail", isDesktop && !anyRightActive);
+  } else if(isWide && isRightPane) {
+    // Right-pane: deactivate other right-panes only, keep left-pane
+    rightPanes.forEach(s => {
+      const el = document.getElementById("screen-"+s);
+      if(el) el.classList.toggle("active", s===name);
+    });
+    document.body.classList.remove("tablet-no-detail", "desktop-no-detail");
+  } else {
+    // Mobile: standard single-screen behavior
+    document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+    const el=document.getElementById("screen-"+name);
+    if(el){el.classList.add("active");el.scrollTop=0;}
+    document.body.classList.remove("tablet-no-detail", "desktop-no-detail");
+  }
+
+  // Reset scroll
+  const el = document.getElementById("screen-"+name);
+  if(el) el.scrollTop = 0;
+
+  // Render content based on screen
   if(name==="stats") { renderStats(); setTimeout(renderStatsExtra, 100); }
   if(name==="settings") syncSettingsUI(themeSettings);
   if(name==="theory") { renderTheoryFolderBar(); renderTheory(); }
   if(name==="aichat") { initAIChat(); }
-  // FAB: show only on list screen
+
+  // FAB: show only on list screen (mobile/tablet)
   const fab=document.getElementById("fab-btn");
-  if(fab) fab.classList.toggle("visible", name==="list");
-  // Bottom nav active state
+  if(fab) fab.classList.toggle("visible", name==="list" && !isDesktop);
+
+  // Bottom nav active state (mobile only)
   ["list","stats","theory","aichat","settings"].forEach(s=>{
     const bn=document.getElementById("bn-"+s);
     if(bn) bn.classList.toggle("active", s===name);
+    // Desktop sidebar
+    const ds=document.getElementById("ds-"+s);
+    if(ds) ds.classList.toggle("active", s===name);
   });
-  // Hide bottom nav on form/detail screens
+
+  // Bottom nav visibility:
+  // - Desktop: never (sidebar replaces it)
+  // - Tablet: always show (list always visible in left column)
+  // - Mobile: hide on form/detail screens only
   const bnEl=document.getElementById("bottom-nav");
-  if(bnEl) bnEl.style.display=["new","detail","edit"].includes(name)?"none":"flex";
+  if(bnEl) {
+    if(isDesktop) bnEl.style.display = "none";
+    else if(isWide) bnEl.style.display = "flex"; // tablet
+    else bnEl.style.display = isRightPane ? "none" : "flex"; // mobile
+  }
 };
+
+// Update body class + nav visibility on resize
+window.addEventListener("resize", () => {
+  const isWide = window.innerWidth >= 768;
+  const isDesktop = window.innerWidth >= 1200;
+  const rightPanes = ["detail","new","edit"];
+  const anyRightActive = rightPanes.some(s => document.getElementById("screen-"+s)?.classList.contains("active"));
+  document.body.classList.toggle("tablet-no-detail", isWide && !isDesktop && !anyRightActive);
+  document.body.classList.toggle("desktop-no-detail", isDesktop && !anyRightActive);
+
+  // Re-apply bottom-nav visibility based on new viewport
+  const bnEl = document.getElementById("bottom-nav");
+  if(bnEl) {
+    if(isDesktop) bnEl.style.display = "none";
+    else if(isWide) bnEl.style.display = "flex"; // tablet
+    else {
+      // mobile: depends on current screen
+      const onRightPane = rightPanes.some(s => document.getElementById("screen-"+s)?.classList.contains("active"));
+      bnEl.style.display = onRightPane ? "none" : "flex";
+    }
+  }
+
+  // FAB visibility
+  const fab = document.getElementById("fab-btn");
+  if(fab) {
+    const listActive = document.getElementById("screen-list")?.classList.contains("active");
+    fab.classList.toggle("visible", listActive && !isDesktop);
+  }
+});
 window.confirmBack = function(target) {
   if(window.formDirty && !confirm("Bạn chưa lưu. Thoát không?")) return;
   window.formDirty=false;
+  // On wide screens going back to "list", deactivate any right-pane
+  if(window.innerWidth >= 768 && target === "list") {
+    ["detail","new","edit"].forEach(s => {
+      const el = document.getElementById("screen-"+s);
+      if(el) el.classList.remove("active");
+    });
+  }
   showScreen(target); // showScreen handles FAB toggle
+};
+
+// Sidebar navigation: respects formDirty + clears right-pane on switch
+window.navSidebar = function(target) {
+  if(window.formDirty && !confirm("Bạn chưa lưu. Thoát không?")) return;
+  window.formDirty=false;
+  // Clear any right-pane (detail/new/edit) when switching nav
+  if(target !== "new") {
+    ["detail","new","edit"].forEach(s => {
+      const el = document.getElementById("screen-"+s);
+      if(el) el.classList.remove("active");
+    });
+  }
+  // For "new" → openNew() opens form in right pane
+  if(target === "new") { openNew(); return; }
+  showScreen(target);
 };
 window.toggleSelect = function(btn) {
   document.querySelectorAll(`[data-group="${btn.dataset.group}"]`).forEach(b=>b.classList.remove("active"));
@@ -1828,11 +2110,15 @@ window.deleteFolder=async function(f){
   if(!confirm(`Xóa thư mục "${f}"? Lệnh trong đó thành "Chưa phân loại".`)) return;
   const idx=folders.indexOf(f); if(idx>-1) folders.splice(idx,1);
   await saveFolders();
+  // Capture trades to update BEFORE mutating
   const toUpdate=trades.filter(t=>t.folder===f);
-  for(const t of toUpdate){try{await updateDoc(doc(db,"trades",t.id),{folder:""});}catch(e){}}
+  // Optimistic local update
+  trades.forEach(t => { if(t.folder===f) t.folder=""; });
   if(currentFolder===f) currentFolder="all";
-  renderFolderBar(); populateFolderSelects(); await loadTrades();
+  renderFolderBar(); populateFolderSelects(); renderList();
   showToast("🗑 Đã xóa thư mục: "+f);
+  // Background sync to Firestore
+  Promise.all(toUpdate.map(t => updateDoc(doc(db,"trades",t.id),{folder:""}).catch(()=>{}))).catch(()=>{});
 };
 
 // ══ MOVE FOLDER MODAL ══
@@ -1931,10 +2217,11 @@ function renderList() {
   } else if(tagBar){ tagBar.style.display="none"; }
 
   const wins=trades.filter(t=>t.result==="Win").length, losses=trades.filter(t=>t.result==="Loss").length;
-  document.getElementById("stat-total").textContent=trades.length;
-  document.getElementById("stat-win").textContent=wins;
-  document.getElementById("stat-loss").textContent=losses;
-  document.getElementById("stat-wr").textContent=(trades.length?Math.round(wins/trades.length*100):0)+"%";
+  // Stats bar removed — guard with optional chaining in case re-added later
+  const elTotal=document.getElementById("stat-total"); if(elTotal) elTotal.textContent=trades.length;
+  const elWin=document.getElementById("stat-win"); if(elWin) elWin.textContent=wins;
+  const elLoss=document.getElementById("stat-loss"); if(elLoss) elLoss.textContent=losses;
+  const elWr=document.getElementById("stat-wr"); if(elWr) elWr.textContent=(trades.length?Math.round(wins/trades.length*100):0)+"%";
   updateStreakRow();
 
   const el=document.getElementById("trade-list");
@@ -2025,7 +2312,17 @@ function renderList() {
 
 // ══ DETAIL ══
 window.openDetail=function(id){
-  currentTrade=trades.find(t=>t.id===id); if(!currentTrade) return;
+  currentTrade=trades.find(t=>t.id===id);
+  if(!currentTrade) {
+    // Fallback: maybe trade was just saved but not in array yet
+    showToast("⚠️ Đang tải lệnh...");
+    showScreen("list");
+    loadTrades().then(() => {
+      const found = trades.find(t=>t.id===id);
+      if(found) { currentTrade = found; window.openDetail(id); }
+    }).catch(()=>{});
+    return;
+  }
   currentTF="D1";
   const t = currentTrade;
   document.getElementById("detail-header-title").textContent=(t.title||"—").substring(0,24);
@@ -2156,10 +2453,13 @@ window.saveTrade=async function(){
     const ref=await addDoc(collection(db,"trades"),trade);
     window.formDirty=false;
     lastSavedId=ref.id; // Fix 3
+    // Insert into local trades array immediately so renderList shows it now
+    trades.unshift({id:ref.id, ...trade});
     showToast("✅ Đã lưu lệnh");
     try{if(navigator.vibrate)navigator.vibrate(10);}catch(e){}
-    showScreen("list"); // Always navigate first
-    loadTrades().catch(()=>{}); // Reload in background
+    showScreen("list");
+    renderList(); // Render with the new trade visible
+    loadTrades().catch(()=>{}); // Sync from cloud in background
   }catch(e){alert("Lỗi lưu: "+e.message);}
   btn.disabled=false; btn.textContent="LƯU LỆNH ĐẦY ĐỦ";
 };
@@ -2171,13 +2471,24 @@ window.quickSave=async function(result){
   const pnl=document.getElementById("f-pnl").value.trim();
   // Disable all quick save buttons during save
   document.querySelectorAll(".quick-save-btn").forEach(b=>{b.disabled=true;});
-  TFS.forEach(tf=>{const c=document.getElementById("tf-caption-"+tf)?.value.trim();if(c) formCaptions[tf]=c;});
-  const trade={title,symbol,pnl,result,note:document.getElementById("f-note").value.trim(),folder:document.getElementById("f-folder").value||"",onplan:"",tags:[],images:{...formImages},captions:{...formCaptions},tradeDate:Date.now(),createdAt:Date.now()};
+  const trade={
+    title,symbol,pnl,result,
+    note:document.getElementById("f-note").value.trim(),
+    folder:document.getElementById("f-folder").value||"",
+    onplan:"",
+    tags:document.getElementById("f-tags").value.split(",").map(t=>t.trim()).filter(Boolean),
+    ...getFormImagesFromSections(),
+    orders: getFormOrders(),
+    tradeDate:Date.now(),
+    createdAt:Date.now()
+  };
   try{
     const ref=await addDoc(collection(db,"trades"),trade);
     window.formDirty=false; lastSavedId=ref.id;
+    trades.unshift({id:ref.id, ...trade});
     showToast(`⚡ Đã lưu nhanh: ${result}`);
     showScreen("list");
+    renderList();
     loadTrades().catch(()=>{});
   }catch(e){alert("Lỗi: "+e.message);}
   document.querySelectorAll(".quick-save-btn").forEach(b=>{b.disabled=false;});
@@ -2190,7 +2501,22 @@ window.deleteTrade=async function(){
   const toDelete={...currentTrade};
   try{
     await deleteDoc(doc(db,"trades",toDelete.id));
-    showScreen("list");
+    // Remove from local array immediately
+    const idx = trades.findIndex(t => t.id === toDelete.id);
+    if(idx >= 0) trades.splice(idx, 1);
+    currentTrade = null;
+    // Clear right-pane on tablet/desktop, navigate to list on mobile
+    if(window.innerWidth >= 768) {
+      ["detail","new","edit"].forEach(s => {
+        const el = document.getElementById("screen-"+s);
+        if(el) el.classList.remove("active");
+      });
+      document.body.classList.toggle("tablet-no-detail", window.innerWidth < 1200);
+      document.body.classList.toggle("desktop-no-detail", window.innerWidth >= 1200);
+    } else {
+      showScreen("list");
+    }
+    renderList();
     showUndoToast(toDelete);
     loadTrades().catch(()=>{});
   }catch(e){alert("Lỗi xóa: "+e.message);}
@@ -2216,8 +2542,12 @@ window.undoDelete=async function(){
   const {id,...data}=lastDeletedTrade;
   try{
     const ref=await addDoc(collection(db,"trades"),data);
-    lastSavedId=ref.id; lastDeletedTrade=null;
-    await loadTrades(); showToast("↩ Đã hoàn tác xóa");
+    lastSavedId=ref.id;
+    trades.unshift({id:ref.id, ...data});
+    lastDeletedTrade=null;
+    renderList();
+    showToast("↩ Đã hoàn tác xóa");
+    loadTrades().catch(()=>{});
   }catch(e){alert("Lỗi hoàn tác: "+e.message);}
 };
 
@@ -2231,10 +2561,13 @@ window.duplicateTrade=async function(){
   if(!currentTrade||!confirm("Nhân bản lệnh này?")) return;
   const {id,...data}=currentTrade;
   try{
-    const ref=await addDoc(collection(db,"trades"),{...data,title:"[Copy] "+data.title,createdAt:Date.now(),tradeDate:null});
+    const newTrade = {...data,title:"[Copy] "+data.title,createdAt:Date.now(),tradeDate:null};
+    const ref=await addDoc(collection(db,"trades"),newTrade);
     lastSavedId=ref.id;
+    trades.unshift({id:ref.id, ...newTrade});
     showToast("📋 Đã nhân bản");
     showScreen("list");
+    renderList();
     loadTrades().catch(()=>{});
   }catch(e){alert("Lỗi: "+e.message);}
 };
@@ -2762,15 +3095,14 @@ window.updateTrade=async function(){
   try{
     await updateDoc(doc(db,"trades",currentTrade.id),upd);
     window.formDirty=false; showToast("✅ Đã cập nhật");
-    // Update local state from upd, then navigate immediately
-    currentTrade={...currentTrade,...upd};
+    // Update local trades array immediately so openDetail sees fresh data
+    const idx = trades.findIndex(t => t.id === currentTrade.id);
+    if(idx >= 0) trades[idx] = {...trades[idx], ...upd};
+    currentTrade = {...currentTrade, ...upd};
     showScreen("detail");
     window.openDetail(currentTrade.id);
-    // Reload trades in background
-    loadTrades().then(() => {
-      const fresh = trades.find(t=>t.id===currentTrade.id);
-      if(fresh) currentTrade = fresh;
-    }).catch(()=>{});
+    // Reload trades in background to sync from cloud
+    loadTrades().catch(()=>{});
   }catch(e){alert("Lỗi cập nhật: "+e.message); btn.disabled=false; btn.textContent="CẬP NHẬT LỆNH"; return;}
   btn.disabled=false; btn.textContent="CẬP NHẬT LỆNH";
 };
@@ -2866,23 +3198,35 @@ window.exportPDF=function(){
   const wins=trades.filter(t=>t.result==="Win").length, wr=Math.round(wins/trades.length*100);
   const rows=trades.map(t=>`<tr><td>${t.tradeDate?fmtDate(t.tradeDate):(t.createdAt?fmtDate(t.createdAt):"")}</td><td><b>${t.title||""}</b></td><td>${t.symbol||""}</td><td style="color:${t.result==="Win"?"#4caf50":t.result==="Loss"?"#ef5350":"#90a4ae"}">${t.result||""}</td><td>${t.pnl||""}</td><td>${t.onplan||""}</td><td>${t.folder||""}</td><td style="max-width:180px;word-break:break-word;">${(t.note||"").substring(0,100)}</td></tr>`).join("");
   const w=window.open("","_blank");
-  w.document.write(`<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"/><title>TradeLog Export</title><style>body{font-family:serif;padding:20px;color:#222;}h1{font-size:18px;}.sum{display:flex;gap:16px;margin:12px 0 20px;}.s{background:#f5f5f0;border-radius:var(--radius-sm);padding:8px 16px;text-align:center;}.s b{display:block;font-size:20px;}table{width:100%;border-collapse:collapse;font-size:12px;}th{background:#c9a84c;color:#fff;padding:7px;text-align:left;font-size:11px;letter-spacing:1px;}td{padding:6px 7px;border-bottom:1px solid #eee;vertical-align:top;}tr:nth-child(even){background:#fafaf7;}@media print{body{padding:0}}</style></head><body>
-  <h1>📒 TradeLog – Nhật Ký Giao Dịch</h1><div style="font-size:12px;color:#888;">Xuất ngày ${fmtDate(Date.now())}</div>
+  w.document.write(`<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>TradeLog Export</title><style>
+    body{font-family:serif;padding:20px;color:#222;margin:0;}
+    h1{font-size:18px;margin-top:0;}
+    .toolbar{position:sticky;top:0;background:#fff;border-bottom:2px solid #c9a84c;padding:12px 20px;margin:-20px -20px 20px;display:flex;gap:10px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+    .toolbar button{padding:10px 18px;border-radius:8px;border:1px solid #c9a84c;background:#fff;color:#222;font-size:14px;cursor:pointer;font-family:sans-serif;font-weight:600;}
+    .toolbar button.primary{background:#c9a84c;color:#fff;}
+    .toolbar button:hover{opacity:0.85;}
+    .sum{display:flex;gap:16px;margin:12px 0 20px;}
+    .s{background:#f5f5f0;border-radius:6px;padding:8px 16px;text-align:center;}
+    .s b{display:block;font-size:20px;}
+    table{width:100%;border-collapse:collapse;font-size:12px;}
+    th{background:#c9a84c;color:#fff;padding:7px;text-align:left;font-size:11px;letter-spacing:1px;}
+    td{padding:6px 7px;border-bottom:1px solid #eee;vertical-align:top;}
+    tr:nth-child(even){background:#fafaf7;}
+    @media print{
+      body{padding:0;}
+      .toolbar{display:none !important;}
+    }
+  </style></head><body>
+  <div class="toolbar">
+    <button onclick="window.close()">← Quay lại</button>
+    <button class="primary" onclick="window.print()">🖨 In / Lưu PDF</button>
+  </div>
+  <h1>📒 TradeLog – Nhật Ký Giao Dịch</h1>
+  <div style="font-size:12px;color:#888;">Xuất ngày ${fmtDate(Date.now())}</div>
   <div class="sum"><div class="s"><b>${trades.length}</b>Tổng</div><div class="s"><b style="color:#4caf50">${wins}</b>Win</div><div class="s"><b style="color:#ef5350">${trades.filter(t=>t.result==="Loss").length}</b>Loss</div><div class="s"><b>${wr}%</b>WR</div></div>
   <table><thead><tr><th>Ngày</th><th>Tên lệnh</th><th>Symbol</th><th>KQ</th><th>P&L</th><th>Plan</th><th>Thư mục</th><th>Ghi chú</th></tr></thead><tbody>${rows}</tbody></table>
-  <script>window.onload=()=>window.print()<\/script>
-<!-- OFFLINE BANNER -->
-<div id="offline-banner" style="display:none;position:fixed;bottom:64px;left:0;right:0;background:#1a1a1a;border-top:1px solid #ef535066;padding:10px 16px;z-index:8999;display:none;align-items:center;gap:10px;">
-  <span style="font-size:16px;">📶</span>
-  <div style="flex:1">
-    <div style="font-size:13px;font-weight:500;color:#ef9090;">Không có kết nối mạng</div>
-    <div style="font-size:11px;color:#888;margin-top:1px;">Dữ liệu sẽ tự đồng bộ khi có mạng trở lại</div>
-  </div>
-  <div id="offline-indicator" style="width:8px;height:8px;border-radius:50%;background:#ef5350;flex-shrink:0;"></div>
-</div>
-
 </body></html>`);
-  w.document.close(); showToast("📄 Đang mở PDF...");
+  w.document.close(); showToast("📄 Đã mở PDF — bấm 'In / Lưu PDF' để xuất");
 };
 
 // ══ THEME / SETTINGS ══
@@ -5141,7 +5485,7 @@ if(_tl) _tl.innerHTML = Array(5).fill(0).map((_,i)=>`
 
 await loadTrades();
 const _fab=document.getElementById("fab-btn");
-if(_fab) _fab.classList.add("visible");
+if(_fab && window.innerWidth < 1200) _fab.classList.add("visible");
 updateSessionBadge();
 setInterval(updateSessionBadge, 60000);
 
@@ -5318,6 +5662,50 @@ document.addEventListener('keydown', function(e) {
 
 
 // ═══ LONG PRESS CONTEXT MENU ═══
+// Context menu helpers — must be window-scoped to be callable from inline onclick
+window.contextEdit = function(tradeId) {
+  const t = trades.find(x => x.id === tradeId);
+  if(!t) { showToast("⚠️ Không tìm thấy lệnh"); return; }
+  currentTrade = t;
+  openEdit();
+};
+window.contextDuplicate = function(tradeId) {
+  const t = trades.find(x => x.id === tradeId);
+  if(!t) { showToast("⚠️ Không tìm thấy lệnh"); return; }
+  lastSavedId = null;
+  currentTrade = t;
+  duplicateTrade();
+};
+window.contextDelete = async function(tradeId) {
+  if(!confirm("Xóa lệnh này?")) return;
+  try {
+    await deleteDoc(doc(db, "trades", tradeId));
+    // Remove from local array immediately
+    const idx = trades.findIndex(t => t.id === tradeId);
+    if(idx >= 0) trades.splice(idx, 1);
+    // If detail is showing this trade, clear it
+    if(currentTrade?.id === tradeId) {
+      currentTrade = null;
+      // Clear right-pane on tablet/desktop, navigate to list on mobile
+      if(window.innerWidth >= 768) {
+        ["detail","new","edit"].forEach(s => {
+          const el = document.getElementById("screen-"+s);
+          if(el) el.classList.remove("active");
+        });
+        document.body.classList.toggle("tablet-no-detail", window.innerWidth < 1200);
+        document.body.classList.toggle("desktop-no-detail", window.innerWidth >= 1200);
+      } else {
+        showScreen("list");
+      }
+    }
+    renderList();
+    showToast("🗑 Đã xóa");
+    loadTrades().catch(()=>{});
+  } catch(e) {
+    alert("Lỗi xóa: " + e.message);
+  }
+};
+
 (function(){
   let lpTimer=null, lpEl=null;
   
@@ -5332,10 +5720,10 @@ document.addEventListener('keydown', function(e) {
     const rect = el.getBoundingClientRect();
     menu.innerHTML = `
       <div onclick="openDetail('${tradeId}');closeContextMenu()" style="padding:12px 16px;cursor:pointer;font-size:14px;border-radius:var(--radius-sm);">👁 Xem chi tiết</div>
-      <div onclick="currentTrade=trades.find(t=>t.id==='${tradeId}');openEdit();closeContextMenu()" style="padding:12px 16px;cursor:pointer;font-size:14px;border-radius:var(--radius-sm);">✏️ Sửa lệnh</div>
-      <div onclick="lastSavedId=null;const t=trades.find(x=>x.id==='${tradeId}');if(t){currentTrade=t;duplicateTrade();}closeContextMenu()" style="padding:12px 16px;cursor:pointer;font-size:14px;border-radius:var(--radius-sm);">📋 Nhân bản</div>
+      <div onclick="contextEdit('${tradeId}');closeContextMenu()" style="padding:12px 16px;cursor:pointer;font-size:14px;border-radius:var(--radius-sm);">✏️ Sửa lệnh</div>
+      <div onclick="contextDuplicate('${tradeId}');closeContextMenu()" style="padding:12px 16px;cursor:pointer;font-size:14px;border-radius:var(--radius-sm);">📋 Nhân bản</div>
       <div style="height:0.5px;background:var(--border);margin:4px 0;"></div>
-      <div onclick="if(confirm('Xóa?')){deleteDoc(doc(db,'trades','${tradeId}')).then(()=>{loadTrades().then(renderList);showToast('🗑 Đã xóa');});}closeContextMenu()" style="padding:12px 16px;cursor:pointer;font-size:14px;border-radius:var(--radius-sm);color:var(--loss);">🗑 Xóa</div>
+      <div onclick="contextDelete('${tradeId}');closeContextMenu()" style="padding:12px 16px;cursor:pointer;font-size:14px;border-radius:var(--radius-sm);color:var(--loss);">🗑 Xóa</div>
     `;
     // Position
     const top = Math.min(rect.bottom + 4, window.innerHeight - 220);
@@ -5430,7 +5818,7 @@ window.showScreen = function(name) {
 };
 
 window.addEventListener('popstate', function(e) {
-  // User pressed hardware back
+  // User pressed hardware back / swiped back
   const modals = document.querySelectorAll('.modal-overlay');
   const openModal = [...modals].find(m => m.style.display !== 'none' && m.style.display !== '');
   if(openModal) {
@@ -5443,9 +5831,27 @@ window.addEventListener('popstate', function(e) {
     fs.style.display = 'none';
     return;
   }
+  // If form is dirty, confirm before leaving
+  if(window.formDirty) {
+    if(!confirm("Bạn chưa lưu. Thoát không?")) {
+      // Push state back to "stay"
+      history.pushState({screen: 'form'}, '', '');
+      return;
+    }
+    window.formDirty = false;
+  }
   // Navigate back in app
   _screenHistory.pop();
   const prev = _screenHistory[_screenHistory.length - 1] || 'list';
+  // On wide screens, going back from form clears right-pane
+  if(window.innerWidth >= 768) {
+    ["detail","new","edit"].forEach(s => {
+      const el = document.getElementById("screen-"+s);
+      if(el) el.classList.remove("active");
+    });
+    document.body.classList.toggle("tablet-no-detail", window.innerWidth < 1200);
+    document.body.classList.toggle("desktop-no-detail", window.innerWidth >= 1200);
+  }
   _origShowScreen(prev === 'list' ? 'list' : 'list');
 });
 
@@ -5488,6 +5894,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if(el) _rippleObserver.observe(el, {childList: true, subtree: true});
   });
   applyRipples();
+
+  // Tablet/Desktop: show empty state in right column on first load
+  const isWide = window.innerWidth >= 768;
+  const isDesktop = window.innerWidth >= 1200;
+  if(isWide && !isDesktop) document.body.classList.add("tablet-no-detail");
+  if(isDesktop) document.body.classList.add("desktop-no-detail");
 });
 // Also run on showScreen
 const _origShowScreen2 = window.showScreen;
