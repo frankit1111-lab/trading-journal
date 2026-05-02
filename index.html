@@ -3976,36 +3976,35 @@ function renderTheory() {
       <div class="theory-card-body">
         <div class="theory-card-content">
           ${(()=>{
-            const svg=getTheoryDiagramSVG(t.id);
-            if(svg) return `<div style="margin:14px 0;">${svg}<div class="theory-diagram-caption">${t.tag} — Sơ đồ minh họa</div></div>`;
-            const secs=(t.imgSections||[]).filter(s=>s&&(s.images?.length||s.caption));
-            if(secs.length) return secs.map(s=>`
-              <div style="margin:12px 0;">
-                ${s.tf?`<div style="font-family:var(--sys);font-size:11px;color:var(--gold);letter-spacing:0.5px;margin-bottom:6px;opacity:0.8;">${s.tf}</div>`:""}
-                ${(s.images||[]).length?`<div style="margin-bottom:6px;">${(s.images||[]).map(src=>`<img src="${src}" onclick="document.getElementById('theory-img-fullscreen').style.display='flex';document.getElementById('theory-img-fullscreen-img').src=this.src" style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);object-fit:contain;cursor:zoom-in;display:block;margin-bottom:6px;" loading="lazy"/>`).join("")}</div>`:""}
-                ${s.caption?`<div style="font-size:13px;color:var(--text);line-height:1.7;font-style:italic;opacity:0.85;padding:8px 12px;background:var(--bg3);border-left:2px solid var(--gold-dim);border-radius:0 8px 8px 0;">${s.caption}</div>`:""}
-              </div>`).join("<div style='height:1px;background:var(--border);margin:8px 0;'></div>");
-            if(t.img) return `<pre style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;font-size:11px;color:var(--gold);opacity:0.85;font-family:monospace;overflow-x:auto;white-space:pre;margin:14px 0;line-height:1.7;">${t.img}</pre>`;
-            return "";
+            const svg = getTheoryDiagramSVG(t.id);
+            if (svg) return `<div style="margin:14px 0;">${svg}<div class="theory-diagram-caption">${t.tag}</div></div>`;
+            // Show imgSections (H4/H1 chart images) at top
+            const secs = (t.imgSections||[]).filter(s=>s&&(s.images?.length||s.caption));
+            const secsHtml = secs.map(s=>`
+              <div style="margin:0 0 12px 0;">
+                ${s.tf?`<div style="font-size:11px;color:var(--gold);letter-spacing:0.5px;margin-bottom:6px;opacity:0.8;font-weight:600;">${s.tf}</div>`:""}
+                ${(s.images||[]).map(src=>`<img src="${src}" onclick="document.getElementById('theory-img-fullscreen').style.display='flex';document.getElementById('theory-img-fullscreen-img').src=this.src" style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);cursor:zoom-in;display:block;margin-bottom:6px;" loading="lazy"/>`).join("")}
+                ${s.caption?`<div style="font-size:13px;color:var(--text);line-height:1.7;padding:8px 12px;background:var(--bg3);border-left:2px solid var(--gold-dim);border-radius:0 8px 8px 0;margin-top:4px;">${s.caption}</div>`:""}
+              </div>`).join("");
+            return secsHtml;
           })()}
           ${rules.map(r => {
             const text = typeof r === "string" ? r : (r.t||"");
             const imgs = (typeof r === "object" && Array.isArray(r.imgs) && r.imgs.length) ? r.imgs : [];
+            if (!text && !imgs.length) return "";
             return `<div class="theory-rule">
-              <div class="theory-rule-dot" style="margin-top:6px;"></div>
+              <div class="theory-rule-dot" style="flex-shrink:0;margin-top:6px;"></div>
               <div style="flex:1;min-width:0;">
                 ${text ? `<div class="theory-rule-text">${text}</div>` : ""}
-                ${imgs.length ? `<div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
-                  ${imgs.map(src => `<img src="${src}"
-                    onclick="document.getElementById('theory-img-fullscreen').style.display='flex';document.getElementById('theory-img-fullscreen-img').src=this.src"
-                    style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);cursor:zoom-in;display:block;"
-                    loading="lazy"/>`).join("")}
-                </div>` : ""}
+                ${imgs.map(src=>`<img src="${src}"
+                  onclick="document.getElementById('theory-img-fullscreen').style.display='flex';document.getElementById('theory-img-fullscreen-img').src=this.src"
+                  style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);cursor:zoom-in;display:block;margin-top:8px;"
+                  loading="lazy"/>`).join("")}
               </div>
             </div>`;
           }).join("")}
           ${highlight?.text?`<div class="theory-highlight ${highlight.type==="warn"?"warn":highlight.type==="info"?"info":""}">💡 ${highlight.text}</div>`:""}
-          <button onclick="toggleMastered('${t.id}')" style="width:100%;margin-top:14px;padding:12px;border-radius:var(--radius-md);border:1px solid ${mastered?"var(--win)":"var(--gold-faint)"};background:${mastered?"#4caf5018":"transparent"};color:${mastered?"var(--win)":"var(--gold)"};font-family:var(--sys);font-size:11px;letter-spacing:0.5px;cursor:pointer;transition:all 0.2s;">
+          <button onclick="toggleMastered('${t.id}')" style="width:100%;margin-top:14px;padding:12px;border-radius:var(--radius-md);border:1px solid ${mastered?"var(--win)":"var(--gold-faint)"};background:${mastered?"#4caf5018":"transparent"};color:${mastered?"var(--win)":"var(--gold)"};font-family:var(--sys);font-size:11px;cursor:pointer;transition:all 0.2s;">
             ${mastered?"✓ ĐÃ THUỘC":"○ ĐÁNH DẤU ĐÃ THUỘC"}
           </button>
         </div>
