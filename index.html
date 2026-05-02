@@ -1529,6 +1529,7 @@ window.viewImg = function(src) {
 
 window.showScreen = function(name) {
   if(name !== 'import') { window._importParsed = null; } // clear stale import data
+  if(window.resetPasteTarget) window.resetPasteTarget(); // clear paste target on screen change
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   const el=document.getElementById("screen-"+name);
   if(el){el.classList.add("active");el.scrollTop=0;}
@@ -1621,7 +1622,7 @@ async function loadFolders() {
 }
 async function saveFolders() {
   try { await setDoc(doc(db,"app_config","folders"),{list:folders}); } catch(e){}
-  localStorage.setItem("tl_folders",JSON.stringify(folders));
+  try { localStorage.setItem("tl_folders",JSON.stringify(folders)); } catch(e){}
 }
 function renderFolderBar() {
   const emojis={all:"📂",Win:"✅",Loss:"❌",BE:"➖"};
@@ -2157,7 +2158,8 @@ window.saveTrade=async function(){
     lastSavedId=ref.id; // Fix 3
     showToast("✅ Đã lưu lệnh");
     try{if(navigator.vibrate)navigator.vibrate(10);}catch(e){}
-    await loadTrades();showScreen("list");
+    showScreen("list"); // Always navigate first
+    loadTrades().catch(()=>{}); // Reload in background
   }catch(e){alert("Lỗi lưu: "+e.message);}
   btn.disabled=false; btn.textContent="LƯU LỆNH ĐẦY ĐỦ";
 };
@@ -2175,7 +2177,8 @@ window.quickSave=async function(result){
     const ref=await addDoc(collection(db,"trades"),trade);
     window.formDirty=false; lastSavedId=ref.id;
     showToast(`⚡ Đã lưu nhanh: ${result}`);
-    await loadTrades(); showScreen("list");
+    showScreen("list");
+    loadTrades().catch(()=>{});
   }catch(e){alert("Lỗi: "+e.message);}
   document.querySelectorAll(".quick-save-btn").forEach(b=>{b.disabled=false;});
 };
@@ -2187,8 +2190,9 @@ window.deleteTrade=async function(){
   const toDelete={...currentTrade};
   try{
     await deleteDoc(doc(db,"trades",toDelete.id));
-    await loadTrades(); showScreen("list");
+    showScreen("list");
     showUndoToast(toDelete);
+    loadTrades().catch(()=>{});
   }catch(e){alert("Lỗi xóa: "+e.message);}
 };
 
@@ -2229,7 +2233,9 @@ window.duplicateTrade=async function(){
   try{
     const ref=await addDoc(collection(db,"trades"),{...data,title:"[Copy] "+data.title,createdAt:Date.now(),tradeDate:null});
     lastSavedId=ref.id;
-    showToast("📋 Đã nhân bản");await loadTrades();showScreen("list");
+    showToast("📋 Đã nhân bản");
+    showScreen("list");
+    loadTrades().catch(()=>{});
   }catch(e){alert("Lỗi: "+e.message);}
 };
 
@@ -2338,6 +2344,7 @@ window.openNew=function(){
   document.querySelectorAll('[data-group="onplan"]').forEach(b=>b.classList.toggle("active", b.dataset.val==="Đúng plan"));
   buildTFUploadRow(); _resetFormOrders(); populateFolderSelects();
   window._formLastTFIdx = null; window._foLastMode = null;
+  if(window.resetPasteTarget) window.resetPasteTarget();
   window.formDirty=false; showScreen("new");
 };
 
@@ -2699,6 +2706,7 @@ window.openEdit=function(){
   // Load LỆNH
   _resetOrders("edit");
   (t.orders||[]).forEach(o => addEditOrder(o.label||"", o.tfs||[]));
+  if(window.resetPasteTarget) window.resetPasteTarget();
   window.formDirty=false; showScreen("edit");
 };
 function buildEditTFUploadRow(){
@@ -2754,9 +2762,15 @@ window.updateTrade=async function(){
   try{
     await updateDoc(doc(db,"trades",currentTrade.id),upd);
     window.formDirty=false; showToast("✅ Đã cập nhật");
-    await loadTrades();
-    currentTrade=trades.find(t=>t.id===currentTrade.id)||{...currentTrade,...upd};
-    showScreen("detail"); window.openDetail(currentTrade.id);
+    // Update local state from upd, then navigate immediately
+    currentTrade={...currentTrade,...upd};
+    showScreen("detail");
+    window.openDetail(currentTrade.id);
+    // Reload trades in background
+    loadTrades().then(() => {
+      const fresh = trades.find(t=>t.id===currentTrade.id);
+      if(fresh) currentTrade = fresh;
+    }).catch(()=>{});
   }catch(e){alert("Lỗi cập nhật: "+e.message); btn.disabled=false; btn.textContent="CẬP NHẬT LỆNH"; return;}
   btn.disabled=false; btn.textContent="CẬP NHẬT LỆNH";
 };
@@ -2940,7 +2954,7 @@ function syncSettingsUI(t) {
 }
 
 window.setMode = async function(mode) {
-  localStorage.setItem("tl_theme_manual","1");
+  try { localStorage.setItem("tl_theme_manual","1"); } catch(e){}
   themeSettings.mode = mode;
   applyTheme(themeSettings);
   syncSettingsUI(themeSettings);
@@ -2972,7 +2986,7 @@ window.resetTheme = async function() {
 
 async function saveTheme() {
   try { await setDoc(doc(db,"app_config","theme"), themeSettings); } catch(e){}
-  localStorage.setItem("tl_theme", JSON.stringify(themeSettings));
+  try { localStorage.setItem("tl_theme", JSON.stringify(themeSettings)); } catch(e){}
 }
 
 async function loadTheme() {
@@ -3408,7 +3422,7 @@ async function loadTheoryFolders() {
 }
 async function saveTheoryFolders() {
   try { await setDoc(doc(db,"app_config","theory_folders"),{folders:theoryFolders}); } catch(e){}
-  localStorage.setItem("tl_theory_folders", JSON.stringify(theoryFolders));
+  try { localStorage.setItem("tl_theory_folders", JSON.stringify(theoryFolders)); } catch(e){}
 }
 function getAllTheoryFolderKeys() {
   const keys = [];
@@ -3570,7 +3584,12 @@ async function loadCustomTheory() {
 }
 async function saveCustomTheory() {
   try { await setDoc(doc(db,"app_config","theory_custom"),{cards:theoryCustomData}); } catch(e){}
-  localStorage.setItem("tl_theory_custom", JSON.stringify(theoryCustomData));
+  try {
+    localStorage.setItem("tl_theory_custom", JSON.stringify(theoryCustomData));
+  } catch(e) {
+    console.warn("localStorage quota exceeded for theory_custom", e);
+    // Continue silently — Firestore is the source of truth
+  }
 }
 
 // Merge: THEORY_DATA + custom overrides
@@ -3884,6 +3903,7 @@ window.openAddTheoryCard = function() {
   document.getElementById("te-img-sections").innerHTML="";
   document.getElementById("te-examples-list").innerHTML="";
   buildRuleFields([]);
+  if(window.resetPasteTarget) window.resetPasteTarget();
   document.getElementById("modal-theory-edit").style.display="flex";
   setTimeout(()=>document.getElementById("te-scroll-body").scrollTop=0,50);
 };
@@ -3914,6 +3934,7 @@ window.openEditTheoryCard = function(id) {
     (t.tfSections||[]).forEach(s => { if(s?.tf||s?.notes||s?.images?.length) tfs.push({tf:s.tf||"",images:s.images||[],notes:s.notes||""}); });
     if(tfs.length) addExample("", tfs);
   }
+  if(window.resetPasteTarget) window.resetPasteTarget();
   document.getElementById("modal-theory-edit").style.display="flex";
   setTimeout(()=>document.getElementById("te-scroll-body").scrollTop=0,50);
 };
@@ -4125,7 +4146,15 @@ function renderRuleField(idx) {
   const delBtn = document.createElement("button");
   delBtn.textContent = "✕";
   delBtn.style.cssText = "background:none;border:1px solid #ef535044;border-radius:6px;padding:5px 8px;color:var(--loss);font-size:12px;cursor:pointer;flex-shrink:0;";
-  delBtn.addEventListener("click", () => { teRuleItems.splice(idx,1); wrap.remove(); });
+  delBtn.addEventListener("click", () => {
+    teRuleItems.splice(idx,1);
+    // Re-render all rules with corrected indices
+    const list = document.getElementById("te-rules-list");
+    if(list) {
+      list.innerHTML = "";
+      teRuleItems.forEach((_, i) => renderRuleField(i));
+    }
+  });
 
   row1.appendChild(ta); row1.appendChild(delBtn);
   wrap.appendChild(row1);
@@ -4249,10 +4278,16 @@ window.saveTheoryCard = async function() {
   if(sizeKB>600){try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
   showToast("⚠️ Cảnh báo: thẻ nặng "+sizeKB+"KB — có thể lỗi khi lưu ảnh nhiều");}
   theoryCustomData[id]=card;
-  await saveCustomTheory();
+  // Close modal IMMEDIATELY — don't wait for save to finish
   document.getElementById("modal-theory-edit").style.display="none";
   try{if(navigator.vibrate)navigator.vibrate([10,30,10]);}catch(e){}
-  renderTheory(); showToast("✅ Đã lưu thẻ!");
+  renderTheory();
+  showToast("✅ Đã lưu thẻ!");
+  // Save to Firestore in background — modal already closed
+  saveCustomTheory().catch(e => {
+    console.error("saveCustomTheory failed:", e);
+    showToast("⚠️ Có thể chưa đồng bộ cloud — thử lại sau");
+  });
 };
 
 window.deleteTheoryCard = async function() {
@@ -4309,7 +4344,7 @@ async function loadTheoryData() {
 async function saveTheoryData() {
   const data = { mastered: theoryMastered };
   try { await setDoc(doc(db,"app_config","theory_progress"), data); } catch(e) {}
-  localStorage.setItem("tl_theory", JSON.stringify(data));
+  try { localStorage.setItem("tl_theory", JSON.stringify(data)); } catch(e) {}
 }
 
 // ══ SVG THEORY DIAGRAMS ══
@@ -4639,7 +4674,7 @@ function getTodayTheory() {
   const unmastered = merged.filter(t=>!theoryMastered[t.id]);
   const pool = unmastered.length > 0 ? unmastered : merged;
   const pick = pool[Math.floor(Math.random()*pool.length)];
-  localStorage.setItem("tl_today_theory", JSON.stringify({date:today, id:pick.id}));
+  try { localStorage.setItem("tl_today_theory", JSON.stringify({date:today, id:pick.id})); } catch(e){}
   return pick;
 }
 
@@ -5364,6 +5399,7 @@ function debounce(fn, ms) {
   let t; return function(...args) { clearTimeout(t); t = setTimeout(()=>fn.apply(this,args), ms); };
 }
 const debouncedSearch = debounce((v) => { renderList(); }, 150);
+window.debouncedSearch = debouncedSearch;
 
 
 // ═══ FOCUS TRAP (Tim Cook: accessibility) ═══
@@ -6118,7 +6154,10 @@ window.setAIContext = function(ctx) {
 
 window.clearAIChat = function() {
   if(aiChatHistory.length && !confirm("Xoá toàn bộ hội thoại?")) return;
-  aiChatHistory = []; saveAIChat(); renderAIMessages();
+  aiChatHistory = [];
+  aiThinking = false; // also reset thinking state to allow new messages
+  saveAIChat();
+  renderAIMessages();
 };
 
 function renderAIMessages() {
@@ -6444,6 +6483,15 @@ window.sendAIMessage = async function() {
     }
   } catch(e) {
     aiChatHistory.push({role:"assistant", content:"❌ Lỗi: " + (e.message||"không rõ")});
+    // Sanitize: drop any orphan tool_use turns to prevent next-message API error
+    aiChatHistory = aiChatHistory.filter(m => {
+      if(typeof m.content === "string") return true;
+      if(Array.isArray(m.content)) {
+        const hasTool = m.content.some(b => b && (b.type === "tool_use" || b.type === "tool_result"));
+        return !hasTool;
+      }
+      return true;
+    });
   }
 
   // Track usage after the entire conversation turn (including tool loops)
@@ -6461,6 +6509,7 @@ window.sendAIMessage = async function() {
 // 1 handler duy nhất, dùng data-paste-target trên element được focus
 // ════════════════════════════════════════════
 let __lastPasteTarget = null;
+window.resetPasteTarget = () => { __lastPasteTarget = null; };
 
 // Track click anywhere — find nearest [data-paste-target] ancestor
 document.addEventListener("click", e => {
@@ -6476,6 +6525,20 @@ document.addEventListener("focusin", e => {
 document.addEventListener("paste", async e => {
   const items = e.clipboardData?.items;
   if(!items) return;
+
+  // Check if clipboard contains text (HTML/plain)
+  // If user is pasting text into a textarea/input, let it through normally
+  const hasText = Array.from(items).some(item =>
+    item.kind === "string" && (item.type === "text/plain" || item.type === "text/html")
+  );
+  const target_el = e.target;
+  const isTextInput = target_el && (target_el.tagName === "TEXTAREA" ||
+    (target_el.tagName === "INPUT" && /^(text|search|email|url)$/i.test(target_el.type || "text")));
+
+  // If pasting into text input AND clipboard has text → let browser paste text
+  // (don't intercept; user is typing notes, not adding image)
+  if(hasText && isTextInput) return;
+
   let imageItem = null;
   for(const item of items) {
     if(item.type.startsWith("image/")) { imageItem = item; break; }
