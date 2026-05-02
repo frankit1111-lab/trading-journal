@@ -1563,6 +1563,10 @@ window.setSort = function(dir) {
   document.getElementById("sort-asc").classList.toggle("active",dir==="asc");
   renderList();
 };
+window.setTagFilter = function(tag) {
+  currentTagFilter = tag || "";
+  renderList();
+};
 window.setNow = function() {
   const n=new Date();
   document.getElementById("f-date").value=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-${String(n.getDate()).padStart(2,"0")}`;
@@ -2333,6 +2337,7 @@ window.openNew=function(){
   document.querySelectorAll('[data-group="result"]').forEach(b=>b.classList.toggle("active", b.dataset.val==="Win"));
   document.querySelectorAll('[data-group="onplan"]').forEach(b=>b.classList.toggle("active", b.dataset.val==="Đúng plan"));
   buildTFUploadRow(); _resetFormOrders(); populateFolderSelects();
+  window._formLastTFIdx = null; window._foLastMode = null;
   window.formDirty=false; showScreen("new");
 };
 
@@ -2392,7 +2397,13 @@ function addFormTFSection(tf) {
     sec.remove();
   });
   sec.querySelector("[data-add]").addEventListener("click", () => {
+    window._formLastTFIdx = idx; // track for Ctrl+V
+    window._foLastMode = null;   // don't interfere with orders paste
     document.getElementById("form-tf-file-"+idx)?.click();
+  });
+  sec.querySelector("[data-caption]").addEventListener("focus", () => {
+    window._formLastTFIdx = idx;
+    window._foLastMode = null;
   });
   sec.querySelector("[data-caption]").addEventListener("input", e => {
     if (formTFSections[idx]) formTFSections[idx].caption = e.target.value;
@@ -2455,6 +2466,8 @@ document.addEventListener("paste", async function(e) {
   // Only when new trade form is active
   const screen = document.getElementById("screen-new");
   if (!screen?.classList.contains("active")) return;
+  // If user last clicked in LỆNH section → let handler 2 handle it
+  if(window._foLastMode === "new") return;
   const items = e.clipboardData?.items;
   if (!items) return;
   for (const item of items) {
@@ -2464,12 +2477,15 @@ document.addEventListener("paste", async function(e) {
       reader.onload = async ev => {
         try {
           const c = await compressImage(ev.target.result);
-          // Paste into last non-null section
-          const lastIdx = formTFSections.findLastIndex(s => s !== null);
-          if (lastIdx >= 0) {
-            formTFSections[lastIdx].images.push(c);
-            renderFormTFImgs(lastIdx);
-            showToast("📷 Dán ảnh vào " + formTFSections[lastIdx].tf);
+          // Use last focused TF, otherwise fallback to last non-null
+          const focusIdx = window._formLastTFIdx;
+          const targetIdx = (focusIdx !== null && focusIdx !== undefined && formTFSections[focusIdx])
+            ? focusIdx
+            : formTFSections.findLastIndex(s => s !== null);
+          if (targetIdx >= 0 && formTFSections[targetIdx]) {
+            formTFSections[targetIdx].images.push(c);
+            renderFormTFImgs(targetIdx);
+            showToast("📷 Dán vào " + formTFSections[targetIdx].tf);
           } else {
             showToast("⚠️ Thêm khung thời gian trước");
           }
@@ -2652,6 +2668,7 @@ function _renderOrderTf(mode, oi, ti) {
   });
   wrap.querySelector(".fo-pick-img").addEventListener("click", () => {
     window._foLastMode = mode; window._foLastOi = oi; window._foLastTi = ti;
+    window._formLastTFIdx = null; // don't paste into chart section
     document.getElementById(fileId)?.click();
   });
   document.getElementById(fileId).addEventListener("change", async function() {
@@ -2701,7 +2718,12 @@ document.addEventListener("paste", async function(e) {
   if(mode === undefined || mode === null) return;
   const oi = window._foLastOi, ti = window._foLastTi;
   const cs = _ordersCtx(mode).state;
-  if(!cs[oi]?.tfs[ti]) return;
+  if(!cs[oi]?.tfs[ti]) {
+    // Only show hint if on the right screen
+    const screen = document.getElementById(mode==="edit"?"screen-edit":"screen-new");
+    if(screen?.classList.contains("active")) showToast("⚠️ Click '📎 Ảnh' của khung TF muốn dán trước");
+    return;
+  }
   // Only fire if relevant screen is active
   const screen = document.getElementById(mode==="edit"?"screen-edit":"screen-new");
   if(!screen?.classList.contains("active")) return;
@@ -3834,6 +3856,7 @@ window.addTheoryImgSection = function(tf="", imgs=[], caption="") {
   sec.querySelector(".te-pick-img").addEventListener("click", () => {
     window._teRuleFocusIdx = null;
     window._teImgSectionFocusIdx = idx;
+    window._teLastExIdx = null; window._teLastTfIdx = null;
     document.getElementById("te-file-"+idx)?.click();
   });
   document.getElementById("te-file-"+idx).addEventListener("change", function() {
@@ -4078,6 +4101,7 @@ function _renderExampleTf(exIdx, ti) {
   });
   wrap.querySelector(".extf-pick").addEventListener("click", () => {
     window._teLastExIdx = exIdx; window._teLastTfIdx = ti;
+    window._teLastRuleImgIdx = null; window._teImgSectionFocusIdx = null;
     document.getElementById("te-ex-file-"+exIdx+"-"+ti)?.click();
   });
   document.getElementById("te-ex-file-"+exIdx+"-"+ti).addEventListener("change", async function() {
@@ -4171,6 +4195,7 @@ function renderRuleField(idx) {
   addBtn.style.cssText = "background:transparent;border:1px dashed var(--gold-faint);border-radius:6px;padding:4px 10px;color:var(--gold);font-size:11px;cursor:pointer;align-self:flex-start;";
   addBtn.addEventListener("click", () => {
     window._teLastRuleImgIdx = idx;
+    window._teLastExIdx = null; window._teLastTfIdx = null;
     fileInput.click();
   });
   fileInput.addEventListener("change", async function() {
@@ -4272,17 +4297,24 @@ function attachTePaste() {
             const c = await compressImage(ev.target.result);
             // If last clicked was a rule's add-img button, paste there
             const ruleIdx = window._teLastRuleImgIdx;
+            const exIdx = window._teLastExIdx;
+            const exTfIdx = window._teLastTfIdx;
             const secIdx = teImgSections.findLastIndex(s => s !== null);
+
             if (ruleIdx !== null && ruleIdx !== undefined && teRuleItems[ruleIdx]) {
               teRuleItems[ruleIdx].imgs.push(c);
               renderRuleImgs(ruleIdx);
               showToast("📎 Dán ảnh vào dòng " + (ruleIdx+1));
+            } else if (exIdx !== null && exIdx !== undefined && teExamples[exIdx]?.tfs[exTfIdx]) {
+              teExamples[exIdx].tfs[exTfIdx].images.push(c);
+              _renderExTfImgs(exIdx, exTfIdx);
+              showToast("📷 Dán vào Ví dụ " + (exIdx+1) + " · " + (teExamples[exIdx].tfs[exTfIdx].tf || "TF"));
             } else if (secIdx >= 0 && teImgSections[secIdx]) {
               teImgSections[secIdx].images.push(c);
               teRenderSecImgs(secIdx);
               showToast("📷 Dán vào " + (teImgSections[secIdx].tf || "ảnh chart"));
             } else {
-              showToast("⚠️ Click vào 'Thêm ảnh minh họa' hoặc thêm khung thời gian trước");
+              showToast("⚠️ Click vào '📎 Ảnh' trong khung thời gian muốn dán trước");
             }
           } catch(e2) {}
         };
@@ -4540,8 +4572,8 @@ function renderTheory() {
       const ruleText = typeof firstRule==="string" ? firstRule : (firstRule?.t||"");
       todayHtml = `<div class="today-card" onclick="scrollToCard('${todayCard.id}')">
         <div class="today-label">📅 BÀI HỌC HÔM NAY</div>
-        <div style="font-family:var(--sys);font-size:14px;color:var(--gold);margin-bottom:6px;">${todayCard.icon} ${todayCard.title}</div>
-        <div style="font-size:13px;color:var(--text);opacity:0.7;line-height:1.5;">${ruleText.replace(/<[^>]+>/g,"").slice(0,80)}...</div>
+        <div style="font-family:var(--sys);font-size:14px;color:var(--gold);margin-bottom:6px;">${esc(todayCard.icon)} ${esc(todayCard.title)}</div>
+        <div style="font-size:13px;color:var(--text);opacity:0.7;line-height:1.5;">${esc(ruleText.replace(/<[^>]+>/g,"")).slice(0,80)}...</div>
         <div style="margin-top:10px;font-size:11px;color:var(--gold);opacity:0.85;font-family:var(--sys);letter-spacing:1px;">Nhấn để ôn bài →</div>
       </div>`;
     }
@@ -4558,9 +4590,9 @@ function renderTheory() {
       <button onclick="event.stopPropagation();quickDeleteTheoryCard('${t.id}')" style="background:#ef535014;border:1px solid #ef535055;border-radius:6px;padding:8px 12px;color:var(--loss);font-size:13px;cursor:pointer;flex-shrink:0;" title="Xóa">🗑</button>`;
     return `<div class="theory-card${mastered?" theory-mastered":""}" id="tc-${t.id}">
       <div class="theory-card-header" onclick="toggleTheoryCard('${t.id}')">
-        <span class="theory-card-icon">${t.icon}</span>
-        <span class="theory-card-title">${t.title}</span>
-        <span class="theory-card-tag">${t.tag||catLabel}</span>
+        <span class="theory-card-icon">${esc(t.icon||"📌")}</span>
+        <span class="theory-card-title">${esc(t.title||"")}</span>
+        <span class="theory-card-tag">${esc(t.tag||catLabel)}</span>
         ${mastered?'<span style="color:var(--win);font-size:14px;">✓</span>':''}
         ${editBtns}
         <span class="theory-card-chevron">▼</span>
@@ -4587,7 +4619,7 @@ function renderTheory() {
                       onclick="document.getElementById('theory-img-fullscreen').style.display='flex';document.getElementById('theory-img-fullscreen-img').src=this.src"
                       style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);cursor:zoom-in;display:block;"
                       loading="lazy"/>
-                    ${caps[i] ? `<div style="font-size:14px;color:var(--text);opacity:0.95;font-family:var(--sys);margin-top:6px;padding:8px 12px;background:var(--bg3);border-left:3px solid var(--gold-dim);border-radius:0 6px 6px 0;line-height:1.5;">${caps[i]}</div>` : ""}
+                    ${caps[i] ? `<div style="font-size:14px;color:var(--text);opacity:0.95;font-family:var(--sys);margin-top:6px;padding:8px 12px;background:var(--bg3);border-left:3px solid var(--gold-dim);border-radius:0 6px 6px 0;line-height:1.5;">${esc(caps[i])}</div>` : ""}
                   </div>`).join("")}
               </div>
             </div>`;
@@ -4606,13 +4638,13 @@ function renderTheory() {
                   <div style="margin-bottom:14px;border:1px solid var(--gold-dim);border-radius:var(--radius-md);overflow:hidden;">
                     <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg2);">
                       <div style="min-width:20px;height:20px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700;flex-shrink:0;">${ei+1}</div>
-                      ${ex.label?`<div style="font-size:12px;color:var(--gold);font-weight:600;font-family:var(--sys);">${ex.label}</div>`:""}
+                      ${ex.label?`<div style="font-size:12px;color:var(--gold);font-weight:600;font-family:var(--sys);">${esc(ex.label)}</div>`:""}
                     </div>
                     ${(ex.tfs||[]).map(tf=>`
                       <div style="border-top:1px solid var(--border);padding:10px 12px;">
-                        ${tf.tf?`<div style="font-size:11px;color:var(--gold);font-weight:700;font-family:var(--sys);letter-spacing:0.5px;margin-bottom:8px;padding:3px 8px;background:var(--gold-faint);border-radius:4px;display:inline-block;">${tf.tf}</div>`:""}
+                        ${tf.tf?`<div style="font-size:11px;color:var(--gold);font-weight:700;font-family:var(--sys);letter-spacing:0.5px;margin-bottom:8px;padding:3px 8px;background:var(--gold-faint);border-radius:4px;display:inline-block;">${esc(tf.tf)}</div>`:""}
                         ${(tf.images||[]).map(src=>_img(src)).join("")}
-                        ${tf.notes?`<div style="font-size:13px;color:var(--text);line-height:1.7;">${tf.notes}</div>`:""}
+                        ${tf.notes?`<div style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;">${esc(tf.notes)}</div>`:""}
                       </div>`).join("")}
                   </div>`).join("")}
               </div>`;
@@ -4620,18 +4652,18 @@ function renderTheory() {
             // Legacy fallback
             return `<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;">
               ${legacySecs.map(s=>`<div style="margin-bottom:10px;">
-                ${s.tf?`<div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px;">${s.tf}</div>`:""}
+                ${s.tf?`<div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px;">${esc(s.tf)}</div>`:""}
                 ${(s.images||[]).map(src=>_img(src)).join("")}
-                ${s.caption?`<div style="font-size:13px;color:var(--text);line-height:1.7;">${s.caption}</div>`:""}
+                ${s.caption?`<div style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;">${esc(s.caption)}</div>`:""}
               </div>`).join("")}
               ${legacyTf.map(s=>`<div style="margin-bottom:10px;">
-                ${s.tf?`<div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px;">${s.tf}</div>`:""}
+                ${s.tf?`<div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px;">${esc(s.tf)}</div>`:""}
                 ${(s.images||[]).map(src=>_img(src)).join("")}
-                ${s.notes?`<div style="font-size:13px;color:var(--text);line-height:1.7;">${s.notes}</div>`:""}
+                ${s.notes?`<div style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;">${esc(s.notes)}</div>`:""}
               </div>`).join("")}
             </div>`;
           })()}
-          ${highlight?.text?`<div class="theory-highlight ${highlight.type==="warn"?"warn":highlight.type==="info"?"info":""}">💡 ${highlight.text}</div>`:""}
+          ${highlight?.text?`<div class="theory-highlight ${highlight.type==="warn"?"warn":highlight.type==="info"?"info":""}">💡 ${esc(highlight.text)}</div>`:""}
           <button onclick="toggleMastered('${t.id}')" style="width:100%;margin-top:14px;padding:12px;border-radius:var(--radius-md);border:1px solid ${mastered?"var(--win)":"var(--gold-faint)"};background:${mastered?"#4caf5018":"transparent"};color:${mastered?"var(--win)":"var(--gold)"};font-family:var(--sys);font-size:11px;cursor:pointer;transition:all 0.2s;">
             ${mastered?"✓ ĐÃ THUỘC":"○ ĐÁNH DẤU ĐÃ THUỘC"}
           </button>
@@ -5648,7 +5680,22 @@ let aiUsageLog = {};
 
 try {
   const saved = localStorage.getItem("ai_chat_history");
-  if(saved) aiChatHistory = JSON.parse(saved);
+  if(saved) {
+    const parsed = JSON.parse(saved);
+    // Sanitize: remove turns containing tool_use/tool_result blocks
+    // These cause API errors when sent without their pair
+    aiChatHistory = parsed.filter(m => {
+      if(typeof m.content === "string") return true;
+      if(Array.isArray(m.content)) {
+        // Keep only if has text blocks and no tool_use/tool_result
+        const hasTool = m.content.some(b => b && (b.type === "tool_use" || b.type === "tool_result"));
+        if(hasTool) return false; // Drop tool turns when reloading
+        const hasText = m.content.some(b => b && b.type === "text" && b.text);
+        return hasText;
+      }
+      return false;
+    });
+  }
   const ctx = localStorage.getItem("ai_chat_context");
   if(ctx) aiContext = ctx;
   const m = localStorage.getItem("ai_model");
@@ -6203,7 +6250,18 @@ function renderAIMessages() {
 
 function renderMessage(m) {
   if(m.role === "user") {
-    const txt = typeof m.content === "string" ? m.content : (m.content.find(b=>b.type==="text")?.text || "");
+    let txt = "";
+    if(typeof m.content === "string") {
+      txt = m.content;
+    } else if(Array.isArray(m.content)) {
+      // Could be text blocks or tool_results — only render text
+      const textBlock = m.content.find(b => b && b.type === "text");
+      if(textBlock) txt = textBlock.text || "";
+      // tool_result blocks → render as small chip
+      const toolResults = m.content.filter(b => b && b.type === "tool_result");
+      if(toolResults.length && !txt) return ""; // skip pure tool_result turns
+    }
+    if(!txt) return "";
     return `<div style="align-self:flex-end;max-width:85%;background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-lg) var(--radius-lg) 4px var(--radius-lg);padding:10px 14px;color:var(--text);font-size:15px;line-height:1.5;white-space:pre-wrap;word-break:break-word;">${esc(txt)}</div>`;
   }
   // Assistant: may have text + tool_use blocks
