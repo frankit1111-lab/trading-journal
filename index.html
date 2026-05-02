@@ -518,6 +518,10 @@
     padding:max(14px, env(safe-area-inset-top,14px)) 20px 12px;
     display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
   }
+  /* Safari iPhone fallback: status bar can render on top in some modes */
+  @supports (-webkit-touch-callout: none) {
+    .header { padding-top: max(20px, env(safe-area-inset-top, 20px)); }
+  }
   .header::before{
     content:'';position:absolute;inset:0;
     background:linear-gradient(90deg,transparent,var(--gold-faint),transparent);
@@ -1270,7 +1274,7 @@
     <button class="sort-btn active" id="sort-desc" onclick="setSort('desc')">↓ Mới nhất</button>
     <button class="sort-btn" id="sort-asc" onclick="setSort('asc')">↑ Cũ nhất</button>
   </div>
-  <div id="trade-list" role="main" aria-label="Danh sách lệnh" style="flex:1;padding-bottom:80px;"></div>
+  <div id="trade-list" role="main" aria-label="Danh sách lệnh" style="flex:1;padding-bottom:calc(90px + env(safe-area-inset-bottom,0));"></div>
 </div>
 
 <!-- COPY/MOVE TO THEORY MODAL -->
@@ -1489,7 +1493,7 @@
     <div class="header-title"><div class="label">Báo Cáo</div><div class="name">Thống Kê</div></div>
     <button class="header-btn" onclick="openNew()" style="font-size:20px;font-weight:700;" title="Thêm lệnh mới">+</button>
   </div>
-  <div id="stats-body" style="padding:16px 18px 40px;flex:1;overflow-y:auto;"></div>
+  <div id="stats-body" style="padding:16px 18px calc(90px + env(safe-area-inset-bottom,0));flex:1;overflow-y:auto;"></div>
 </div>
 
 <!-- NEW TRADE -->
@@ -1730,7 +1734,7 @@
   <div id="theory-edit-bar" style="display:none;"></div>
 
   <!-- Cards -->
-  <div id="theory-list" role="main" aria-label="Danh sách lý thuyết" style="flex:1;padding:14px 18px 100px;overflow-y:auto;"></div>
+  <div id="theory-list" role="main" aria-label="Danh sách lý thuyết" style="flex:1;padding:14px 18px calc(110px + env(safe-area-inset-bottom,0));overflow-y:auto;"></div>
 </div>
 
 <!-- THEORY EDIT MODAL -->
@@ -1855,7 +1859,7 @@
     <div class="header-title"><div class="label">Tuỳ Chỉnh</div><div class="name">Giao Diện</div></div>
     <div style="width:36px;"></div>
   </div>
-  <div style="padding:20px 18px 60px;flex:1;overflow-y:auto;">
+  <div style="padding:20px 18px calc(110px + env(safe-area-inset-bottom,0));flex:1;overflow-y:auto;">
 
     <!-- DARK / LIGHT MODE -->
     <div class="section-label" style="margin-top:4px;">Chế Độ Nền</div>
