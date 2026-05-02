@@ -1200,6 +1200,16 @@
         <button onclick="addTheoryRuleField()" style="margin-top:8px;width:100%;padding:8px;border-radius:var(--radius-sm);border:1px dashed var(--gold-faint);background:transparent;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;letter-spacing:1px;">+ Thêm dòng phân tích</button>
       </div>
 
+      <!-- ── KHUNG THỜI GIAN ── -->
+      <div style="background:var(--bg3);border-radius:var(--radius-md);padding:14px;border:1px solid var(--gold-faint);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:11px;letter-spacing:0.5px;color:var(--gold);font-family:var(--sys);opacity:0.8;">KHUNG THỜI GIAN</div>
+          <div style="font-size:11px;color:var(--gold);opacity:0.45;font-family:var(--sys);">Phân tích theo từng TF</div>
+        </div>
+        <div id="te-tf-sections" style="display:flex;flex-direction:column;gap:10px;"></div>
+        <button onclick="addTfSection()" style="width:100%;margin-top:8px;padding:10px;border-radius:var(--radius-sm);border:1px dashed var(--gold-dim);background:transparent;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;letter-spacing:1px;">+ Thêm khung thời gian</button>
+      </div>
+
       <!-- ── HIGHLIGHT ── -->
       <div style="background:var(--bg3);border-radius:var(--radius-md);padding:14px;border:1px solid var(--gold-faint);">
         <div style="font-size:11px;letter-spacing:0.5px;color:var(--gold);font-family:var(--sys);margin-bottom:8px;opacity:0.8;">KẾT LUẬN / HIGHLIGHT</div>
@@ -3498,7 +3508,7 @@ function populateTheoryCatSelect(selectedKey) {
 }
 
 window.openAddTheoryCard = function() {
-  theoryEditingId = null; teImgSections = [];
+  theoryEditingId = null; teImgSections = []; teSections = [];
   window._teRuleFocusIdx = null; window._teImgSectionFocusIdx = null;
   document.getElementById("theory-edit-modal-title").textContent = "THÊM THẺ MỚI";
   ["te-icon","te-title","te-tag","te-img","te-hl-text"].forEach(id=>document.getElementById(id).value="");
@@ -3507,6 +3517,7 @@ window.openAddTheoryCard = function() {
   document.getElementById("te-hl-type").value="tip";
   document.getElementById("te-delete-btn").style.display="none";
   document.getElementById("te-img-sections").innerHTML="";
+  document.getElementById("te-tf-sections").innerHTML="";
   buildRuleFields([]);
   addTheoryImgSection("H4"); addTheoryImgSection("H1");
   document.getElementById("modal-theory-edit").style.display="flex";
@@ -3515,7 +3526,7 @@ window.openAddTheoryCard = function() {
 
 window.openEditTheoryCard = function(id) {
   const t = getMergedTheory().find(x=>x.id===id); if(!t) return;
-  theoryEditingId = id; teImgSections = [];
+  theoryEditingId = id; teImgSections = []; teSections = [];
   window._teRuleFocusIdx = null; window._teImgSectionFocusIdx = null;
   document.getElementById("theory-edit-modal-title").textContent = "CHỈNH SỬA THẺ";
   document.getElementById("te-icon").value = t.icon||"📌";
@@ -3527,16 +3538,79 @@ window.openEditTheoryCard = function(id) {
   document.getElementById("te-hl-text").value = t.highlight?.text||t.hlText||"";
   document.getElementById("te-delete-btn").style.display="block";
   document.getElementById("te-img-sections").innerHTML="";
+  document.getElementById("te-tf-sections").innerHTML="";
   buildRuleFields(t.rules||[]);
   const sections=t.imgSections||[];
   if(sections.length) sections.forEach(s=>addTheoryImgSection(s.tf||"",s.images||[],s.caption||""));
   else addTheoryImgSection("H4");
+  (t.tfSections||[]).forEach(s=>addTfSection(s.tf||"",s.notes||"",s.images||[]));
   document.getElementById("modal-theory-edit").style.display="flex";
   setTimeout(()=>document.getElementById("te-scroll-body").scrollTop=0,50);
 };
 
 // ── Rule items: each rule = {t: text, imgs: [base64...]} ──
 let teRuleItems = []; // [{t, imgs}]
+
+// ── TF Sections: [{tf, notes, images}] — KHUNG THỜI GIAN block ──
+let teSections = [];
+
+window.addTfSection = function(tf="", notes="", images=[]) {
+  const idx = teSections.length;
+  teSections.push({tf, notes, images:[...images]});
+  const wrap = document.getElementById("te-tf-sections");
+  const sec = document.createElement("div");
+  sec.id = "te-tfsec-"+idx;
+  sec.style.cssText = "background:var(--bg);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:10px;display:flex;flex-direction:column;gap:8px;";
+
+  const num = idx + 1;
+  sec.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--gold-faint);border:1px solid var(--gold-dim);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--gold);font-family:var(--sys);font-weight:700;">${num}</div>
+      <input class="tfsec-tf-input" data-idx="${idx}" placeholder="Khung thời gian (D1, H4, H1...)" value="${esc(tf)}" style="flex:1;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:7px 10px;color:var(--gold);font-size:13px;font-weight:600;font-family:var(--sys);outline:none;"/>
+      <button class="tfsec-remove" data-idx="${idx}" style="background:none;border:1px solid #ef535044;border-radius:6px;padding:6px 10px;color:var(--loss);font-size:12px;cursor:pointer;flex-shrink:0;">✕</button>
+    </div>
+    <textarea class="tfsec-notes-input" data-idx="${idx}" placeholder="Phân tích / nhận định cho khung này..." rows="3" style="width:100%;background:var(--bg3);border:1px solid var(--gold-faint);border-radius:6px;padding:8px 10px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;resize:vertical;line-height:1.6;">${esc(notes)}</textarea>
+    <div id="te-tfsec-imgs-${idx}" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    <div style="display:flex;gap:6px;">
+      <button class="tfsec-pick-img" data-idx="${idx}" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:6px 12px;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;white-space:nowrap;">📎 Thêm ảnh</button>
+      <input type="file" accept="image/*" multiple style="display:none" id="te-tfsec-file-${idx}"/>
+    </div>`;
+
+  wrap.appendChild(sec);
+
+  sec.querySelector(".tfsec-tf-input").addEventListener("input", e => { if(teSections[idx]) teSections[idx].tf = e.target.value; });
+  sec.querySelector(".tfsec-notes-input").addEventListener("input", e => { if(teSections[idx]) teSections[idx].notes = e.target.value; });
+  sec.querySelector(".tfsec-remove").addEventListener("click", () => { teSections[idx]=null; sec.style.display="none"; });
+  sec.querySelector(".tfsec-pick-img").addEventListener("click", () => { document.getElementById("te-tfsec-file-"+idx)?.click(); });
+  document.getElementById("te-tfsec-file-"+idx).addEventListener("change", async function() {
+    for (const f of Array.from(this.files)) {
+      await new Promise(res=>{const r=new FileReader();r.onload=async ev=>{try{const c=await compressImage(ev.target.result);if(teSections[idx])teSections[idx].images.push(c);}catch(e){}res();};r.readAsDataURL(f);});
+    }
+    renderTfSecImgs(idx); this.value="";
+  });
+  renderTfSecImgs(idx);
+};
+
+function renderTfSecImgs(idx) {
+  const zone = document.getElementById("te-tfsec-imgs-"+idx);
+  if (!zone) return;
+  const sec = teSections[idx];
+  zone.innerHTML = "";
+  if (!sec || !sec.images || !sec.images.length) return;
+  sec.images.forEach((src, i) => {
+    const d = document.createElement("div");
+    d.style.cssText = "position:relative;flex:0 0 auto;";
+    const img = document.createElement("img");
+    img.src = src;
+    img.style.cssText = "width:88px;height:66px;object-fit:cover;border-radius:6px;border:1px solid var(--gold-dim);display:block;cursor:zoom-in;";
+    img.addEventListener("click", () => openTeImgFull(src));
+    const del = document.createElement("button");
+    del.innerHTML = "✕";
+    del.style.cssText = "position:absolute;top:2px;right:2px;background:#000000cc;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:bold;z-index:10;";
+    del.addEventListener("click", e => { e.stopPropagation(); if(teSections[idx])teSections[idx].images.splice(i,1); renderTfSecImgs(idx); });
+    d.appendChild(img); d.appendChild(del); zone.appendChild(d);
+  });
+}
 
 function buildRuleFields(rules) {
   teRuleItems = (rules.length ? rules : [""]).map(r =>
@@ -3711,7 +3785,8 @@ window.saveTheoryCard = async function() {
     .filter(r => r.t.trim() || r.imgs?.length)
     .map(r => ({t: r.t.trim(), imgs: r.imgs||[]}));
   const imgSections=teImgSections.filter(Boolean).filter(s=>s.images.length>0||s.caption||s.tf);
-  const card={id,icon:document.getElementById("te-icon").value.trim()||"📌",cat:document.getElementById("te-cat").value,title,tag:document.getElementById("te-tag").value.trim(),img:document.getElementById("te-img").value,rules,imgSections,highlight:{type:document.getElementById("te-hl-type").value,text:document.getElementById("te-hl-text").value.trim()}};
+  const tfSections=teSections.filter(Boolean).filter(s=>s.tf||s.notes||s.images?.length);
+  const card={id,icon:document.getElementById("te-icon").value.trim()||"📌",cat:document.getElementById("te-cat").value,title,tag:document.getElementById("te-tag").value.trim(),img:document.getElementById("te-img").value,rules,imgSections,tfSections,highlight:{type:document.getElementById("te-hl-type").value,text:document.getElementById("te-hl-text").value.trim()}};
   const sizeKB = estimateKB(card);
   if(sizeKB>950){try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
   showToast("⚠️ Quá lớn ("+sizeKB+"KB)! Xóa bớt ảnh hoặc dùng ảnh nhỏ hơn.");return;}
@@ -3958,7 +4033,6 @@ function renderTheory() {
     const mastered = theoryMastered[t.id];
     const highlight = t.highlight || (t.hlText ? {type:t.hlType||"tip",text:t.hlText} : null);
     const quiz = t.quiz || (t.qQ ? {q:t.qQ,opts:t.qOpts||[],ans:t.qAns||0} : null);
-    const rules = (t.rules||[]).map(r=>typeof r==="string"?r:r.t);
     const catLabel = theoryFolderLabel(t.cat||"basic");
     const editBtns = `
       <button onclick="event.stopPropagation();openEditTheoryCard('${t.id}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:13px;cursor:pointer;flex-shrink:0;" title="Sửa">✏️</button>
@@ -3988,7 +4062,7 @@ function renderTheory() {
               </div>`).join("");
             return secsHtml;
           })()}
-          ${rules.map(r => {
+          ${(t.rules||[]).map(r => {
             const text = typeof r === "string" ? r : (r.t||"");
             const imgs = (typeof r === "object" && Array.isArray(r.imgs) && r.imgs.length) ? r.imgs : [];
             if (!text && !imgs.length) return "";
@@ -4003,6 +4077,24 @@ function renderTheory() {
               </div>
             </div>`;
           }).join("")}
+          ${(()=>{
+            const tfsecs = (t.tfSections||[]).filter(s=>s&&(s.tf||s.notes||s.images?.length));
+            if(!tfsecs.length) return "";
+            return `<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;">
+              <div style="font-size:10px;letter-spacing:1px;color:var(--gold);opacity:0.7;font-family:var(--sys);margin-bottom:10px;">KHUNG THỜI GIAN</div>
+              ${tfsecs.map((s,i)=>`
+                <div style="margin-bottom:12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;">
+                  <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--border);">
+                    <div style="width:20px;height:20px;border-radius:50%;background:var(--gold-faint);border:1px solid var(--gold-dim);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--gold);font-weight:700;flex-shrink:0;">${i+1}</div>
+                    ${s.tf?`<div style="font-size:12px;color:var(--gold);font-weight:600;font-family:var(--sys);letter-spacing:0.5px;">${s.tf}</div>`:""}
+                  </div>
+                  <div style="padding:10px 12px;">
+                    ${(s.images||[]).map(src=>`<img src="${src}" onclick="document.getElementById('theory-img-fullscreen').style.display='flex';document.getElementById('theory-img-fullscreen-img').src=this.src" style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);cursor:zoom-in;display:block;margin-bottom:8px;" loading="lazy"/>`).join("")}
+                    ${s.notes?`<div style="font-size:13px;color:var(--text);line-height:1.7;">${s.notes}</div>`:""}
+                  </div>
+                </div>`).join("")}
+            </div>`;
+          })()}
           ${highlight?.text?`<div class="theory-highlight ${highlight.type==="warn"?"warn":highlight.type==="info"?"info":""}">💡 ${highlight.text}</div>`:""}
           <button onclick="toggleMastered('${t.id}')" style="width:100%;margin-top:14px;padding:12px;border-radius:var(--radius-md);border:1px solid ${mastered?"var(--win)":"var(--gold-faint)"};background:${mastered?"#4caf5018":"transparent"};color:${mastered?"var(--win)":"var(--gold)"};font-family:var(--sys);font-size:11px;cursor:pointer;transition:all 0.2s;">
             ${mastered?"✓ ĐÃ THUỘC":"○ ĐÁNH DẤU ĐÃ THUỘC"}
