@@ -341,14 +341,14 @@
     #trade-list { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important; }
     #theory-list { padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important; }
     #stats-body { padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)) !important; }
-    /* Paint body safe-area zones to match adjacent UI:
-       - Top zone (status bar area): dark #060606 matching header start
-       - Bottom zone (home indicator area): bg2 matching bottom-nav */
+    /* Paint body safe-area zones to match adjacent UI using theme variables.
+       Top zone: var(--bg) matching screen background.
+       Bottom zone: var(--bg2) matching bottom-nav background. */
     body {
       background:
         linear-gradient(to bottom,
-          #060606 0,
-          #060606 env(safe-area-inset-top, 0),
+          var(--bg) 0,
+          var(--bg) env(safe-area-inset-top, 0),
           transparent env(safe-area-inset-top, 0)),
         linear-gradient(to top,
           var(--bg2) 0,
