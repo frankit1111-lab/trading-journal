@@ -3581,16 +3581,24 @@ function renderRuleField(idx) {
   ta.addEventListener("focus", () => {
     window._teRuleFocusIdx = idx;
     window._teImgSectionFocusIdx = null;
-    // Visual: highlight this rule as paste target
     document.querySelectorAll("[id^='te-rule-']").forEach(r => r.style.borderColor = "var(--gold-faint)");
-    document.getElementById("te-rule-"+idx).style.borderColor = "var(--gold)";
+    const ruleEl = document.getElementById("te-rule-"+idx);
+    if (ruleEl) ruleEl.style.borderColor = "var(--gold)";
     document.querySelectorAll("[id^='te-sec-']").forEach(s => s.style.borderColor = "var(--gold-faint)");
   });
+  ta.addEventListener("mousedown", () => {
+    window._teRuleFocusIdx = idx;
+    window._teImgSectionFocusIdx = null;
+  });
   ta.addEventListener("blur", () => {
+    // Save last known focus for paste (paste fires after blur)
+    window._lastTeRuleFocusIdx = idx;
+    window._lastTeImgSectionFocusIdx = null;
     setTimeout(() => {
       if(window._teRuleFocusIdx===idx) window._teRuleFocusIdx=null;
-      document.getElementById("te-rule-"+idx)?.style && (document.getElementById("te-rule-"+idx).style.borderColor = "var(--gold-faint)");
-    }, 200);
+      const ruleEl = document.getElementById("te-rule-"+idx);
+      if (ruleEl) ruleEl.style.borderColor = "var(--gold-faint)";
+    }, 500); // longer timeout — paste fires after blur
   });
 
   const delBtn = document.createElement("button");
@@ -3625,7 +3633,11 @@ function renderRuleField(idx) {
   fileInput.type = "file"; fileInput.accept = "image/*"; fileInput.multiple = true;
   fileInput.style.display = "none";
   fileInput.id = "te-rule-file-"+idx;
-  addImgBtn.addEventListener("click", () => fileInput.click());
+  addImgBtn.addEventListener("click", () => {
+    window._teRuleFocusIdx = idx;
+    window._teImgSectionFocusIdx = null;
+    fileInput.click();
+  });
   fileInput.addEventListener("change", async () => {
     for (const f of Array.from(fileInput.files)) {
       await new Promise(res => {
@@ -3703,8 +3715,9 @@ function attachTePaste() {
         reader.onload = async ev => {
           try {
             const c = await compressImage(ev.target.result);
-            const ruleIdx = window._teRuleFocusIdx;
-            const secIdx = window._teImgSectionFocusIdx;
+            // Use current focus OR last known focus (paste fires after blur sometimes)
+            const ruleIdx = window._teRuleFocusIdx ?? window._lastTeRuleFocusIdx;
+            const secIdx = window._teImgSectionFocusIdx ?? window._lastTeImgSectionFocusIdx;
             if (ruleIdx !== null && ruleIdx !== undefined && teRuleItems[ruleIdx]) {
               teRuleItems[ruleIdx].imgs.push(c);
               renderRuleImgs(ruleIdx);
@@ -3735,6 +3748,9 @@ window.saveTheoryCard = async function() {
   const id=theoryEditingId||("tc_"+Date.now());
   const rules = teRuleItems.filter(r => r.t.trim() || r.imgs?.length)
     .map(r => ({t: r.t.trim(), imgs: r.imgs||[]}));
+  const totalImgs = rules.reduce((sum, r) => sum + (r.imgs?.length||0), 0)
+    + teImgSections.filter(Boolean).reduce((sum, s) => sum + (s.images?.length||0), 0);
+  console.log("Saving card:", {rules: rules.length, rulesWithImgs: rules.filter(r=>r.imgs?.length).length, totalImgs, imgSections: teImgSections.filter(Boolean).length});
   const imgSections=teImgSections.filter(Boolean).filter(s=>s.images.length>0||s.caption||s.tf);
   const card={id,icon:document.getElementById("te-icon").value.trim()||"📌",cat:document.getElementById("te-cat").value,title,tag:document.getElementById("te-tag").value.trim(),img:document.getElementById("te-img").value,rules,imgSections,highlight:{type:document.getElementById("te-hl-type").value,text:document.getElementById("te-hl-text").value.trim()}};
   const sizeKB = estimateKB(card);
