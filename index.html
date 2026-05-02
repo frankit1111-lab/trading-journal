@@ -764,6 +764,13 @@
     padding-bottom:env(safe-area-inset-bottom,0);
     backdrop-filter:blur(20px);
   }
+  /* PWA standalone: reduce bottom padding so text sits closer to home indicator (more compact) */
+  @media all and (display-mode: standalone) {
+    .bottom-nav {
+      /* Use only half of safe-area-inset-bottom to bring text closer to bottom edge */
+      padding-bottom: max(8px, calc(env(safe-area-inset-bottom, 0) * 0.4));
+    }
+  }
   .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 8px;cursor:pointer;border:none;background:transparent;color:var(--gold);opacity:0.55;transition:all 0.2s;font-family:var(--sys);}
   .bn-item.active{opacity:1;}
   .bn-item .bn-icon{font-size:22px;margin-bottom:3px;}
