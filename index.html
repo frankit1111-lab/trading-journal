@@ -147,19 +147,7 @@
     #screen-detail.active, #screen-new.active, #screen-edit.active {
       display: flex !important;
     }
-    /* When detail not active, show empty state in right column */
-    body.tablet-no-detail::before {
-      content: "← Chọn 1 lệnh để xem chi tiết";
-      position: fixed;
-      top: 50%; left: calc(380px + (100vw - 380px) / 2);
-      transform: translate(-50%, -50%);
-      color: var(--gold);
-      opacity: 0.4;
-      font-size: 16px;
-      font-family: var(--sys);
-      z-index: 1;
-      pointer-events: none;
-    }
+    /* When detail not active, show empty state — handled by #empty-right-pane HTML */
     /* Bottom nav stays at bottom of left column */
     .bottom-nav {
       left: 0 !important;
@@ -254,18 +242,10 @@
     #screen-detail.active, #screen-new.active, #screen-edit.active {
       display: flex !important;
     }
-    /* Empty state in right column */
-    body.desktop-no-detail::before {
-      content: "← Chọn 1 lệnh để xem chi tiết";
-      position: fixed;
-      top: 50%; left: calc(220px + 420px + (100vw - 640px) / 2);
-      transform: translate(-50%, -50%);
-      color: var(--gold);
-      opacity: 0.4;
-      font-size: 18px;
-      font-family: var(--sys);
-      z-index: 1;
-      pointer-events: none;
+    /* Empty state in right column — replaced by HTML panel below */
+    body.desktop-no-detail #empty-right-pane,
+    body.tablet-no-detail #empty-right-pane {
+      display: flex !important;
     }
     /* Save bar in right column */
     .save-bar {
@@ -276,6 +256,98 @@
     }
     /* Detail content max-width for readability */
     .detail-body, .form-body { max-width: 720px; margin: 0 auto; }
+  }
+
+  /* Welcome panel (right column when no trade selected) */
+  #empty-right-pane {
+    display: none;
+    position: fixed;
+    top: 0; bottom: 0; right: 0;
+    flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px;
+    pointer-events: auto;
+    z-index: 1;
+    background: var(--bg);
+    text-align: center;
+  }
+  @media (min-width: 768px) and (max-width: 1199px) {
+    #empty-right-pane { left: 380px; }
+  }
+  @media (min-width: 1200px) {
+    #empty-right-pane { left: calc(220px + 420px); }
+  }
+  .empty-pane-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.7;
+  }
+  .empty-pane-title {
+    font-family: var(--serif, 'Cinzel', serif);
+    font-size: 24px;
+    color: var(--gold);
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+  }
+  .empty-pane-sub {
+    font-family: var(--sys);
+    font-size: 14px;
+    color: var(--text);
+    opacity: 0.7;
+    max-width: 380px;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+  .empty-pane-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+    width: 100%;
+    max-width: 480px;
+  }
+  .empty-pane-stat {
+    background: var(--bg2);
+    border: 1px solid var(--gold-faint);
+    border-radius: var(--radius-md);
+    padding: 16px 8px;
+    text-align: center;
+  }
+  .empty-pane-stat-val {
+    font-family: var(--sys);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .empty-pane-stat-lbl {
+    font-family: var(--sys);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--text);
+    opacity: 0.6;
+  }
+  .empty-pane-cta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .empty-pane-btn {
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gold);
+    background: var(--gold-faint);
+    color: var(--gold);
+    font-family: var(--sys);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .empty-pane-btn:hover {
+    background: var(--gold);
+    color: #000;
   }
 
   /* ── HEADER ── */
@@ -292,15 +364,17 @@
     background:linear-gradient(90deg,transparent,var(--gold-faint),transparent);
     opacity:0.3;pointer-events:none;
   }
-  .header-title{text-align:center;flex:1;}
+  .header-title{text-align:center;flex:1;min-width:0;overflow:hidden;}
   .header-title .label{
     font-size:11px;letter-spacing:1.5px;color:var(--gold);
     text-transform:uppercase;font-family:var(--sys);
     opacity:0.7;display:block;margin-bottom:2px;font-weight:500;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .header-title .name{
-    font-family:var(--sys);font-size:19px;color:var(--gold);
+    font-family:var(--sys);font-size:17px;color:var(--gold);
     letter-spacing:0.3px;font-weight:600;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .header-btn{
     background:none;border:none;color:var(--gold);font-size:22px;
@@ -962,6 +1036,24 @@
     <span class="ds-icon">➕</span><span>Lệnh mới</span>
   </button>
 </aside>
+
+
+<!-- EMPTY STATE (cột phải khi chưa chọn trade — chỉ hiện trên tablet/desktop) -->
+<div id="empty-right-pane">
+  <div class="empty-pane-icon">📒</div>
+  <div class="empty-pane-title">TradeLog</div>
+  <div class="empty-pane-sub">Chọn một lệnh từ danh sách để xem chi tiết, hoặc tạo lệnh mới để ghi setup hôm nay.</div>
+  <div class="empty-pane-stats" id="empty-pane-stats">
+    <div class="empty-pane-stat"><div class="empty-pane-stat-val" id="ep-total">—</div><div class="empty-pane-stat-lbl">TỔNG</div></div>
+    <div class="empty-pane-stat"><div class="empty-pane-stat-val win" id="ep-win">—</div><div class="empty-pane-stat-lbl">WIN</div></div>
+    <div class="empty-pane-stat"><div class="empty-pane-stat-val loss" id="ep-loss">—</div><div class="empty-pane-stat-lbl">LOSS</div></div>
+    <div class="empty-pane-stat"><div class="empty-pane-stat-val" id="ep-wr">—</div><div class="empty-pane-stat-lbl">WIN RATE</div></div>
+  </div>
+  <div class="empty-pane-cta">
+    <button class="empty-pane-btn" onclick="openNew()">➕ Tạo lệnh mới</button>
+    <button class="empty-pane-btn" onclick="navSidebar('stats')" style="background:transparent;">📊 Xem thống kê</button>
+  </div>
+</div>
 
 
 <!-- LIST -->
@@ -2222,6 +2314,11 @@ function renderList() {
   const elWin=document.getElementById("stat-win"); if(elWin) elWin.textContent=wins;
   const elLoss=document.getElementById("stat-loss"); if(elLoss) elLoss.textContent=losses;
   const elWr=document.getElementById("stat-wr"); if(elWr) elWr.textContent=(trades.length?Math.round(wins/trades.length*100):0)+"%";
+  // Empty right-pane stats (tablet/desktop)
+  const epTotal=document.getElementById("ep-total"); if(epTotal) epTotal.textContent=trades.length;
+  const epWin=document.getElementById("ep-win"); if(epWin) epWin.textContent=wins;
+  const epLoss=document.getElementById("ep-loss"); if(epLoss) epLoss.textContent=losses;
+  const epWr=document.getElementById("ep-wr"); if(epWr) epWr.textContent=(trades.length?Math.round(wins/trades.length*100):0)+"%";
   updateStreakRow();
 
   const el=document.getElementById("trade-list");
@@ -2325,7 +2422,7 @@ window.openDetail=function(id){
   }
   currentTF="D1";
   const t = currentTrade;
-  document.getElementById("detail-header-title").textContent=(t.title||"—").substring(0,24);
+  document.getElementById("detail-header-title").textContent=(t.title||"—").substring(0,20);
 
   // Banner: date + folder + tags
   const dd = t.tradeDate ? fmtDate(t.tradeDate) : (t.createdAt ? fmtDate(t.createdAt) : "");
