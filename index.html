@@ -871,8 +871,8 @@
   <button class="bn-item" id="bn-theory" onclick="showScreen('theory')" aria-label="Lý thuyết">
     <div class="bn-icon" aria-hidden="true">📚</div><div class="bn-label">LÝ THUYẾT</div>
   </button>
-  <button class="bn-item" id="bn-import" onclick="showScreen('import')">
-    <div class="bn-icon">📥</div><div class="bn-label">IMPORT</div>
+  <button class="bn-item" id="bn-aichat" onclick="showScreen('aichat')" aria-label="AI Hỏi đáp">
+    <div class="bn-icon" aria-hidden="true">💬</div><div class="bn-label">AI CHAT</div>
   </button>
   <button class="bn-item" id="bn-settings" onclick="showScreen('settings')">
     <div class="bn-icon">⚙️</div><div class="bn-label">CÀI ĐẶT</div>
@@ -914,6 +914,107 @@
 
 <!-- GLOBAL FAB -->
 <button class="fab" id="fab-btn" onclick="openNew()" aria-label="Thêm lệnh mới">+</button>
+
+<!-- AI CHAT SCREEN -->
+<div class="screen" id="screen-aichat">
+  <div class="header">
+    <button class="header-btn" onclick="clearAIChat()" title="Xoá hội thoại" style="font-size:18px;">🗑</button>
+    <div class="header-title"><div class="label">Trợ Lý ICT</div><div class="name">AI Chat</div></div>
+    <button class="header-btn" onclick="toggleAIContext()" title="Ngữ cảnh" style="font-size:18px;" id="ai-ctx-btn">🎯</button>
+  </div>
+
+  <!-- Context bar -->
+  <div id="ai-context-bar" style="padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;color:var(--gold);">
+      <span style="font-weight:600;opacity:0.8;">Ngữ cảnh:</span>
+      <span id="ai-context-label">Tổng quát</span>
+      <span style="opacity:0.4;">·</span>
+      <button onclick="toggleAIModel()" id="ai-model-btn" style="background:transparent;border:1px solid var(--gold-dim);border-radius:10px;padding:2px 8px;color:var(--gold);font-size:11px;cursor:pointer;font-family:var(--sys);">⚡ Haiku</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--gold);opacity:0.75;">
+      <span id="ai-usage-info">--</span>
+      <button onclick="showAIUsageModal()" style="background:transparent;border:none;color:var(--gold);font-size:13px;cursor:pointer;padding:0 4px;" title="Chi tiết">📊</button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div id="ai-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;"></div>
+
+  <!-- Input bar -->
+  <div style="padding:12px 14px;border-top:1px solid var(--border);background:var(--bg);display:flex;gap:8px;align-items:flex-end;flex-shrink:0;padding-bottom:calc(12px + env(safe-area-inset-bottom,0));">
+    <textarea id="ai-input" placeholder="Hỏi về ICT, setup, thị trường..." rows="1"
+      style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:10px 16px;color:var(--text);font-size:15px;font-family:var(--sys);outline:none;resize:none;line-height:1.4;max-height:120px;"></textarea>
+    <button id="ai-send-btn" onclick="sendAIMessage()" style="flex-shrink:0;background:var(--gold);border:none;border-radius:50%;width:42px;height:42px;color:#000;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;">↑</button>
+  </div>
+</div>
+
+<!-- AI Usage Detail modal -->
+<div id="ai-usage-modal" style="display:none;position:fixed;inset:0;background:#000a;z-index:1000;align-items:flex-end;justify-content:center;" onclick="if(event.target===this)closeAIUsageModal()">
+  <div style="background:var(--bg2);width:100%;max-width:480px;border-radius:var(--radius-xl) var(--radius-xl) 0 0;padding:20px 18px 28px;max-height:85vh;overflow-y:auto;" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div style="font-size:15px;color:var(--gold);font-weight:700;">📊 Chi phí AI</div>
+      <button onclick="closeAIUsageModal()" style="background:transparent;border:none;color:var(--gold);font-size:20px;cursor:pointer;">✕</button>
+    </div>
+
+    <!-- Today -->
+    <div style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:14px;margin-bottom:10px;">
+      <div style="font-size:11px;color:var(--gold);opacity:0.7;text-transform:uppercase;font-weight:600;margin-bottom:8px;">Hôm nay</div>
+      <div id="ai-usage-today" style="font-size:14px;color:var(--text);line-height:1.7;"></div>
+    </div>
+
+    <!-- Month -->
+    <div style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:14px;margin-bottom:14px;">
+      <div style="font-size:11px;color:var(--gold);opacity:0.7;text-transform:uppercase;font-weight:600;margin-bottom:8px;">Tháng này</div>
+      <div id="ai-usage-month" style="font-size:14px;color:var(--text);line-height:1.7;"></div>
+    </div>
+
+    <!-- Daily limit -->
+    <div style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:14px;margin-bottom:14px;">
+      <div style="font-size:11px;color:var(--gold);opacity:0.7;text-transform:uppercase;font-weight:600;margin-bottom:10px;">Giới hạn hằng ngày</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <input type="number" id="ai-daily-limit-input" min="1" max="500" style="flex:1;background:var(--bg);border:1px solid var(--gold-faint);border-radius:8px;padding:9px 12px;color:var(--text);font-size:15px;font-family:var(--sys);outline:none;"/>
+        <span style="font-size:13px;color:var(--gold);opacity:0.7;">tin nhắn/ngày</span>
+      </div>
+      <div style="font-size:11px;color:var(--gold);opacity:0.55;margin-top:8px;">Đặt 0 để không giới hạn. Reset mỗi ngày 00:00</div>
+    </div>
+
+    <!-- Model -->
+    <div style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:14px;margin-bottom:14px;">
+      <div style="font-size:11px;color:var(--gold);opacity:0.7;text-transform:uppercase;font-weight:600;margin-bottom:10px;">Model AI</div>
+      <button onclick="setAIModel('haiku')" id="model-opt-haiku" class="model-opt" style="width:100%;text-align:left;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;font-family:var(--sys);cursor:pointer;margin-bottom:6px;">
+        <div style="font-weight:700;color:var(--gold);">⚡ Haiku 4.5 — Rẻ &amp; nhanh</div>
+        <div style="font-size:11px;opacity:0.6;margin-top:2px;">$1/$5 per 1M tokens · ~60 VNĐ/câu hỏi</div>
+      </button>
+      <button onclick="setAIModel('sonnet')" id="model-opt-sonnet" class="model-opt" style="width:100%;text-align:left;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;font-family:var(--sys);cursor:pointer;">
+        <div style="font-weight:700;color:var(--gold);">🧠 Sonnet 4 — Thông minh hơn</div>
+        <div style="font-size:11px;opacity:0.6;margin-top:2px;">$3/$15 per 1M tokens · ~200 VNĐ/câu hỏi</div>
+      </button>
+    </div>
+
+    <button onclick="resetAIUsage()" style="width:100%;padding:12px;border-radius:8px;border:1px solid #ef535055;background:transparent;color:#ef5350;font-size:13px;cursor:pointer;font-family:var(--sys);">🗑 Xoá lịch sử usage</button>
+    <button onclick="saveAILimitFromModal();closeAIUsageModal()" style="width:100%;padding:14px;border-radius:8px;border:1px solid var(--gold);background:var(--gold-faint);color:var(--gold);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sys);margin-top:8px;">💾 LƯU CÀI ĐẶT</button>
+  </div>
+</div>
+
+<!-- AI Context picker modal -->
+<div id="ai-ctx-modal" style="display:none;position:fixed;inset:0;background:#000a;z-index:1000;align-items:flex-end;justify-content:center;" onclick="if(event.target===this)closeAIContextModal()">
+  <div style="background:var(--bg2);width:100%;max-width:480px;border-radius:var(--radius-xl) var(--radius-xl) 0 0;padding:20px 18px 28px;max-height:70vh;overflow-y:auto;" onclick="event.stopPropagation()">
+    <div style="font-size:13px;letter-spacing:0.5px;color:var(--gold);font-weight:600;margin-bottom:14px;text-transform:uppercase;">Chọn ngữ cảnh AI</div>
+    <button onclick="setAIContext('general')" class="ctx-opt" style="width:100%;text-align:left;padding:14px 16px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:15px;font-family:var(--sys);cursor:pointer;margin-bottom:8px;">
+      🌐 <strong style="color:var(--gold);">Tổng quát</strong> — Hỏi gì cũng được
+    </button>
+    <button onclick="setAIContext('ict')" class="ctx-opt" style="width:100%;text-align:left;padding:14px 16px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:15px;font-family:var(--sys);cursor:pointer;margin-bottom:8px;">
+      📚 <strong style="color:var(--gold);">ICT Coach</strong> — Hỏi về methodology, concepts
+    </button>
+    <button onclick="setAIContext('myTrades')" class="ctx-opt" style="width:100%;text-align:left;padding:14px 16px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:15px;font-family:var(--sys);cursor:pointer;margin-bottom:8px;">
+      📋 <strong style="color:var(--gold);">Lệnh của tôi</strong> — Phân tích lệnh đã ghi
+    </button>
+    <button onclick="setAIContext('myTheory')" class="ctx-opt" style="width:100%;text-align:left;padding:14px 16px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:15px;font-family:var(--sys);cursor:pointer;margin-bottom:8px;">
+      🎓 <strong style="color:var(--gold);">Thẻ lý thuyết</strong> — AI biết thẻ trong app
+    </button>
+    <button onclick="closeAIContextModal()" style="width:100%;padding:12px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--border);color:var(--gold);font-size:14px;cursor:pointer;margin-top:6px;">Đóng</button>
+  </div>
+</div>
 
 <!-- STATS -->
 <div class="screen" id="screen-stats">
@@ -1336,7 +1437,10 @@
     </div>
 
     <!-- RESET -->
-    <button onclick="resetTheme()" style="width:100%;padding:12px;border-radius:var(--radius-md);border:1px solid #ef535055;background:none;color:#ef535099;font-family:var(--sys);font-size:12px;letter-spacing:2px;cursor:pointer;margin-bottom:20px;">↺ ĐẶT LẠI MẶC ĐỊNH</button>
+    <button onclick="resetTheme()" style="width:100%;padding:12px;border-radius:var(--radius-md);border:1px solid #ef535055;background:none;color:#ef535099;font-family:var(--sys);font-size:12px;letter-spacing:2px;cursor:pointer;margin-bottom:12px;">↺ ĐẶT LẠI MẶC ĐỊNH</button>
+
+    <!-- IMPORT shortcut -->
+    <button onclick="showScreen('import')" style="width:100%;padding:14px;border-radius:var(--radius-md);border:1px solid var(--gold-dim);background:var(--gold-faint);color:var(--gold);font-family:var(--sys);font-size:14px;font-weight:600;cursor:pointer;margin-bottom:20px;">📥 Import lệnh từ file Word/CSV</button>
 
     <!-- APP INFO -->
     <div style="text-align:center;padding:16px 0;border-top:1px solid var(--gold-faint);">
@@ -1431,11 +1535,12 @@ window.showScreen = function(name) {
   if(name==="stats") { renderStats(); setTimeout(renderStatsExtra, 100); }
   if(name==="settings") syncSettingsUI(themeSettings);
   if(name==="theory") { renderTheoryFolderBar(); renderTheory(); }
+  if(name==="aichat") { initAIChat(); }
   // FAB: show only on list screen
   const fab=document.getElementById("fab-btn");
   if(fab) fab.classList.toggle("visible", name==="list");
   // Bottom nav active state
-  ["list","stats","theory","import","settings"].forEach(s=>{
+  ["list","stats","theory","aichat","settings"].forEach(s=>{
     const bn=document.getElementById("bn-"+s);
     if(bn) bn.classList.toggle("active", s===name);
   });
@@ -5519,6 +5624,873 @@ function updateOnlineStatus() {
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus(); // Check on load
+
+
+// ════════════════════════════════════════════
+// ── AI AGENT ENGINE — with Tool Use ──
+// ════════════════════════════════════════════
+
+let aiChatHistory = []; // [{role:"user"|"assistant", content:"..."|[blocks]}]
+let aiContext = "general";
+let aiThinking = false;
+let aiModel = "haiku"; // "haiku" or "sonnet" — default Haiku for cost
+let aiDailyLimit = 30; // messages per day, 0 = unlimited
+
+// Cost rates (USD per 1M tokens)
+const AI_RATES = {
+  haiku:  { id: "claude-haiku-4-5-20251001", input: 1,  output: 5,  label: "⚡ Haiku" },
+  sonnet: { id: "claude-sonnet-4-20250514", input: 3,  output: 15, label: "🧠 Sonnet" }
+};
+const VND_PER_USD = 25500;
+
+// Usage stats: {YYYY-MM-DD: {messages, inputTokens, outputTokens, cost}}
+let aiUsageLog = {};
+
+try {
+  const saved = localStorage.getItem("ai_chat_history");
+  if(saved) aiChatHistory = JSON.parse(saved);
+  const ctx = localStorage.getItem("ai_chat_context");
+  if(ctx) aiContext = ctx;
+  const m = localStorage.getItem("ai_model");
+  if(m) aiModel = m;
+  const lim = localStorage.getItem("ai_daily_limit");
+  if(lim !== null) aiDailyLimit = parseInt(lim) || 0;
+  const u = localStorage.getItem("ai_usage_log");
+  if(u) aiUsageLog = JSON.parse(u);
+} catch(e){}
+
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function monthKey() {
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+}
+
+function saveAIChat() {
+  try {
+    const trimmed = aiChatHistory.slice(-30);
+    localStorage.setItem("ai_chat_history", JSON.stringify(trimmed));
+    localStorage.setItem("ai_chat_context", aiContext);
+    localStorage.setItem("ai_model", aiModel);
+    localStorage.setItem("ai_daily_limit", String(aiDailyLimit));
+    localStorage.setItem("ai_usage_log", JSON.stringify(aiUsageLog));
+  } catch(e){}
+}
+
+function trackUsage(inputTokens, outputTokens, model) {
+  const k = todayKey();
+  if(!aiUsageLog[k]) aiUsageLog[k] = { messages:0, inputTokens:0, outputTokens:0, cost:0 };
+  const rate = AI_RATES[model] || AI_RATES.haiku;
+  const cost = (inputTokens/1000000)*rate.input + (outputTokens/1000000)*rate.output;
+  aiUsageLog[k].messages++;
+  aiUsageLog[k].inputTokens += inputTokens;
+  aiUsageLog[k].outputTokens += outputTokens;
+  aiUsageLog[k].cost += cost;
+  // Cleanup old logs (keep last 90 days)
+  const keys = Object.keys(aiUsageLog).sort();
+  while(keys.length > 90) { delete aiUsageLog[keys.shift()]; }
+  saveAIChat();
+  updateUsageBar();
+}
+
+function getTodayUsage() { return aiUsageLog[todayKey()] || { messages:0, inputTokens:0, outputTokens:0, cost:0 }; }
+function getMonthUsage() {
+  const m = monthKey();
+  let total = { messages:0, inputTokens:0, outputTokens:0, cost:0 };
+  Object.entries(aiUsageLog).forEach(([k,v]) => {
+    if(k.startsWith(m)) {
+      total.messages += v.messages;
+      total.inputTokens += v.inputTokens;
+      total.outputTokens += v.outputTokens;
+      total.cost += v.cost;
+    }
+  });
+  return total;
+}
+
+function updateUsageBar() {
+  const el = document.getElementById("ai-usage-info");
+  if(!el) return;
+  const today = getTodayUsage();
+  const vnd = Math.round(today.cost * VND_PER_USD);
+  const limitStr = aiDailyLimit > 0 ? `${today.messages}/${aiDailyLimit}` : `${today.messages}`;
+  el.textContent = `${limitStr} 💬 · ${vnd.toLocaleString("vi-VN")}đ`;
+  // Color warning
+  if(aiDailyLimit > 0 && today.messages >= aiDailyLimit) {
+    el.style.color = "var(--loss)"; el.style.opacity = "1";
+  } else if(aiDailyLimit > 0 && today.messages >= aiDailyLimit*0.8) {
+    el.style.color = "#ffaa00"; el.style.opacity = "1";
+  } else {
+    el.style.color = "var(--gold)"; el.style.opacity = "0.75";
+  }
+  // Update model button
+  const mb = document.getElementById("ai-model-btn");
+  if(mb) mb.textContent = AI_RATES[aiModel].label;
+}
+
+function getContextLabel() {
+  return ({
+    general: "🌐 Tổng quát",
+    ict: "📚 ICT Coach",
+    myTrades: "📋 Lệnh của tôi",
+    myTheory: "🎓 Thẻ lý thuyết"
+  })[aiContext] || "Tổng quát";
+}
+
+window.toggleAIModel = function() {
+  aiModel = aiModel === "haiku" ? "sonnet" : "haiku";
+  saveAIChat();
+  updateUsageBar();
+  if(typeof showToast === "function") showToast("✨ Model: " + AI_RATES[aiModel].label);
+};
+window.setAIModel = function(m) {
+  aiModel = m;
+  saveAIChat();
+  updateUsageBar();
+  // Update button highlight in modal
+  document.querySelectorAll(".model-opt").forEach(b => {
+    b.style.borderColor = "var(--border)";
+    b.style.background = "var(--bg)";
+  });
+  const sel = document.getElementById("model-opt-"+m);
+  if(sel) { sel.style.borderColor = "var(--gold)"; sel.style.background = "var(--gold-faint)"; }
+};
+
+window.showAIUsageModal = function() {
+  const today = getTodayUsage();
+  const month = getMonthUsage();
+  const todayVnd = Math.round(today.cost * VND_PER_USD).toLocaleString("vi-VN");
+  const monthVnd = Math.round(month.cost * VND_PER_USD).toLocaleString("vi-VN");
+
+  document.getElementById("ai-usage-today").innerHTML =
+    `<div>💬 Tin nhắn: <strong style="color:var(--gold);">${today.messages}</strong></div>` +
+    `<div>📥 Input: ${today.inputTokens.toLocaleString()} tokens</div>` +
+    `<div>📤 Output: ${today.outputTokens.toLocaleString()} tokens</div>` +
+    `<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">💰 Chi phí: <strong style="color:var(--gold);">$${today.cost.toFixed(4)} ≈ ${todayVnd} VNĐ</strong></div>`;
+
+  document.getElementById("ai-usage-month").innerHTML =
+    `<div>💬 Tin nhắn: <strong style="color:var(--gold);">${month.messages}</strong></div>` +
+    `<div>📥 Input: ${month.inputTokens.toLocaleString()} tokens</div>` +
+    `<div>📤 Output: ${month.outputTokens.toLocaleString()} tokens</div>` +
+    `<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">💰 Chi phí: <strong style="color:var(--gold);">$${month.cost.toFixed(4)} ≈ ${monthVnd} VNĐ</strong></div>`;
+
+  document.getElementById("ai-daily-limit-input").value = aiDailyLimit;
+  // Highlight selected model
+  document.querySelectorAll(".model-opt").forEach(b => {
+    b.style.borderColor = "var(--border)";
+    b.style.background = "var(--bg)";
+  });
+  const sel = document.getElementById("model-opt-"+aiModel);
+  if(sel) { sel.style.borderColor = "var(--gold)"; sel.style.background = "var(--gold-faint)"; }
+
+  document.getElementById("ai-usage-modal").style.display = "flex";
+};
+window.closeAIUsageModal = function() { document.getElementById("ai-usage-modal").style.display = "none"; };
+window.saveAILimitFromModal = function() {
+  const v = parseInt(document.getElementById("ai-daily-limit-input").value) || 0;
+  aiDailyLimit = Math.max(0, Math.min(500, v));
+  saveAIChat();
+  updateUsageBar();
+  if(typeof showToast === "function") showToast(aiDailyLimit > 0 ? `✅ Giới hạn: ${aiDailyLimit} tin/ngày` : "♾ Không giới hạn");
+};
+window.resetAIUsage = function() {
+  if(!confirm("Xoá toàn bộ lịch sử usage?")) return;
+  aiUsageLog = {};
+  saveAIChat();
+  updateUsageBar();
+  showAIUsageModal();
+};
+
+// ── TOOL DEFINITIONS for Claude ──
+const AI_TOOLS = [
+  {
+    name: "list_trades",
+    description: "Lấy danh sách lệnh/setup. Dùng khi user hỏi về lệnh đã ghi, muốn xem/lọc/tìm. Filter là optional.",
+    input_schema: {
+      type: "object",
+      properties: {
+        limit: { type: "number", description: "Số lệnh tối đa, default 20" },
+        result: { type: "string", enum: ["Win","Loss","BE",""], description: "Lọc theo kết quả" },
+        symbol: { type: "string", description: "Lọc theo cặp tiền (vd: NQ, XAUUSD)" },
+        tag: { type: "string", description: "Lọc theo tag (vd: FVG, BPR)" },
+        from_date: { type: "string", description: "Lọc từ ngày, format YYYY-MM-DD" },
+        to_date: { type: "string", description: "Lọc đến ngày, format YYYY-MM-DD" },
+        search: { type: "string", description: "Search trong title/note" }
+      }
+    }
+  },
+  {
+    name: "get_trade_detail",
+    description: "Lấy chi tiết đầy đủ 1 lệnh bao gồm orders/lệnh con, note, ảnh metadata. Dùng khi cần phân tích sâu.",
+    input_schema: {
+      type: "object",
+      properties: { id: { type: "string", description: "ID lệnh" } },
+      required: ["id"]
+    }
+  },
+  {
+    name: "list_theory_cards",
+    description: "Liệt kê thẻ lý thuyết ICT. Có thể search theo title, tag.",
+    input_schema: {
+      type: "object",
+      properties: {
+        search: { type: "string", description: "Search keyword" },
+        category: { type: "string", description: "Filter theo folder (basic/advanced/...)" }
+      }
+    }
+  },
+  {
+    name: "get_theory_card",
+    description: "Lấy chi tiết 1 thẻ lý thuyết (title, rules, examples).",
+    input_schema: {
+      type: "object",
+      properties: { id: { type: "string" } },
+      required: ["id"]
+    }
+  },
+  {
+    name: "create_theory_card",
+    description: "Tạo thẻ lý thuyết mới khi user yêu cầu (vd: 'tạo thẻ về FVG'). LUÔN hỏi xác nhận user trước khi gọi tool này.",
+    input_schema: {
+      type: "object",
+      properties: {
+        title: { type: "string", description: "Tiêu đề thẻ" },
+        tag: { type: "string", description: "Tag ngắn (vd: FVG, BPR)" },
+        icon: { type: "string", description: "Emoji icon, default 📌" },
+        category: { type: "string", description: "Folder: basic/advanced/htf/smt..., default basic" },
+        rules: {
+          type: "array",
+          description: "Mảng các dòng phân tích/quy tắc",
+          items: { type: "string" }
+        },
+        highlight: { type: "string", description: "Câu kết luận / takeaway" },
+        highlight_type: { type: "string", enum: ["tip","warn","info"], description: "default tip" }
+      },
+      required: ["title","rules"]
+    }
+  },
+  {
+    name: "update_theory_card",
+    description: "Sửa thẻ lý thuyết hiện có. LUÔN xác nhận user trước.",
+    input_schema: {
+      type: "object",
+      properties: {
+        id: { type: "string" },
+        title: { type: "string" },
+        tag: { type: "string" },
+        rules: { type: "array", items: { type: "string" } },
+        highlight: { type: "string" },
+        add_rules: { type: "array", description: "Thêm rules mới (giữ rules cũ)", items: { type: "string" } }
+      },
+      required: ["id"]
+    }
+  },
+  {
+    name: "delete_theory_card",
+    description: "Xoá thẻ lý thuyết. LUÔN hỏi xác nhận user.",
+    input_schema: {
+      type: "object",
+      properties: { id: { type: "string" } },
+      required: ["id"]
+    }
+  },
+  {
+    name: "compute_stats",
+    description: "Tính thống kê từ lệnh. Dùng khi user hỏi 'win rate tháng này', 'pattern lặp', 'best symbol'...",
+    input_schema: {
+      type: "object",
+      properties: {
+        from_date: { type: "string", description: "YYYY-MM-DD" },
+        to_date: { type: "string", description: "YYYY-MM-DD" },
+        group_by: { type: "string", enum: ["symbol","tag","folder","day_of_week","none"], description: "Nhóm thống kê" }
+      }
+    }
+  },
+  {
+    name: "navigate",
+    description: "Mở 1 màn hình hoặc chi tiết lệnh/thẻ trong app. Dùng khi user nói 'mở thẻ FVG', 'xem lệnh đó'.",
+    input_schema: {
+      type: "object",
+      properties: {
+        target: { type: "string", enum: ["list","stats","theory","aichat","settings","trade","theory_card"], description: "Loại màn hình" },
+        id: { type: "string", description: "ID nếu target=trade hoặc theory_card" }
+      },
+      required: ["target"]
+    }
+  }
+];
+
+// ── TOOL EXECUTORS ──
+async function executeTool(name, input) {
+  try {
+    if(name === "list_trades") {
+      const all = (typeof trades !== "undefined" ? trades : []).slice();
+      let filtered = all;
+      if(input.result) filtered = filtered.filter(t => t.result === input.result);
+      if(input.symbol) filtered = filtered.filter(t => (t.symbol||"").toUpperCase().includes(input.symbol.toUpperCase()));
+      if(input.tag) filtered = filtered.filter(t => {
+        const tags = Array.isArray(t.tags) ? t.tags.join(",") : (t.tags||"");
+        return tags.toLowerCase().includes(input.tag.toLowerCase());
+      });
+      if(input.from_date) {
+        const from = new Date(input.from_date).getTime();
+        filtered = filtered.filter(t => (t.tradeDate||t.createdAt||0) >= from);
+      }
+      if(input.to_date) {
+        const to = new Date(input.to_date).getTime() + 86400000;
+        filtered = filtered.filter(t => (t.tradeDate||t.createdAt||0) <= to);
+      }
+      if(input.search) {
+        const q = input.search.toLowerCase();
+        filtered = filtered.filter(t => (t.title||"").toLowerCase().includes(q) || (t.note||"").toLowerCase().includes(q));
+      }
+      const limit = input.limit || 20;
+      const out = filtered.slice(0, limit).map(t => ({
+        id: t.id,
+        title: t.title,
+        symbol: t.symbol,
+        result: t.result,
+        pnl: t.pnl,
+        date: t.tradeDate ? new Date(t.tradeDate).toISOString().slice(0,10) : null,
+        tags: Array.isArray(t.tags) ? t.tags : [],
+        folder: t.folder,
+        order_count: (t.orders||[]).filter(o=>o&&o.tfs?.length).length,
+        has_note: !!t.note
+      }));
+      return { total_matched: filtered.length, returned: out.length, trades: out };
+    }
+
+    if(name === "get_trade_detail") {
+      const t = (typeof trades !== "undefined" ? trades : []).find(x => x.id === input.id);
+      if(!t) return { error: "Không tìm thấy lệnh id="+input.id };
+      const orders = (t.orders||[]).map((o,i) => ({
+        index: i+1, label: o.label,
+        tfs: (o.tfs||[]).map(tf => ({
+          tf: tf.tf, caption: tf.caption,
+          image_count: (tf.images||[]).length
+        }))
+      }));
+      return {
+        id: t.id, title: t.title, symbol: t.symbol, result: t.result, pnl: t.pnl,
+        date: t.tradeDate ? new Date(t.tradeDate).toISOString().slice(0,10) : null,
+        tags: t.tags, folder: t.folder, note: t.note, orders
+      };
+    }
+
+    if(name === "list_theory_cards") {
+      let cards = (typeof getMergedTheory !== "undefined" ? getMergedTheory() : []);
+      if(input.search) {
+        const q = input.search.toLowerCase();
+        cards = cards.filter(c => (c.title||"").toLowerCase().includes(q) || (c.tag||"").toLowerCase().includes(q));
+      }
+      if(input.category) cards = cards.filter(c => (c.cat||"").startsWith(input.category));
+      return { count: cards.length, cards: cards.slice(0,30).map(c => ({
+        id: c.id, title: c.title, tag: c.tag, category: c.cat,
+        rule_count: (c.rules||[]).length, example_count: (c.examples||[]).length
+      })) };
+    }
+
+    if(name === "get_theory_card") {
+      const c = (typeof getMergedTheory !== "undefined" ? getMergedTheory() : []).find(x => x.id === input.id);
+      if(!c) return { error: "Không tìm thấy thẻ" };
+      const rules = (c.rules||[]).map(r => typeof r === "string" ? r : (r.t||""));
+      const examples = (c.examples||[]).map((ex,i) => ({
+        index:i+1, label:ex.label,
+        tfs: (ex.tfs||[]).map(tf => ({tf:tf.tf, notes:tf.notes, image_count:(tf.images||[]).length}))
+      }));
+      return { id:c.id, title:c.title, tag:c.tag, icon:c.icon, rules, examples, highlight:c.highlight };
+    }
+
+    if(name === "create_theory_card") {
+      // Confirm
+      if(!confirm("AI muốn TẠO thẻ lý thuyết:\n\n📌 " + input.title + "\nTag: " + (input.tag||"") + "\nRules: " + (input.rules||[]).length + " dòng\n\nĐồng ý tạo?")) {
+        return { cancelled: true, reason: "User từ chối" };
+      }
+      const id = "ai_tc_" + Date.now();
+      const card = {
+        id,
+        icon: input.icon || "📌",
+        title: input.title,
+        tag: input.tag || "",
+        cat: input.category || "basic",
+        rules: (input.rules||[]).map(t => ({t, imgs:[], imgCaptions:[]})),
+        highlight: input.highlight ? {type: input.highlight_type||"tip", text: input.highlight} : null,
+        examples: []
+      };
+      if(typeof theoryCustomData !== "undefined") {
+        theoryCustomData[id] = card;
+        await saveCustomTheory();
+        if(typeof renderTheory === "function") renderTheory();
+      }
+      return { success: true, id, message: "Đã tạo thẻ '"+input.title+"'" };
+    }
+
+    if(name === "update_theory_card") {
+      const existing = (typeof getMergedTheory !== "undefined" ? getMergedTheory() : []).find(x => x.id === input.id);
+      if(!existing) return { error: "Không tìm thấy thẻ" };
+      if(!confirm("AI muốn SỬA thẻ:\n\n" + existing.title + "\n\nĐồng ý?")) {
+        return { cancelled: true, reason: "User từ chối" };
+      }
+      const updated = {...existing};
+      if(input.title) updated.title = input.title;
+      if(input.tag !== undefined) updated.tag = input.tag;
+      if(input.rules) updated.rules = input.rules.map(t => ({t, imgs:[], imgCaptions:[]}));
+      if(input.add_rules) {
+        const oldRules = updated.rules || [];
+        updated.rules = oldRules.concat(input.add_rules.map(t => ({t, imgs:[], imgCaptions:[]})));
+      }
+      if(input.highlight) updated.highlight = {type: updated.highlight?.type || "tip", text: input.highlight};
+      if(typeof theoryCustomData !== "undefined") {
+        theoryCustomData[input.id] = updated;
+        await saveCustomTheory();
+        if(typeof renderTheory === "function") renderTheory();
+      }
+      return { success: true, id: input.id, message: "Đã cập nhật" };
+    }
+
+    if(name === "delete_theory_card") {
+      const c = (typeof getMergedTheory !== "undefined" ? getMergedTheory() : []).find(x => x.id === input.id);
+      if(!c) return { error: "Không tìm thấy thẻ" };
+      if(!confirm("AI muốn XOÁ thẻ:\n\n🗑 " + c.title + "\n\nXác nhận xoá?")) {
+        return { cancelled: true, reason: "User từ chối" };
+      }
+      if(typeof theoryCustomData !== "undefined") {
+        theoryCustomData[input.id] = { id: input.id, _deleted: true };
+        await saveCustomTheory();
+        if(typeof renderTheory === "function") renderTheory();
+      }
+      return { success: true, message: "Đã xoá '"+c.title+"'" };
+    }
+
+    if(name === "compute_stats") {
+      let list = (typeof trades !== "undefined" ? trades : []).slice();
+      if(input.from_date) { const from = new Date(input.from_date).getTime(); list = list.filter(t => (t.tradeDate||t.createdAt||0) >= from); }
+      if(input.to_date) { const to = new Date(input.to_date).getTime() + 86400000; list = list.filter(t => (t.tradeDate||t.createdAt||0) <= to); }
+      const total = list.length;
+      const wins = list.filter(t => t.result === "Win").length;
+      const losses = list.filter(t => t.result === "Loss").length;
+      const be = list.filter(t => t.result === "BE").length;
+      const pnl = list.map(t => parseFloat((t.pnl||"").replace(/[^0-9.-]/g,""))||0).reduce((a,b)=>a+b,0);
+      const result = {
+        total, wins, losses, be,
+        win_rate: total ? (wins/total*100).toFixed(1) + "%" : "0%",
+        total_pnl: pnl.toFixed(2)
+      };
+      if(input.group_by && input.group_by !== "none") {
+        const groups = {};
+        list.forEach(t => {
+          let k = "?";
+          if(input.group_by === "symbol") k = t.symbol || "?";
+          else if(input.group_by === "tag") k = (Array.isArray(t.tags)?t.tags[0]:t.tags) || "?";
+          else if(input.group_by === "folder") k = t.folder || "không có";
+          else if(input.group_by === "day_of_week") {
+            const d = new Date(t.tradeDate || t.createdAt || 0);
+            k = ["CN","T2","T3","T4","T5","T6","T7"][d.getDay()];
+          }
+          if(!groups[k]) groups[k] = {total:0, wins:0, losses:0};
+          groups[k].total++;
+          if(t.result === "Win") groups[k].wins++;
+          if(t.result === "Loss") groups[k].losses++;
+        });
+        result.groups = Object.entries(groups).map(([k,v]) => ({
+          key: k, total: v.total, wins: v.wins, losses: v.losses,
+          win_rate: v.total ? (v.wins/v.total*100).toFixed(1)+"%" : "0%"
+        })).sort((a,b)=>b.total-a.total);
+      }
+      return result;
+    }
+
+    if(name === "navigate") {
+      if(input.target === "trade" && input.id) {
+        if(typeof openDetail === "function") { openDetail(input.id); return { success: true }; }
+      } else if(input.target === "theory_card" && input.id) {
+        if(typeof showScreen === "function") showScreen("theory");
+        setTimeout(() => {
+          const el = document.getElementById("tc-"+input.id);
+          if(el) { el.classList.add("expanded"); el.scrollIntoView({behavior:"smooth",block:"center"}); }
+        }, 200);
+        return { success: true };
+      } else {
+        if(typeof showScreen === "function") showScreen(input.target);
+        return { success: true };
+      }
+      return { error: "Không thể navigate" };
+    }
+
+    return { error: "Tool không hỗ trợ: " + name };
+  } catch(e) {
+    return { error: "Lỗi thực thi tool: " + (e.message||e) };
+  }
+}
+
+function buildSystemPrompt() {
+  const base = "Bạn là TRỢ LÝ AGENT cho trader ICT (Inner Circle Trader). Bạn có quyền truy cập các TOOLS để đọc/sửa/tạo/xoá data trong app — KHÔNG chỉ trả lời text. Khi user yêu cầu thao tác, HÃY DÙNG TOOLS thay vì chỉ giải thích.\n\nNGUYÊN TẮC:\n- Trả lời tiếng Việt ngắn gọn, đi thẳng vấn đề\n- Dùng thuật ngữ ICT chuẩn (FVG, OB, BPR, MSS, IFVG, SMT, AMD, killzone...)\n- Khi cần data, GỌI TOOL list_trades / list_theory_cards / get_trade_detail trước rồi phân tích\n- Khi user yêu cầu tạo/sửa/xoá → GỌI TOOL tương ứng (app sẽ tự confirm với user)\n- Khi muốn show kết quả: dùng tool navigate để mở màn hình tương ứng\n- Sau khi gọi tool, tổng hợp kết quả thành câu trả lời ngắn gọn cho user\n- KHÔNG bịa data — luôn gọi tool để lấy dữ liệu thật";
+  if(aiContext === "ict") return base + "\n\nFocus: ICT mentor mode. Giải thích như Michael Huddleston dạy.";
+  if(aiContext === "myTrades") return base + "\n\nFocus: Phân tích nhật ký lệnh. Luôn gọi list_trades / get_trade_detail trước khi phân tích.";
+  if(aiContext === "myTheory") return base + "\n\nFocus: Quản lý thẻ lý thuyết. Có thể tạo/sửa/xoá theo yêu cầu.";
+  return base;
+}
+
+window.initAIChat = function() {
+  document.getElementById("ai-context-label").textContent = getContextLabel();
+  updateUsageBar();
+  renderAIMessages();
+  const inp = document.getElementById("ai-input");
+  if(inp && !inp._wired) {
+    inp._wired = true;
+    inp.addEventListener("input", () => {
+      inp.style.height = "auto";
+      inp.style.height = Math.min(inp.scrollHeight, 120) + "px";
+    });
+    inp.addEventListener("keydown", e => {
+      if(e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendAIMessage(); }
+    });
+  }
+  setTimeout(() => {
+    const m = document.getElementById("ai-messages");
+    if(m) m.scrollTop = m.scrollHeight;
+  }, 50);
+};
+
+window.toggleAIContext = function() { document.getElementById("ai-ctx-modal").style.display = "flex"; };
+window.closeAIContextModal = function() { document.getElementById("ai-ctx-modal").style.display = "none"; };
+window.setAIContext = function(ctx) {
+  aiContext = ctx; saveAIChat();
+  document.getElementById("ai-context-label").textContent = getContextLabel();
+  closeAIContextModal();
+  if(typeof showToast === "function") showToast("✨ Ngữ cảnh: " + getContextLabel());
+};
+
+window.clearAIChat = function() {
+  if(aiChatHistory.length && !confirm("Xoá toàn bộ hội thoại?")) return;
+  aiChatHistory = []; saveAIChat(); renderAIMessages();
+};
+
+function renderAIMessages() {
+  const wrap = document.getElementById("ai-messages");
+  if(!wrap) return;
+  if(!aiChatHistory.length) {
+    wrap.innerHTML = `
+      <div style="text-align:center;padding:30px 20px;opacity:0.95;">
+        <div style="font-size:48px;margin-bottom:14px;">🤖</div>
+        <div style="font-size:17px;color:var(--gold);font-weight:600;margin-bottom:8px;">AI Agent của bạn</div>
+        <div style="font-size:13px;color:var(--text);opacity:0.7;line-height:1.5;margin-bottom:18px;">⚡ Câu hỏi đơn giản: <strong style="color:var(--win);">miễn phí</strong><br>🤖 Câu phức tạp: dùng AI (Haiku/Sonnet)</div>
+
+        <div style="font-size:11px;color:var(--win);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px;">⚡ MIỄN PHÍ</div>
+        <div style="display:flex;flex-direction:column;gap:6px;max-width:340px;margin:0 auto 16px;">
+          <button onclick="aiQuickAsk('Hôm nay tôi có lệnh gì?')" style="background:var(--bg3);border:1px solid var(--win);border-radius:var(--radius-md);padding:10px 14px;color:var(--text);font-size:14px;cursor:pointer;text-align:left;font-family:var(--sys);">📅 Hôm nay tôi có lệnh gì?</button>
+          <button onclick="aiQuickAsk('Win rate tháng này?')" style="background:var(--bg3);border:1px solid var(--win);border-radius:var(--radius-md);padding:10px 14px;color:var(--text);font-size:14px;cursor:pointer;text-align:left;font-family:var(--sys);">📊 Win rate tháng này?</button>
+          <button onclick="aiQuickAsk('FVG là gì?')" style="background:var(--bg3);border:1px solid var(--win);border-radius:var(--radius-md);padding:10px 14px;color:var(--text);font-size:14px;cursor:pointer;text-align:left;font-family:var(--sys);">💡 FVG là gì?</button>
+          <button onclick="aiQuickAsk('Top symbol tôi trade nhiều nhất?')" style="background:var(--bg3);border:1px solid var(--win);border-radius:var(--radius-md);padding:10px 14px;color:var(--text);font-size:14px;cursor:pointer;text-align:left;font-family:var(--sys);">🏆 Top symbol của tôi?</button>
+        </div>
+
+        <div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px;">🤖 DÙNG AI (TỐN PHÍ)</div>
+        <div style="display:flex;flex-direction:column;gap:6px;max-width:340px;margin:0 auto;">
+          <button onclick="aiQuickAsk('Tạo thẻ lý thuyết Liquidity Sweep với 5 rules cơ bản.')" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 14px;color:var(--text);font-size:14px;cursor:pointer;text-align:left;font-family:var(--sys);">✨ Tạo thẻ lý thuyết</button>
+          <button onclick="aiQuickAsk('Phân tích pattern lệnh thua tháng này, lỗi gì lặp lại?')" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 14px;color:var(--text);font-size:14px;cursor:pointer;text-align:left;font-family:var(--sys);">🔍 Phân tích pattern lệnh thua</button>
+        </div>
+      </div>`;
+    return;
+  }
+  wrap.innerHTML = aiChatHistory.map(m => renderMessage(m)).join("");
+  if(aiThinking) {
+    wrap.innerHTML += `<div id="ai-typing" style="align-self:flex-start;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 16px;color:var(--gold);font-size:14px;opacity:0.85;">⏳ Đang suy nghĩ...</div>`;
+  }
+  setTimeout(() => { wrap.scrollTop = wrap.scrollHeight; }, 30);
+}
+
+function renderMessage(m) {
+  if(m.role === "user") {
+    const txt = typeof m.content === "string" ? m.content : (m.content.find(b=>b.type==="text")?.text || "");
+    return `<div style="align-self:flex-end;max-width:85%;background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-lg) var(--radius-lg) 4px var(--radius-lg);padding:10px 14px;color:var(--text);font-size:15px;line-height:1.5;white-space:pre-wrap;word-break:break-word;">${esc(txt)}</div>`;
+  }
+  // Assistant: may have text + tool_use blocks
+  const blocks = Array.isArray(m.content) ? m.content : [{type:"text", text:m.content}];
+  return blocks.map(b => {
+    if(b.type === "text" && b.text?.trim()) {
+      return `<div style="align-self:flex-start;max-width:90%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg) var(--radius-lg) var(--radius-lg) 4px;padding:12px 14px;color:var(--text);font-size:15px;line-height:1.6;white-space:pre-wrap;word-break:break-word;">${formatAIResponse(b.text)}</div>`;
+    }
+    if(b.type === "tool_use") {
+      const toolNames = {
+        list_trades:"📋 Tìm lệnh", get_trade_detail:"📋 Đọc chi tiết lệnh",
+        list_theory_cards:"🎓 Tìm thẻ lý thuyết", get_theory_card:"🎓 Đọc thẻ",
+        create_theory_card:"✨ Tạo thẻ", update_theory_card:"✏️ Sửa thẻ",
+        delete_theory_card:"🗑 Xoá thẻ", compute_stats:"📊 Tính thống kê",
+        navigate:"➡️ Mở màn hình"
+      };
+      const label = toolNames[b.name] || b.name;
+      return `<div style="align-self:flex-start;max-width:90%;background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-md);padding:8px 12px;font-size:13px;color:var(--gold);font-family:var(--sys);">🔧 ${label}</div>`;
+    }
+    return "";
+  }).join("");
+}
+
+function formatAIResponse(text) {
+  let s = esc(text);
+  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong style="color:var(--gold);">$1</strong>');
+  s = s.replace(/`([^`]+)`/g, '<code style="background:var(--bg2);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:13px;color:var(--gold);">$1</code>');
+  return s;
+}
+
+window.aiQuickAsk = function(q) {
+  document.getElementById("ai-input").value = q;
+  sendAIMessage();
+};
+
+// ════════════════════════════════════════════
+// ── LOCAL RESPONDER — Trả lời MIỄN PHÍ từ data trong app ──
+// Không gọi AI cho các câu hỏi cơ bản — tiết kiệm 100%
+// ════════════════════════════════════════════
+
+// ICT Glossary — kiến thức cơ bản
+const ICT_GLOSSARY = {
+  fvg: {
+    title: "📊 FVG (Fair Value Gap)",
+    text: "Khoảng trống giá giữa 3 nến — nến giữa di chuyển mạnh khiến râu nến 1 và râu nến 3 không chạm nhau.\n\n• **Bullish FVG**: low của nến 3 > high của nến 1\n• **Bearish FVG**: high của nến 3 < low của nến 1\n\nGiá thường quay lại lấp gap rồi tiếp tục xu hướng. Là PD Array quan trọng nhất trong ICT."
+  },
+  ifvg: {
+    title: "📊 IFVG (Inverted FVG)",
+    text: "FVG bị xuyên thủng và chuyển vai trò:\n\n• **Bullish IFVG cũ → Bearish IFVG**: giá xuyên xuống dưới FVG bullish, giờ FVG đó trở thành kháng cự\n• **Bearish FVG cũ → Bullish IFVG**: giá xuyên lên trên FVG bearish, giờ FVG đó trở thành hỗ trợ\n\nIFVG là tín hiệu structure shift mạnh hơn FVG bình thường."
+  },
+  bpr: {
+    title: "📊 BPR (Balanced Price Range)",
+    text: "Sự chồng lấn giữa Bullish FVG và Bearish FVG ở cùng vùng giá → tạo zone phản ứng mạnh.\n\nKhi giá quay lại BPR thường tạo entry chuẩn vì có 2 lớp PD Array trùng nhau. Là một trong những setup chuẩn nhất của ICT."
+  },
+  ob: {
+    title: "📊 Order Block (OB)",
+    text: "Nến cuối cùng của xu hướng cũ trước khi giá đảo chiều mạnh.\n\n• **Bullish OB**: nến giảm cuối trước khi giá tăng\n• **Bearish OB**: nến tăng cuối trước khi giá giảm\n\nOB tốt phải kèm displacement (di chuyển mạnh) sau đó. ICT khuyên dùng OB + FVG để confirm."
+  },
+  mss: {
+    title: "📊 MSS (Market Structure Shift)",
+    text: "Sự phá vỡ cấu trúc thị trường — high/low quan trọng bị xuyên thủng → tín hiệu đổi xu hướng.\n\n• Bullish MSS: phá high gần nhất (BOS)\n• Bearish MSS: phá low gần nhất\n\nMSS là điều kiện tiên quyết trước khi vào lệnh ngược xu hướng cũ."
+  },
+  smt: {
+    title: "📊 SMT Divergence (Smart Money Technique)",
+    text: "Sự phân kỳ giữa 2 cặp tiền tương quan (vd ES/NQ, EURUSD/GBPUSD).\n\n• 1 cặp tạo high mới, cặp kia không → SMT bearish\n• 1 cặp tạo low mới, cặp kia không → SMT bullish\n\n**Lưu ý**: SMT dùng cho cặp **cùng chiều** (correlated), không phải inverse. SMT tại key level (PD Array, killzone) là tín hiệu mạnh."
+  },
+  amd: {
+    title: "📊 AMD (Accumulation - Manipulation - Distribution)",
+    text: "Mô hình 3 giai đoạn ICT phổ biến:\n\n1. **Accumulation**: tích lũy trong range hẹp (Asia session)\n2. **Manipulation**: quét stop loss của retail (London open)\n3. **Distribution**: đẩy giá theo xu hướng thật (NY session)\n\nNhận diện AMD giúp tránh vào lệnh ngược chiều institutional."
+  },
+  killzone: {
+    title: "📊 Killzone",
+    text: "Khung giờ thanh khoản cao theo ICT (giờ NY):\n\n• **Asia**: 20:00 - 00:00\n• **London Open**: 02:00 - 05:00 ⭐\n• **NY Open**: 08:30 - 11:00 ⭐⭐\n• **NY PM**: 13:30 - 16:00\n• **London Close**: 10:00 - 12:00\n\nĐa phần các move lớn xảy ra trong London/NY killzones."
+  },
+  liquidity: {
+    title: "📊 Liquidity",
+    text: "Vùng thanh khoản — nơi tập trung nhiều stop loss / pending orders mà institutional cần để fill lệnh lớn.\n\n• **BSL** (Buy Side Liquidity): trên equal highs, trendline cao\n• **SSL** (Sell Side Liquidity): dưới equal lows, trendline thấp\n\nGiá hay quét liquidity trước khi đi theo xu hướng thật. Đây là 'manipulation' trong AMD."
+  },
+  pdarray: {
+    title: "📊 PD Array (Premium/Discount Array)",
+    text: "Các zone giá ICT quan trọng để vào lệnh:\n\n**Discount** (mua): OB, FVG, Breaker, MB ở dưới mid của swing\n**Premium** (bán): OB, FVG, Breaker, MB ở trên mid của swing\n\nLuôn buy ở discount, sell ở premium — đây là quy tắc cốt lõi của ICT."
+  }
+};
+
+function tryLocalResponse(question) {
+  const q = question.toLowerCase().trim();
+  if(typeof trades === "undefined") return null;
+  const all = trades || [];
+
+  // ════ STATS QUERIES ════
+  // Today
+  if(/(hôm nay|today|hnay)/i.test(q) && (/(thắng|win|thua|loss|lệnh|setup|kết quả)/i.test(q))) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const todayList = all.filter(t => (t.tradeDate||t.createdAt||0) >= today.getTime());
+    if(!todayList.length) return formatLocalReply("📅 **Hôm nay** chưa có lệnh nào được ghi.");
+    const w = todayList.filter(t=>t.result==="Win").length;
+    const l = todayList.filter(t=>t.result==="Loss").length;
+    const be = todayList.filter(t=>t.result==="BE").length;
+    const list = todayList.slice(0,5).map((t,i)=>`${i+1}. ${t.title||"?"} — ${t.result||"chưa có kết quả"}${t.symbol?" · "+t.symbol:""}`).join("\n");
+    return formatLocalReply(`📅 **Hôm nay** có ${todayList.length} setup\n✅ Win: ${w} · ❌ Loss: ${l} · ➖ BE: ${be}\n\n${list}`);
+  }
+
+  // Win rate
+  if(/(win rate|tỷ lệ thắng|tỉ lệ thắng|winrate|wr)/i.test(q)) {
+    let list = all;
+    let label = "Tổng";
+    // Filter by month
+    if(/(tháng này|this month|tháng hiện tại)/i.test(q)) {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+      list = list.filter(t => (t.tradeDate||t.createdAt||0) >= start);
+      label = "Tháng này";
+    } else if(/(tuần này|this week)/i.test(q)) {
+      const now = new Date();
+      const day = now.getDay() || 7;
+      const start = new Date(now); start.setDate(now.getDate()-day+1); start.setHours(0,0,0,0);
+      list = list.filter(t => (t.tradeDate||t.createdAt||0) >= start.getTime());
+      label = "Tuần này";
+    }
+    const total = list.filter(t=>t.result).length;
+    const wins = list.filter(t=>t.result==="Win").length;
+    const losses = list.filter(t=>t.result==="Loss").length;
+    if(!total) return formatLocalReply(`📊 **${label}** chưa có lệnh đã đóng kết quả.`);
+    const wr = (wins/total*100).toFixed(1);
+    return formatLocalReply(`📊 **Win rate ${label}**\n\nTổng: ${total} lệnh\n✅ Win: ${wins} (${wr}%)\n❌ Loss: ${losses}\n\n${wr>=60?"🔥 Tốt!":wr>=50?"👍 Ổn":"⚠️ Cần xem lại setup"}`);
+  }
+
+  // Total trades / count
+  if(/(bao nhiêu|tổng cộng|how many|đếm).*(lệnh|setup|trade)/i.test(q) || /(lệnh|setup).*(bao nhiêu|tổng)/i.test(q)) {
+    return formatLocalReply(`📋 Bạn có tổng cộng **${all.length}** setup trong nhật ký.`);
+  }
+
+  // Best/worst symbol
+  if(/(symbol|cặp tiền|cặp).*(tốt|nhiều|thắng|trade)/i.test(q) || /best symbol/i.test(q)) {
+    const symMap = {};
+    all.forEach(t => {
+      if(!t.symbol) return;
+      if(!symMap[t.symbol]) symMap[t.symbol] = {total:0,wins:0,losses:0};
+      symMap[t.symbol].total++;
+      if(t.result==="Win") symMap[t.symbol].wins++;
+      if(t.result==="Loss") symMap[t.symbol].losses++;
+    });
+    const sorted = Object.entries(symMap).sort((a,b)=>b[1].total-a[1].total).slice(0,5);
+    if(!sorted.length) return formatLocalReply("📊 Chưa có lệnh nào có symbol.");
+    const txt = sorted.map(([s,v])=>{
+      const wr = v.total ? (v.wins/v.total*100).toFixed(0)+"%" : "-";
+      return `• **${s}**: ${v.total} lệnh · WR ${wr}`;
+    }).join("\n");
+    return formatLocalReply(`📊 **Top symbols**\n\n${txt}`);
+  }
+
+  // ════ ICT GLOSSARY ════
+  for(const [key, info] of Object.entries(ICT_GLOSSARY)) {
+    // Match cả "fvg là gì", "giải thích fvg", "fvg"
+    const re = new RegExp(`\\b${key}\\b`, "i");
+    if(re.test(q) && (/(là gì|nghĩa là|giải thích|what is|định nghĩa|là j|là sao)/i.test(q) || q.replace(/[?!.]/g,"").trim().toLowerCase() === key)) {
+      return formatLocalReply(`**${info.title}**\n\n${info.text}`);
+    }
+  }
+
+  // ════ NAVIGATION ════
+  if(/(mở|hiện|xem|hiển thị|show).*(thống kê|stats)/i.test(q)) {
+    if(typeof showScreen === "function") showScreen("stats");
+    return formatLocalReply("📊 Đã mở màn hình **Thống kê**.");
+  }
+  if(/(mở|hiện|xem|hiển thị|show).*(lý thuyết|theory|thẻ)/i.test(q) && !/(thẻ.*lệnh|thẻ.*setup)/i.test(q)) {
+    if(typeof showScreen === "function") showScreen("theory");
+    return formatLocalReply("📚 Đã mở **Lý thuyết**.");
+  }
+  if(/(mở|hiện|xem|hiển thị|show).*(danh sách|list|lệnh|setup)/i.test(q)) {
+    if(typeof showScreen === "function") showScreen("list");
+    return formatLocalReply("📋 Đã mở **Danh sách lệnh**.");
+  }
+
+  // ════ NO MATCH ════
+  return null;
+}
+
+function formatLocalReply(text) {
+  return { local: true, text };
+}
+window.sendAIMessage = async function() {
+  if(aiThinking) return;
+  const inp = document.getElementById("ai-input");
+  const text = inp.value.trim();
+  if(!text) return;
+
+  aiChatHistory.push({role:"user", content:text});
+  inp.value = ""; inp.style.height = "auto";
+
+  // ✨ LOCAL RESPONDER FIRST — Free, instant
+  const localReply = tryLocalResponse(text);
+  if(localReply) {
+    aiChatHistory.push({role:"assistant", content: [
+      {type:"text", text: localReply.text + "\n\n_⚡ Trả lời từ data app — miễn phí_"}
+    ]});
+    renderAIMessages();
+    saveAIChat();
+    return;
+  }
+
+  // Check daily limit (only for AI calls)
+  if(aiDailyLimit > 0) {
+    const today = getTodayUsage();
+    if(today.messages >= aiDailyLimit) {
+      aiChatHistory.pop(); // remove user message
+      alert("⚠️ Đã đạt giới hạn " + aiDailyLimit + " tin nhắn/ngày.\n\nReset lúc 00:00 hoặc tăng giới hạn trong cài đặt 📊");
+      renderAIMessages();
+      return;
+    }
+  }
+
+  aiThinking = true;
+  renderAIMessages();
+  saveAIChat();
+
+  let totalInputTokens = 0, totalOutputTokens = 0;
+  const modelId = AI_RATES[aiModel].id;
+
+  try {
+    let iterations = 0;
+    const MAX_ITERATIONS = 8;
+    while(iterations < MAX_ITERATIONS) {
+      iterations++;
+      const apiMessages = aiChatHistory.slice(-20).map(m => ({
+        role: m.role,
+        content: typeof m.content === "string" ? m.content : m.content
+      }));
+
+      const r = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          model: modelId,
+          max_tokens: 2000,
+          system: buildSystemPrompt(),
+          tools: AI_TOOLS,
+          messages: apiMessages
+        })
+      });
+      const data = await r.json();
+
+      if(data.error) {
+        aiChatHistory.push({role:"assistant", content:"❌ Lỗi API: " + (data.error.message||"không rõ")});
+        break;
+      }
+
+      // Track tokens
+      if(data.usage) {
+        totalInputTokens += data.usage.input_tokens || 0;
+        totalOutputTokens += data.usage.output_tokens || 0;
+      }
+
+      const blocks = data.content || [];
+      aiChatHistory.push({role:"assistant", content: blocks});
+      renderAIMessages(); saveAIChat();
+
+      const toolUses = blocks.filter(b => b.type === "tool_use");
+      if(toolUses.length === 0 || data.stop_reason !== "tool_use") {
+        break;
+      }
+
+      const toolResults = [];
+      for(const tu of toolUses) {
+        const result = await executeTool(tu.name, tu.input);
+        toolResults.push({
+          type: "tool_result",
+          tool_use_id: tu.id,
+          content: JSON.stringify(result)
+        });
+      }
+      aiChatHistory.push({role:"user", content: toolResults});
+      renderAIMessages(); saveAIChat();
+    }
+  } catch(e) {
+    aiChatHistory.push({role:"assistant", content:"❌ Lỗi: " + (e.message||"không rõ")});
+  }
+
+  // Track usage after the entire conversation turn (including tool loops)
+  if(totalInputTokens > 0 || totalOutputTokens > 0) {
+    trackUsage(totalInputTokens, totalOutputTokens, aiModel);
+  }
+
+  aiThinking = false;
+  renderAIMessages();
+  saveAIChat();
+};
 
 })(); // end async IIFE
 </script>
