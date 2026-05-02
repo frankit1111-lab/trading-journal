@@ -108,6 +108,11 @@
     --border:#c9a84c22;
     --radius:12px;
     --shadow:0 8px 32px #00000088;
+    /* Apple HIG safe areas */
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --tab-bar: 78px;       /* bottom-nav content height (without sab) */
+    --tab-total: calc(var(--tab-bar) + var(--sab));  /* total bottom-nav height */
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
   html,body{
@@ -515,7 +520,7 @@
     background:linear-gradient(180deg,rgba(6,6,6,0.98) 0%,rgba(6,6,6,0.85) 100%);
     backdrop-filter:blur(20px) saturate(180%);
     border-bottom:1px solid var(--border);
-    padding:calc(14px + env(safe-area-inset-top, 0px)) 20px 12px;
+    padding:calc(14px + var(--sat)) 20px 12px;
     display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
   }
   .header::before{
@@ -597,7 +602,7 @@
   .empty-text{font-family:var(--sys);font-size:13px;letter-spacing:0.5px;line-height:2.2;color:var(--gold);opacity:0.55;}
 
   /* ── FORM ── */
-  .form-body{padding:20px 20px 120px;flex:1;}
+  .form-body{padding:20px 20px calc(120px + var(--sab));flex:1;}
   .field{margin-bottom:18px;position:relative;}
   .field-label{
     font-size:13px;letter-spacing:0.3px;color:var(--gold);
@@ -637,7 +642,7 @@
     display:flex;justify-content:space-between;align-items:center;flex-shrink:0;
     background:linear-gradient(135deg,var(--bg2),var(--bg));
   }
-  .detail-body{padding:16px 20px 120px;flex:1;}
+  .detail-body{padding:16px 20px calc(40px + var(--sab));flex:1;}
   .section-label{
     font-size:13px;letter-spacing:0.3px;color:var(--gold);
     text-transform:uppercase;font-family:var(--sys);
@@ -922,7 +927,7 @@
     background:var(--bg2);
     border-top:1px solid var(--border);
     display:flex;z-index:200;
-    padding-bottom:env(safe-area-inset-bottom,0);
+    padding-bottom:var(--sab);
     backdrop-filter:blur(20px);
   }
   .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 8px;cursor:pointer;border:none;background:transparent;color:var(--gold);opacity:0.55;transition:all 0.2s;font-family:var(--sys);}
@@ -1270,7 +1275,7 @@
     <button class="sort-btn active" id="sort-desc" onclick="setSort('desc')">↓ Mới nhất</button>
     <button class="sort-btn" id="sort-asc" onclick="setSort('asc')">↑ Cũ nhất</button>
   </div>
-  <div id="trade-list" role="main" aria-label="Danh sách lệnh" style="flex:1;padding-bottom:calc(80px + env(safe-area-inset-bottom, 0px));"></div>
+  <div id="trade-list" role="main" aria-label="Danh sách lệnh" style="flex:1;padding-bottom:var(--tab-total);"></div>
 </div>
 
 <!-- COPY/MOVE TO THEORY MODAL -->
@@ -1489,7 +1494,7 @@
     <div class="header-title"><div class="label">Báo Cáo</div><div class="name">Thống Kê</div></div>
     <button class="header-btn" onclick="openNew()" style="font-size:20px;font-weight:700;" title="Thêm lệnh mới">+</button>
   </div>
-  <div id="stats-body" style="padding:16px 18px 40px;flex:1;overflow-y:auto;"></div>
+  <div id="stats-body" style="padding:16px 18px var(--tab-total);flex:1;overflow-y:auto;"></div>
 </div>
 
 <!-- NEW TRADE -->
@@ -1730,7 +1735,7 @@
   <div id="theory-edit-bar" style="display:none;"></div>
 
   <!-- Cards -->
-  <div id="theory-list" role="main" aria-label="Danh sách lý thuyết" style="flex:1;padding:14px 18px 100px;overflow-y:auto;"></div>
+  <div id="theory-list" role="main" aria-label="Danh sách lý thuyết" style="flex:1;padding:14px 18px var(--tab-total);overflow-y:auto;"></div>
 </div>
 
 <!-- THEORY EDIT MODAL -->
@@ -1855,7 +1860,7 @@
     <div class="header-title"><div class="label">Tuỳ Chỉnh</div><div class="name">Giao Diện</div></div>
     <div style="width:36px;"></div>
   </div>
-  <div style="padding:20px 18px 60px;flex:1;overflow-y:auto;">
+  <div style="padding:20px 18px var(--tab-total);flex:1;overflow-y:auto;">
 
     <!-- DARK / LIGHT MODE -->
     <div class="section-label" style="margin-top:4px;">Chế Độ Nền</div>
