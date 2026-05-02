@@ -1127,7 +1127,7 @@
   <div class="header">
     <button class="header-btn" onclick="showScreen('list')" style="font-size:20px;">←</button>
     <div class="header-title"><div class="label">Ôn Tập</div><div class="name">Lý Thuyết ICT</div></div>
-    <button class="header-btn" id="theory-edit-toggle" onclick="toggleTheoryEditMode()" style="font-size:16px;" title="Chỉnh sửa lý thuyết">✏️</button>
+    <button class="header-btn" id="theory-edit-toggle" onclick="openAddTheoryCard()" style="font-size:18px;font-weight:700;" title="Thêm thẻ mới">+</button>
   </div>
 
   <!-- Theory Folder Bar (dynamic) -->
@@ -1142,13 +1142,7 @@
   </div>
 
   <!-- Edit Mode Bar -->
-  <div id="theory-edit-bar" style="display:none;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--gold-dim);flex-shrink:0;display:none;">
-    <div style="display:flex;align-items:center;gap:8px;">
-      <div style="font-family:var(--sys);font-size:11px;color:var(--gold);letter-spacing:2px;flex:1;">✏️ CHẾ ĐỘ CHỈNH SỬA</div>
-      <button onclick="openAddTheoryCard()" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);padding:6px 14px;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;letter-spacing:1px;">+ Thêm thẻ</button>
-      <button onclick="toggleTheoryEditMode()" style="background:none;border:1px solid #ef535055;border-radius:var(--radius-sm);padding:6px 14px;color:var(--loss);font-size:11px;font-family:var(--sys);cursor:pointer;opacity:0.8;">✕ Thoát</button>
-    </div>
-  </div>
+  <div id="theory-edit-bar" style="display:none;"></div>
 
   <!-- Cards -->
   <div id="theory-list" role="main" aria-label="Danh sách lý thuyết" style="flex:1;padding:14px 18px 100px;overflow-y:auto;"></div>
@@ -2961,13 +2955,13 @@ function renderTheoryFolderBar() {
   bar.innerHTML = theoryFolders.map(f => {
     const active = f.key===curParent || (f.key==="all" && theoryCategory==="all");
     const isFixed = f.key==="all";
-    const editBtns = (theoryEditMode && !isFixed)
-      ? `<span class="tf-rename" data-key="${f.key}" style="margin-left:5px;opacity:0.7;font-size:12px;cursor:pointer;" title="Đổi tên">✏️</span>
-         <span class="tf-delete" data-key="${f.key}" style="margin-left:2px;opacity:0.6;font-size:13px;cursor:pointer;" title="Xóa">✕</span>`
+    const editBtns = !isFixed
+      ? `<span class="tf-rename" data-key="${f.key}" style="margin-left:5px;opacity:0.6;font-size:12px;cursor:pointer;" title="Đổi tên">✏️</span>
+         <span class="tf-delete" data-key="${f.key}" style="margin-left:2px;opacity:0.5;font-size:13px;cursor:pointer;" title="Xóa">✕</span>`
       : "";
     return `<button class="folder-chip${active?" active":""}" data-key="${f.key}" style="display:inline-flex;align-items:center;gap:2px;">${f.icon} ${f.label}${editBtns}</button>`;
   }).join("") +
-  (theoryEditMode ? `<button class="folder-chip add-folder" id="btn-add-theory-folder" style="border-style:dashed;">＋</button>` : "");
+  `<button class="folder-chip add-folder" id="btn-add-theory-folder" style="border-style:dashed;">＋</button>`;
 
   // Wire ALL events inside module scope
   bar.querySelectorAll(".folder-chip[data-key]").forEach(btn => {
@@ -2990,13 +2984,12 @@ function renderTheoryFolderBar() {
       `<button class="folder-chip${!theorySubfolder?" active":""}" id="btn-tf-sub-all">📁 Tất cả</button>` +
       children.map(c => {
         const active = theorySubfolder===c.key;
-        const editBtns = theoryEditMode
-          ? `<span class="tfs-rename" data-parent="${curParent}" data-key="${c.key}" style="margin-left:5px;opacity:0.7;font-size:12px;cursor:pointer;">✏️</span>
-             <span class="tfs-delete" data-parent="${curParent}" data-key="${c.key}" style="margin-left:2px;opacity:0.6;font-size:13px;cursor:pointer;">✕</span>`
-          : "";
+        const editBtns =
+          `<span class="tfs-rename" data-parent="${curParent}" data-key="${c.key}" style="margin-left:5px;opacity:0.6;font-size:12px;cursor:pointer;">✏️</span>
+             <span class="tfs-delete" data-parent="${curParent}" data-key="${c.key}" style="margin-left:2px;opacity:0.5;font-size:13px;cursor:pointer;">✕</span>`;
         return `<button class="folder-chip${active?" active":""}" data-sub="${c.key}" style="display:inline-flex;align-items:center;">${c.label||c.key}${editBtns}</button>`;
       }).join("") +
-      (theoryEditMode ? `<button class="folder-chip add-folder" id="btn-add-theory-sub" style="border-style:dashed;font-size:11px;">＋</button>` : "");
+      `<button class="folder-chip add-folder" id="btn-add-theory-sub" style="border-style:dashed;font-size:11px;">＋</button>`;
 
     sub.querySelector("#btn-tf-sub-all")?.addEventListener("click", () => setTheorySubfolder(""));
     sub.querySelectorAll("[data-sub]").forEach(btn => {
@@ -3296,6 +3289,13 @@ window.addTheoryImgSection = function(tf="", imgs=[], caption="") {
   wrap.appendChild(sec);
 
   // Wire events inside module scope — no inline handlers
+  sec.querySelector(".te-tf-input").addEventListener("focus", () => {
+    window._teRuleFocusIdx = null;
+    window._teImgSectionFocusIdx = idx;
+    document.querySelectorAll("[id^='te-sec-']").forEach(s => s.style.borderColor = "var(--gold-faint)");
+    sec.style.borderColor = "var(--gold)";
+    document.querySelectorAll("[id^='te-rule-']").forEach(r => r.style.borderColor = "var(--gold-faint)");
+  });
   sec.querySelector(".te-tf-input").addEventListener("input", e => {
     if(teImgSections[idx]) teImgSections[idx].tf = e.target.value;
   });
@@ -3304,34 +3304,24 @@ window.addTheoryImgSection = function(tf="", imgs=[], caption="") {
   });
   sec.querySelector(".te-sec-remove").addEventListener("click", () => removeTeSec(idx));
   sec.querySelector(".te-pick-img").addEventListener("click", () => {
+    window._teRuleFocusIdx = null;
+    window._teImgSectionFocusIdx = idx;
     document.getElementById("te-file-"+idx)?.click();
   });
   document.getElementById("te-file-"+idx).addEventListener("change", function() {
+    window._teImgSectionFocusIdx = idx;
     teHandleFiles(idx, this);
   });
 
-  teRenderSecImgs(idx);
-  attachTePaste();
-};
-
-function attachTePaste() {
-  if (window._tePasteAttached) return;
-  window._tePasteAttached = true;
-  document.getElementById("modal-theory-edit").addEventListener("paste", function(e) {
-    const items = e.clipboardData?.items;
-    if (!items) return;
-    for (const item of items) {
-      if (item.type.startsWith("image/")) {
-        e.preventDefault();
-        const idx2 = teImgSections.length - 1;
-        if (idx2 < 0) return;
-        const reader = new FileReader();
-        reader.onload = async ev => { try { const c = await compressImage(ev.target.result); teImgSections[idx2].images.push(c); teRenderSecImgs(idx2); } catch(e2){} };
-        reader.readAsDataURL(item.getAsFile()); return;
-      }
-    }
+  // Clicking anywhere in this section = focus it for paste
+  sec.addEventListener("click", () => {
+    window._teImgSectionFocusIdx = idx;
+    window._teRuleFocusIdx = null;
   });
-}
+
+  teRenderSecImgs(idx);
+  // attachTePaste() called once from renderRuleField
+};
 
 window.removeTeSec = function(idx) { teImgSections[idx] = null; const el=document.getElementById("te-sec-"+idx); if(el) el.style.display="none"; };
 window.tePickImg = function(idx) { document.getElementById("te-file-"+idx)?.click(); };
@@ -3443,8 +3433,20 @@ function renderRuleField(idx) {
   ta.style.cssText = "flex:1;background:transparent;border:none;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;resize:vertical;line-height:1.5;padding:0;";
   ta.addEventListener("input", () => { teRuleItems[idx].t = ta.value; });
   // Track focus for paste
-  ta.addEventListener("focus", () => { window._teRuleFocusIdx = idx; });
-  ta.addEventListener("blur", () => { setTimeout(() => { if(window._teRuleFocusIdx===idx) window._teRuleFocusIdx=null; }, 200); });
+  ta.addEventListener("focus", () => {
+    window._teRuleFocusIdx = idx;
+    window._teImgSectionFocusIdx = null;
+    // Visual: highlight this rule as paste target
+    document.querySelectorAll("[id^='te-rule-']").forEach(r => r.style.borderColor = "var(--gold-faint)");
+    document.getElementById("te-rule-"+idx).style.borderColor = "var(--gold)";
+    document.querySelectorAll("[id^='te-sec-']").forEach(s => s.style.borderColor = "var(--gold-faint)");
+  });
+  ta.addEventListener("blur", () => {
+    setTimeout(() => {
+      if(window._teRuleFocusIdx===idx) window._teRuleFocusIdx=null;
+      document.getElementById("te-rule-"+idx)?.style && (document.getElementById("te-rule-"+idx).style.borderColor = "var(--gold-faint)");
+    }, 200);
+  });
 
   const delBtn = document.createElement("button");
   delBtn.textContent = "✕";
@@ -3525,15 +3527,23 @@ function attachTePaste() {
         reader.onload = async ev => {
           try {
             const c = await compressImage(ev.target.result);
-            // Paste into focused rule if any
             const ruleIdx = window._teRuleFocusIdx;
+            const secIdx = window._teImgSectionFocusIdx;
             if (ruleIdx !== null && ruleIdx !== undefined && teRuleItems[ruleIdx]) {
+              // Paste into focused rule's image zone
               teRuleItems[ruleIdx].imgs.push(c);
               renderRuleImgs(ruleIdx);
+            } else if (secIdx !== null && secIdx !== undefined && teImgSections[secIdx]) {
+              // Paste into focused img section
+              teImgSections[secIdx].images.push(c);
+              teRenderSecImgs(secIdx);
             } else {
-              // Fallback: paste into last img section
-              const idx2 = teImgSections.length - 1;
-              if (idx2 >= 0) { teImgSections[idx2].images.push(c); teRenderSecImgs(idx2); }
+              // Fallback: last img section
+              const last = teImgSections.length - 1;
+              if (last >= 0 && teImgSections[last]) {
+                teImgSections[last].images.push(c);
+                teRenderSecImgs(last);
+              }
             }
           } catch(e2) {}
         };
@@ -3774,7 +3784,7 @@ function renderTheory() {
       <div style="font-size:48px;margin-bottom:16px;">📚</div>
       <div class="empty-text" style="font-size:16px;font-weight:600;margin-bottom:8px;">Chưa có thẻ lý thuyết</div>
       <div style="font-size:13px;opacity:0.6;line-height:1.6;margin-bottom:20px;">Tạo thẻ lý thuyết từ kiến thức ICT<br>hoặc chuyển lệnh backtest sang đây</div>
-      ${theoryEditMode?`<button onclick="openAddTheoryCard()" style="padding:12px 24px;border-radius:var(--radius-xl);background:var(--gold-faint);border:1px solid var(--gold);color:var(--gold);font-size:14px;cursor:pointer;font-weight:500;">+ Tạo thẻ đầu tiên</button>`:""}
+      ${`<button onclick="openAddTheoryCard()" style="padding:12px 24px;border-radius:var(--radius-xl);background:var(--gold-faint);border:1px solid var(--gold);color:var(--gold);font-size:14px;cursor:pointer;font-weight:500;">+ Tạo thẻ đầu tiên</button>`}
     </div>`;
     return;
   }
@@ -3801,10 +3811,10 @@ function renderTheory() {
     const quiz = t.quiz || (t.qQ ? {q:t.qQ,opts:t.qOpts||[],ans:t.qAns||0} : null);
     const rules = (t.rules||[]).map(r=>typeof r==="string"?r:r.t);
     const catLabel = theoryFolderLabel(t.cat||"basic");
-    const editBtns = theoryEditMode ? `
-      <button onclick="event.stopPropagation();openEditTheoryCard('${t.id}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;flex-shrink:0;">✏️</button>
-      <button onclick="event.stopPropagation();openMoveTheoryCard('${t.id}')" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;flex-shrink:0;" title="Di chuyển">🗂</button>
-      <button onclick="event.stopPropagation();quickDeleteTheoryCard('${t.id}')" style="background:#ef535014;border:1px solid #ef535055;border-radius:6px;padding:8px 12px;color:var(--loss);font-size:11px;cursor:pointer;flex-shrink:0;" title="Xóa">🗑</button>` : "";
+    const editBtns = `
+      <button onclick="event.stopPropagation();openEditTheoryCard('${t.id}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:13px;cursor:pointer;flex-shrink:0;" title="Sửa">✏️</button>
+      <button onclick="event.stopPropagation();openMoveTheoryCard('${t.id}')" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:13px;cursor:pointer;flex-shrink:0;" title="Di chuyển">🗂</button>
+      <button onclick="event.stopPropagation();quickDeleteTheoryCard('${t.id}')" style="background:#ef535014;border:1px solid #ef535055;border-radius:6px;padding:8px 12px;color:var(--loss);font-size:13px;cursor:pointer;flex-shrink:0;" title="Xóa">🗑</button>`;
     return `<div class="theory-card${mastered?" theory-mastered":""}" id="tc-${t.id}">
       <div class="theory-card-header" onclick="toggleTheoryCard('${t.id}')">
         <span class="theory-card-icon">${t.icon}</span>
