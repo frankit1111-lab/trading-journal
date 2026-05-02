@@ -515,7 +515,7 @@
     background:linear-gradient(180deg,rgba(6,6,6,0.98) 0%,rgba(6,6,6,0.85) 100%);
     backdrop-filter:blur(20px) saturate(180%);
     border-bottom:1px solid var(--border);
-    padding:14px 20px 12px;
+    padding:calc(14px + env(safe-area-inset-top, 0px)) 20px 12px;
     display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
   }
   .header::before{
@@ -1270,7 +1270,7 @@
     <button class="sort-btn active" id="sort-desc" onclick="setSort('desc')">↓ Mới nhất</button>
     <button class="sort-btn" id="sort-asc" onclick="setSort('asc')">↑ Cũ nhất</button>
   </div>
-  <div id="trade-list" role="main" aria-label="Danh sách lệnh" style="flex:1;padding-bottom:80px;"></div>
+  <div id="trade-list" role="main" aria-label="Danh sách lệnh" style="flex:1;padding-bottom:calc(80px + env(safe-area-inset-bottom, 0px));"></div>
 </div>
 
 <!-- COPY/MOVE TO THEORY MODAL -->
