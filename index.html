@@ -438,7 +438,7 @@
   .empty-text{font-family:var(--sys);font-size:13px;letter-spacing:0.5px;line-height:2.2;color:var(--gold);opacity:0.55;}
 
   /* ── FORM ── */
-  .form-body{padding:20px 20px 120px;flex:1;}
+  .form-body{padding:20px 20px calc(120px + env(safe-area-inset-bottom,0px));flex:1;}
   .field{margin-bottom:18px;position:relative;}
   .field-label{
     font-size:13px;letter-spacing:0.3px;color:var(--gold);
@@ -478,7 +478,7 @@
     display:flex;justify-content:space-between;align-items:center;flex-shrink:0;
     background:linear-gradient(135deg,var(--bg2),var(--bg));
   }
-  .detail-body{padding:16px 20px 120px;flex:1;}
+  .detail-body{padding:16px 20px calc(40px + env(safe-area-inset-bottom,0px));flex:1;}
   .section-label{
     font-size:13px;letter-spacing:0.3px;color:var(--gold);
     text-transform:uppercase;font-family:var(--sys);
