@@ -3640,6 +3640,10 @@ window.setFontSize = async function(size) {
 
 // Layout mode: 'auto' | 'mobile' | 'tablet' | 'desktop'
 window.setLayoutMode = function(mode) {
+  // Safety: warn if forcing desktop/tablet on a phone-sized screen (user may get stuck)
+  if((mode === "desktop" || mode === "tablet") && window.innerWidth < 600) {
+    if(!confirm(`Màn hình của bạn nhỏ (${window.innerWidth}px). Chọn "${mode === 'desktop' ? 'Laptop' : 'iPad'}" có thể khó dùng. Vẫn tiếp tục?`)) return;
+  }
   // Update body class
   document.body.classList.remove("force-mobile", "force-tablet", "force-desktop");
   if(mode !== "auto") document.body.classList.add("force-" + mode);
@@ -3689,6 +3693,13 @@ window.setLayoutMode = function(mode) {
 
 // Apply persisted layout mode on load
 function applyPersistedLayoutMode() {
+  // URL escape hatch: ?reset=layout clears layout setting (in case user got stuck)
+  if(location.search.includes("reset=layout") || location.hash.includes("reset")) {
+    try { localStorage.setItem("tl_layout_mode", "auto"); } catch(e){}
+    document.body.classList.remove("force-mobile", "force-tablet", "force-desktop");
+    // Clean URL
+    try { history.replaceState({}, "", location.pathname); } catch(e){}
+  }
   let mode = "auto";
   try { mode = localStorage.getItem("tl_layout_mode") || "auto"; } catch(e){}
   if(mode !== "auto") document.body.classList.add("force-" + mode);
