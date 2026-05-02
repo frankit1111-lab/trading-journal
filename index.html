@@ -2378,6 +2378,7 @@ function addFormTFSection(tf) {
   const list = document.getElementById("form-tf-list");
   const sec = document.createElement("div");
   sec.id = "form-tf-sec-" + idx;
+  sec.dataset.pasteTarget = "formTF:" + idx;
   sec.style.cssText = "background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:12px;";
   sec.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -2461,41 +2462,7 @@ function renderFormTFImgs(idx) {
   });
 }
 
-// Paste into form TF section
-document.addEventListener("paste", async function(e) {
-  // Only when new trade form is active
-  const screen = document.getElementById("screen-new");
-  if (!screen?.classList.contains("active")) return;
-  // If user last clicked in LỆNH section → let handler 2 handle it
-  if(window._foLastMode === "new") return;
-  const items = e.clipboardData?.items;
-  if (!items) return;
-  for (const item of items) {
-    if (item.type.startsWith("image/")) {
-      e.preventDefault();
-      const reader = new FileReader();
-      reader.onload = async ev => {
-        try {
-          const c = await compressImage(ev.target.result);
-          // Use last focused TF, otherwise fallback to last non-null
-          const focusIdx = window._formLastTFIdx;
-          const targetIdx = (focusIdx !== null && focusIdx !== undefined && formTFSections[focusIdx])
-            ? focusIdx
-            : formTFSections.findLastIndex(s => s !== null);
-          if (targetIdx >= 0 && formTFSections[targetIdx]) {
-            formTFSections[targetIdx].images.push(c);
-            renderFormTFImgs(targetIdx);
-            showToast("📷 Dán vào " + formTFSections[targetIdx].tf);
-          } else {
-            showToast("⚠️ Thêm khung thời gian trước");
-          }
-        } catch(e2){}
-      };
-      reader.readAsDataURL(item.getAsFile());
-      return;
-    }
-  }
-});
+// Old paste handler removed — replaced by unified handler at end of script
 
 // Update saveTrade to use formTFSections
 function getFormImagesFromSections() {
@@ -2632,6 +2599,7 @@ function _renderOrderTf(mode, oi, ti) {
 
   const wrap = document.createElement("div");
   wrap.id = tfId;
+  wrap.dataset.pasteTarget = "order:" + mode + ":" + oi + ":" + ti;
   wrap.style.cssText = "padding:10px 12px;border-top:1px solid var(--border);";
 
   const imgsZoneId = ctx.prefix+"-imgs-"+oi+"-"+ti;
@@ -2711,43 +2679,9 @@ function _getOrders(mode) {
 function getFormOrders() { return _getOrders("new"); }
 function getEditOrders() { return _getOrders("edit"); }
 
-// Paste image into last-clicked order TF (if any)
-document.addEventListener("paste", async function(e) {
-  // Check if user is in form-new or screen-edit, and has clicked a paste target
-  const mode = window._foLastMode;
-  if(mode === undefined || mode === null) return;
-  const oi = window._foLastOi, ti = window._foLastTi;
-  const cs = _ordersCtx(mode).state;
-  if(!cs[oi]?.tfs[ti]) {
-    // Only show hint if on the right screen
-    const screen = document.getElementById(mode==="edit"?"screen-edit":"screen-new");
-    if(screen?.classList.contains("active")) showToast("⚠️ Click '📎 Ảnh' của khung TF muốn dán trước");
-    return;
-  }
-  // Only fire if relevant screen is active
-  const screen = document.getElementById(mode==="edit"?"screen-edit":"screen-new");
-  if(!screen?.classList.contains("active")) return;
-  const items = e.clipboardData?.items; if(!items) return;
-  for(const item of items) {
-    if(item.type.startsWith("image/")) {
-      e.preventDefault();
-      const f = item.getAsFile();
-      const r = new FileReader();
-      r.onload = async ev => {
-        try {
-          const c = await compressImage(ev.target.result);
-          const cs2 = _ordersCtx(mode).state;
-          if(cs2[oi]?.tfs[ti]) cs2[oi].tfs[ti].images.push(c);
-          _renderOrderTfImgs(mode, oi, ti);
-          window.formDirty = true;
-          showToast("📷 Dán vào "+(cs2[oi].tfs[ti].tf||"lệnh")+" #"+(oi+1));
-        } catch(e2){}
-      };
-      r.readAsDataURL(f);
-      return;
-    }
-  }
-});
+// Old orders paste handler removed — replaced by unified handler
+
+
 
 // ══ EDIT ══
 window.openEdit=function(){
@@ -2769,14 +2703,14 @@ window.openEdit=function(){
 };
 function buildEditTFUploadRow(){
   document.getElementById("e-tf-upload-row").innerHTML=TFS.map(tf=>`
-    <div style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:12px;">
+    <div data-paste-target="editTF:${tf}" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:12px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div style="font-family:var(--sys);font-size:12px;color:var(--gold);letter-spacing:2px;">${tf}</div>
         <button onclick="addEditTFImg('${tf}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:11px;cursor:pointer;font-family:var(--sys);">+ Thêm ảnh</button>
       </div>
       <div id="e-tf-images-${tf}" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;min-height:60px;"></div>
       <div style="font-size:11px;letter-spacing:2px;color:var(--gold);opacity:0.9;font-family:var(--sys);margin-bottom:5px;">CHÚ THÍCH</div>
-      <textarea id="e-tf-caption-${tf}" placeholder="Ghi chú cho khung ${tf}..." style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:16px;font-family:var(--sys);outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;" onpaste="handleEditPaste('${tf}',event)"></textarea>
+      <textarea id="e-tf-caption-${tf}" placeholder="Ghi chú cho khung ${tf}..." style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:6px;padding:8px;color:var(--text);font-size:16px;font-family:var(--sys);outline:none;resize:vertical;min-height:55px;line-height:1.5;box-sizing:border-box;"></textarea>
       <input type="file" accept="image/*" multiple style="display:none" id="e-tf-input-${tf}" onchange="handleEditImgMulti('${tf}',this)"/>
     </div>`).join("");
 }
@@ -4070,6 +4004,7 @@ function _renderExampleTf(exIdx, ti) {
 
   const wrap = document.createElement("div");
   wrap.id = "te-ex-tf-"+exIdx+"-"+ti;
+  wrap.dataset.pasteTarget = "example:" + exIdx + ":" + ti;
   wrap.style.cssText = "padding:10px 12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;";
 
   wrap.innerHTML = `
@@ -4104,6 +4039,14 @@ function _renderExampleTf(exIdx, ti) {
     window._teLastRuleImgIdx = null; window._teImgSectionFocusIdx = null;
     document.getElementById("te-ex-file-"+exIdx+"-"+ti)?.click();
   });
+  // Auto-track focus on this TF — clicking anywhere or typing makes Ctrl+V work
+  const trackFocus = () => {
+    window._teLastExIdx = exIdx; window._teLastTfIdx = ti;
+    window._teLastRuleImgIdx = null; window._teImgSectionFocusIdx = null;
+  };
+  wrap.addEventListener("click", trackFocus);
+  wrap.querySelector(".extf-tf-input")?.addEventListener("focus", trackFocus);
+  wrap.querySelector(".extf-notes-input")?.addEventListener("focus", trackFocus);
   document.getElementById("te-ex-file-"+exIdx+"-"+ti).addEventListener("change", async function() {
     for(const f of Array.from(this.files)){
       await new Promise(res=>{const r=new FileReader();r.onload=async ev=>{try{const c=await compressImage(ev.target.result);if(teExamples[exIdx]?.tfs[ti])teExamples[exIdx].tfs[ti].images.push(c);}catch(e){}res();};r.readAsDataURL(f);});
@@ -4158,6 +4101,7 @@ function renderRuleField(idx) {
   const item = teRuleItems[idx];
   const wrap = document.createElement("div");
   wrap.id = "te-rule-"+idx;
+  wrap.dataset.pasteTarget = "rule:" + idx;
   wrap.style.cssText = "background:var(--bg);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:8px;display:flex;flex-direction:column;gap:6px;";
 
   // Row 1: textarea + delete
@@ -4170,6 +4114,13 @@ function renderRuleField(idx) {
   ta.value = item.t;
   ta.style.cssText = "flex:1;background:transparent;border:none;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;resize:vertical;line-height:1.5;padding:2px 0;";
   ta.addEventListener("input", () => { if(teRuleItems[idx]) teRuleItems[idx].t = ta.value; });
+  // Auto-track focus on this rule — clicking/typing makes Ctrl+V dán vào đây
+  const trackRuleFocus = () => {
+    window._teLastRuleImgIdx = idx;
+    window._teLastExIdx = null; window._teLastTfIdx = null; window._teImgSectionFocusIdx = null;
+  };
+  ta.addEventListener("focus", trackRuleFocus);
+  wrap.addEventListener("click", trackRuleFocus);
 
   const delBtn = document.createElement("button");
   delBtn.textContent = "✕";
@@ -4275,54 +4226,9 @@ function renderRuleImgs(ruleIdx) {
   });
 }
 
-// Paste handler — listen on document, only process when theory modal is open
+// Old theory paste handler removed — replaced by unified handler
 function attachTePaste() {
-  if (window._tePasteAttached) return;
-  window._tePasteAttached = true;
-  document.addEventListener("paste", async function(e) {
-    // Only handle when theory edit modal is open
-    const modal = document.getElementById("modal-theory-edit");
-    if (!modal || modal.style.display === "none" || modal.style.display === "") return;
-
-    const items = e.clipboardData?.items;
-    if (!items) return;
-    for (const item of items) {
-      if (item.type.startsWith("image/")) {
-        e.preventDefault();
-        const file = item.getAsFile();
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = async ev => {
-          try {
-            const c = await compressImage(ev.target.result);
-            // If last clicked was a rule's add-img button, paste there
-            const ruleIdx = window._teLastRuleImgIdx;
-            const exIdx = window._teLastExIdx;
-            const exTfIdx = window._teLastTfIdx;
-            const secIdx = teImgSections.findLastIndex(s => s !== null);
-
-            if (ruleIdx !== null && ruleIdx !== undefined && teRuleItems[ruleIdx]) {
-              teRuleItems[ruleIdx].imgs.push(c);
-              renderRuleImgs(ruleIdx);
-              showToast("📎 Dán ảnh vào dòng " + (ruleIdx+1));
-            } else if (exIdx !== null && exIdx !== undefined && teExamples[exIdx]?.tfs[exTfIdx]) {
-              teExamples[exIdx].tfs[exTfIdx].images.push(c);
-              _renderExTfImgs(exIdx, exTfIdx);
-              showToast("📷 Dán vào Ví dụ " + (exIdx+1) + " · " + (teExamples[exIdx].tfs[exTfIdx].tf || "TF"));
-            } else if (secIdx >= 0 && teImgSections[secIdx]) {
-              teImgSections[secIdx].images.push(c);
-              teRenderSecImgs(secIdx);
-              showToast("📷 Dán vào " + (teImgSections[secIdx].tf || "ảnh chart"));
-            } else {
-              showToast("⚠️ Click vào '📎 Ảnh' trong khung thời gian muốn dán trước");
-            }
-          } catch(e2) {}
-        };
-        reader.readAsDataURL(file);
-        return;
-      }
-    }
-  });
+  // No-op now, kept for compat; unified handler is at end of script
 }
 
 window.saveTheoryCard = async function() {
@@ -6549,6 +6455,99 @@ window.sendAIMessage = async function() {
   renderAIMessages();
   saveAIChat();
 };
+
+// ════════════════════════════════════════════
+// ── UNIFIED PASTE HANDLER ──
+// 1 handler duy nhất, dùng data-paste-target trên element được focus
+// ════════════════════════════════════════════
+let __lastPasteTarget = null;
+
+// Track click anywhere — find nearest [data-paste-target] ancestor
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-paste-target]");
+  if(el) __lastPasteTarget = el;
+}, true);
+// Track focus on inputs/textareas inside paste targets
+document.addEventListener("focusin", e => {
+  const el = e.target.closest("[data-paste-target]");
+  if(el) __lastPasteTarget = el;
+}, true);
+
+document.addEventListener("paste", async e => {
+  const items = e.clipboardData?.items;
+  if(!items) return;
+  let imageItem = null;
+  for(const item of items) {
+    if(item.type.startsWith("image/")) { imageItem = item; break; }
+  }
+  if(!imageItem) return;
+
+  // Find target — must be visible (not hidden modal/screen)
+  let target = __lastPasteTarget;
+  if(target && !target.offsetParent) target = null; // hidden
+  if(!target) {
+    // Auto-fallback: find first visible target on the page
+    const all = document.querySelectorAll("[data-paste-target]");
+    for(const el of all) { if(el.offsetParent) { target = el; break; } }
+  }
+  if(!target) return;
+
+  e.preventDefault();
+  const file = imageItem.getAsFile();
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    try {
+      const c = await compressImage(ev.target.result);
+      const spec = target.dataset.pasteTarget; // "type:arg1:arg2"
+      const parts = spec.split(":");
+      const type = parts[0];
+
+      if(type === "formTF") {
+        const idx = parseInt(parts[1]);
+        if(formTFSections[idx]) {
+          formTFSections[idx].images.push(c);
+          renderFormTFImgs(idx);
+          showToast("📷 Dán vào " + formTFSections[idx].tf);
+        }
+      } else if(type === "order") {
+        // type:order:mode:oi:ti
+        const mode = parts[1], oi = parseInt(parts[2]), ti = parseInt(parts[3]);
+        const cs = _ordersCtx(mode).state;
+        if(cs[oi]?.tfs[ti]) {
+          cs[oi].tfs[ti].images.push(c);
+          _renderOrderTfImgs(mode, oi, ti);
+          window.formDirty = true;
+          showToast("📷 Dán vào lệnh #" + (oi+1) + " · " + (cs[oi].tfs[ti].tf || "TF"));
+        }
+      } else if(type === "rule") {
+        const idx = parseInt(parts[1]);
+        if(teRuleItems[idx]) {
+          teRuleItems[idx].imgs.push(c);
+          renderRuleImgs(idx);
+          showToast("📎 Dán ảnh vào dòng " + (idx+1));
+        }
+      } else if(type === "example") {
+        // type:example:exIdx:tfIdx
+        const exIdx = parseInt(parts[1]), tfIdx = parseInt(parts[2]);
+        if(teExamples[exIdx]?.tfs[tfIdx]) {
+          teExamples[exIdx].tfs[tfIdx].images.push(c);
+          _renderExTfImgs(exIdx, tfIdx);
+          showToast("📷 Dán vào Ví dụ " + (exIdx+1) + " · " + (teExamples[exIdx].tfs[tfIdx].tf || "TF"));
+        }
+      } else if(type === "editTF") {
+        // type:editTF:H4 (timeframe name)
+        const tf = parts[1];
+        if(!editImages[tf]) editImages[tf] = [];
+        editImages[tf].push(c);
+        window.formDirty = true;
+        renderEditTFImages(tf);
+        showToast("📷 Dán vào " + tf);
+      }
+    } catch(err) { console.error("Paste error:", err); }
+  };
+  reader.readAsDataURL(file);
+});
 
 })(); // end async IIFE
 </script>
