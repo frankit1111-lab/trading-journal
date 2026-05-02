@@ -333,13 +333,29 @@
     padding:14px 20px 12px;
     display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
   }
-  /* PWA standalone mode (Add to Home Screen): pad header below status bar overlay */
+  /* PWA standalone mode (Add to Home Screen): full-bleed app, safe-area zones match app colors */
   @media all and (display-mode: standalone) {
+    /* Header padding-top includes safe-area so its content sits below status bar overlay */
     .header { padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
     .bottom-nav { padding-bottom: env(safe-area-inset-bottom, 0); }
     #trade-list { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important; }
     #theory-list { padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important; }
     #stats-body { padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)) !important; }
+    /* Paint body safe-area zones to match adjacent UI:
+       - Top zone (status bar area): dark #060606 matching header start
+       - Bottom zone (home indicator area): bg2 matching bottom-nav */
+    body {
+      background:
+        linear-gradient(to bottom,
+          #060606 0,
+          #060606 env(safe-area-inset-top, 0),
+          transparent env(safe-area-inset-top, 0)),
+        linear-gradient(to top,
+          var(--bg2) 0,
+          var(--bg2) env(safe-area-inset-bottom, 0),
+          transparent env(safe-area-inset-bottom, 0)),
+        var(--bg);
+    }
   }
   .header::before{
     content:'';position:absolute;inset:0;
