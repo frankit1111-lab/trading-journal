@@ -515,8 +515,12 @@
     background:linear-gradient(180deg,rgba(6,6,6,0.98) 0%,rgba(6,6,6,0.85) 100%);
     backdrop-filter:blur(20px) saturate(180%);
     border-bottom:1px solid var(--border);
-    padding:calc(14px + env(safe-area-inset-top,0px)) 20px 12px;
+    padding:14px 20px 12px;
     display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+  }
+  /* iOS PWA: pad header content down so it doesn't sit under status bar overlay */
+  @supports (-webkit-touch-callout: none) {
+    .header { padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
   }
   .header::before{
     content:'';position:absolute;inset:0;
