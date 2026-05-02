@@ -3356,6 +3356,7 @@ function populateTheoryCatSelect(selectedKey) {
 
 window.openAddTheoryCard = function() {
   theoryEditingId = null; teImgSections = []; window._tePasteAttached = false;
+  window._teRuleFocusIdx = null; window._teImgSectionFocusIdx = null;
   document.getElementById("theory-edit-modal-title").textContent = "THÊM THẺ MỚI";
   ["te-icon","te-title","te-tag","te-img","te-hl-text"].forEach(id=>document.getElementById(id).value="");
   document.getElementById("te-icon").value="📌";
@@ -3366,12 +3367,14 @@ window.openAddTheoryCard = function() {
   buildRuleFields([]);
   addTheoryImgSection("H4"); addTheoryImgSection("H1");
   document.getElementById("modal-theory-edit").style.display="flex";
+  attachTePaste(); // attach paste handler RIGHT NOW
   setTimeout(()=>document.getElementById("te-scroll-body").scrollTop=0,50);
 };
 
 window.openEditTheoryCard = function(id) {
   const t = getMergedTheory().find(x=>x.id===id); if(!t) return;
   theoryEditingId = id; teImgSections = []; window._tePasteAttached = false;
+  window._teRuleFocusIdx = null; window._teImgSectionFocusIdx = null;
   document.getElementById("theory-edit-modal-title").textContent = "CHỈNH SỬA THẺ";
   document.getElementById("te-icon").value = t.icon||"📌";
   populateTheoryCatSelect(t.cat||"");
@@ -3387,6 +3390,7 @@ window.openEditTheoryCard = function(id) {
   if(sections.length) sections.forEach(s=>addTheoryImgSection(s.tf||"",s.images||[],s.caption||""));
   else addTheoryImgSection("H4");
   document.getElementById("modal-theory-edit").style.display="flex";
+  attachTePaste(); // attach paste handler RIGHT NOW
   setTimeout(()=>document.getElementById("te-scroll-body").scrollTop=0,50);
 };
 
@@ -3530,19 +3534,18 @@ function attachTePaste() {
             const ruleIdx = window._teRuleFocusIdx;
             const secIdx = window._teImgSectionFocusIdx;
             if (ruleIdx !== null && ruleIdx !== undefined && teRuleItems[ruleIdx]) {
-              // Paste into focused rule's image zone
               teRuleItems[ruleIdx].imgs.push(c);
               renderRuleImgs(ruleIdx);
-            } else if (secIdx !== null && secIdx !== undefined && teImgSections[secIdx]) {
-              // Paste into focused img section
-              teImgSections[secIdx].images.push(c);
-              teRenderSecImgs(secIdx);
+              showToast("📎 Ảnh dán vào dòng phân tích");
             } else {
-              // Fallback: last img section
-              const last = teImgSections.length - 1;
-              if (last >= 0 && teImgSections[last]) {
-                teImgSections[last].images.push(c);
-                teRenderSecImgs(last);
+              // Paste into focused section, or last valid section
+              const targetIdx = (secIdx !== null && secIdx !== undefined && teImgSections[secIdx])
+                ? secIdx
+                : teImgSections.findLastIndex(s => s !== null);
+              if (targetIdx >= 0 && teImgSections[targetIdx]) {
+                teImgSections[targetIdx].images.push(c);
+                teRenderSecImgs(targetIdx);
+                showToast("📷 Ảnh dán vào " + (teImgSections[targetIdx].tf || "section"));
               }
             }
           } catch(e2) {}
