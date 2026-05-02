@@ -258,6 +258,165 @@
     .detail-body, .form-body { max-width: 720px; margin: 0 auto; }
   }
 
+  /* ════════════════════════════════════════════
+     FORCE LAYOUT MODE — user override via settings
+     Adds body class:
+     - body.force-mobile  → ép giao diện iPhone
+     - body.force-tablet  → ép giao diện iPad (2 cột)
+     - body.force-desktop → ép giao diện laptop (3 cột)
+     Default (no class): auto theo viewport
+     ════════════════════════════════════════════ */
+
+  /* FORCE MOBILE: undo all tablet/desktop rules */
+  body.force-mobile .desktop-sidebar { display: none !important; }
+  body.force-mobile #screen-list,
+  body.force-mobile #screen-stats,
+  body.force-mobile #screen-theory,
+  body.force-mobile #screen-aichat,
+  body.force-mobile #screen-settings,
+  body.force-mobile #screen-import,
+  body.force-mobile #screen-detail,
+  body.force-mobile #screen-new,
+  body.force-mobile #screen-edit {
+    left: 0 !important;
+    right: 0 !important;
+    width: auto !important;
+    border-right: none !important;
+  }
+  body.force-mobile #screen-list:not(.active),
+  body.force-mobile #screen-stats:not(.active),
+  body.force-mobile #screen-theory:not(.active),
+  body.force-mobile #screen-aichat:not(.active),
+  body.force-mobile #screen-settings:not(.active),
+  body.force-mobile #screen-import:not(.active),
+  body.force-mobile #screen-detail:not(.active),
+  body.force-mobile #screen-new:not(.active),
+  body.force-mobile #screen-edit:not(.active) {
+    display: none !important;
+  }
+  body.force-mobile .bottom-nav {
+    display: flex !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100% !important;
+    max-width: 480px !important;
+  }
+  body.force-mobile .save-bar {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100% !important;
+    max-width: 480px !important;
+  }
+  body.force-mobile #empty-right-pane { display: none !important; }
+  body.force-mobile .detail-body,
+  body.force-mobile .form-body { max-width: none !important; margin: 0 !important; }
+
+  /* FORCE TABLET: 2 columns regardless of viewport */
+  body.force-tablet .desktop-sidebar { display: none !important; }
+  body.force-tablet #screen-list,
+  body.force-tablet #screen-stats,
+  body.force-tablet #screen-theory,
+  body.force-tablet #screen-aichat,
+  body.force-tablet #screen-settings,
+  body.force-tablet #screen-import {
+    left: 0 !important;
+    width: 380px !important;
+    right: auto !important;
+    border-right: 1px solid var(--gold-faint);
+  }
+  body.force-tablet #screen-list.active,
+  body.force-tablet #screen-stats.active,
+  body.force-tablet #screen-theory.active,
+  body.force-tablet #screen-aichat.active,
+  body.force-tablet #screen-settings.active,
+  body.force-tablet #screen-import.active {
+    display: flex !important;
+  }
+  body.force-tablet #screen-detail,
+  body.force-tablet #screen-new,
+  body.force-tablet #screen-edit {
+    left: 380px !important;
+  }
+  body.force-tablet #screen-detail.active,
+  body.force-tablet #screen-new.active,
+  body.force-tablet #screen-edit.active {
+    display: flex !important;
+  }
+  body.force-tablet .bottom-nav {
+    left: 0 !important;
+    transform: none !important;
+    width: 380px !important;
+    max-width: 380px !important;
+    display: flex !important;
+  }
+  body.force-tablet .save-bar {
+    left: 380px !important;
+    transform: none !important;
+    width: calc(100vw - 380px) !important;
+    max-width: none !important;
+  }
+  body.force-tablet #empty-right-pane { left: 380px !important; }
+  body.force-tablet.tablet-no-detail #empty-right-pane,
+  body.force-tablet.desktop-no-detail #empty-right-pane {
+    display: flex !important;
+  }
+
+  /* FORCE DESKTOP: 3 columns regardless of viewport */
+  body.force-desktop .desktop-sidebar {
+    display: flex !important;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 220px;
+    background: var(--bg2);
+    border-right: 1px solid var(--gold-faint);
+    flex-direction: column;
+    padding: 20px 0;
+    z-index: 200;
+  }
+  body.force-desktop .bottom-nav { display: none !important; }
+  body.force-desktop #screen-list,
+  body.force-desktop #screen-stats,
+  body.force-desktop #screen-theory,
+  body.force-desktop #screen-aichat,
+  body.force-desktop #screen-settings,
+  body.force-desktop #screen-import {
+    left: 220px !important;
+    width: 420px !important;
+    right: auto !important;
+    border-right: 1px solid var(--gold-faint);
+  }
+  body.force-desktop #screen-list.active,
+  body.force-desktop #screen-stats.active,
+  body.force-desktop #screen-theory.active,
+  body.force-desktop #screen-aichat.active,
+  body.force-desktop #screen-settings.active,
+  body.force-desktop #screen-import.active {
+    display: flex !important;
+  }
+  body.force-desktop #screen-detail,
+  body.force-desktop #screen-new,
+  body.force-desktop #screen-edit {
+    left: calc(220px + 420px) !important;
+  }
+  body.force-desktop #screen-detail.active,
+  body.force-desktop #screen-new.active,
+  body.force-desktop #screen-edit.active {
+    display: flex !important;
+  }
+  body.force-desktop .save-bar {
+    left: calc(220px + 420px) !important;
+    transform: none !important;
+    width: calc(100vw - 220px - 420px) !important;
+    max-width: none !important;
+  }
+  body.force-desktop #empty-right-pane { left: calc(220px + 420px) !important; }
+  body.force-desktop.desktop-no-detail #empty-right-pane,
+  body.force-desktop.tablet-no-detail #empty-right-pane {
+    display: flex !important;
+  }
+  body.force-desktop .detail-body,
+  body.force-desktop .form-body { max-width: 720px; margin: 0 auto; }
+
   /* Welcome panel (right column when no trade selected) */
   #empty-right-pane {
     display: none;
@@ -356,7 +515,7 @@
     background:linear-gradient(180deg,rgba(6,6,6,0.98) 0%,rgba(6,6,6,0.85) 100%);
     backdrop-filter:blur(20px) saturate(180%);
     border-bottom:1px solid var(--border);
-    padding:14px 20px 12px;
+    padding:max(14px, env(safe-area-inset-top,14px)) 20px 12px;
     display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
   }
   .header::before{
@@ -760,7 +919,7 @@
   .bottom-nav{
     position:fixed;bottom:0;left:50%;transform:translateX(-50%);
     width:100%;max-width:480px;
-    background:linear-gradient(180deg,transparent,var(--bg2) 20%);
+    background:var(--bg2);
     border-top:1px solid var(--border);
     display:flex;z-index:200;
     padding-bottom:env(safe-area-inset-bottom,0);
@@ -1064,7 +1223,10 @@
       <div class="label">NHẬT KÝ GIAO DỊCH · ICT</div>
       <div class="name" style="font-family:'Cinzel',serif;letter-spacing:2px">TradeLog</div>
     </div>
-    <button class="header-btn" onclick="navSidebar('settings')" style="font-size:16px;opacity:0.7;" title="Cài đặt">⚙️</button>
+    <div style="display:flex;gap:2px;">
+      <button class="header-btn" onclick="openLayoutModal()" style="font-size:16px;opacity:0.7;" title="Bố cục giao diện">📐</button>
+      <button class="header-btn" onclick="navSidebar('settings')" style="font-size:16px;opacity:0.7;" title="Cài đặt">⚙️</button>
+    </div>
   </div>
   <!-- Fix 7: streak row -->
   <div id="streak-row" style="display:flex;justify-content:space-between;align-items:center;padding:7px 18px;background:var(--bg2);border-bottom:1px solid var(--gold-faint);flex-shrink:0;cursor:pointer;gap:8px;" onclick="toggleSessionInfo()">
@@ -1149,6 +1311,38 @@
   <button class="bn-item" id="bn-settings" onclick="navSidebar('settings')">
     <div class="bn-icon">⚙️</div><div class="bn-label">CÀI ĐẶT</div>
   </button>
+</div>
+
+<!-- LAYOUT MODAL (quick switcher from header) -->
+<div id="modal-layout" style="display:none;position:fixed;inset:0;background:#000a;z-index:1000;align-items:flex-end;justify-content:center;" onclick="if(event.target===this)closeLayoutModal()">
+  <div style="background:var(--bg2);width:100%;max-width:480px;border-radius:var(--radius-xl) var(--radius-xl) 0 0;padding:20px 18px 28px;" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div style="font-size:15px;color:var(--gold);font-weight:700;">📐 Bố Cục Giao Diện</div>
+      <button onclick="closeLayoutModal()" style="background:transparent;border:none;color:var(--gold);font-size:20px;cursor:pointer;">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+      <button class="layout-quick-btn" onclick="setLayoutMode('auto');closeLayoutModal()" id="ql-auto" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:18px 12px;color:var(--text);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="font-size:28px;">✨</div>
+        <div style="font-size:13px;font-weight:600;color:var(--gold);">Tự Động</div>
+        <div style="font-size:10px;opacity:0.65;">Theo thiết bị</div>
+      </button>
+      <button class="layout-quick-btn" onclick="setLayoutMode('mobile');closeLayoutModal()" id="ql-mobile" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:18px 12px;color:var(--text);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="font-size:28px;">📱</div>
+        <div style="font-size:13px;font-weight:600;color:var(--gold);">iPhone</div>
+        <div style="font-size:10px;opacity:0.65;">1 cột</div>
+      </button>
+      <button class="layout-quick-btn" onclick="setLayoutMode('tablet');closeLayoutModal()" id="ql-tablet" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:18px 12px;color:var(--text);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="font-size:28px;">📱</div>
+        <div style="font-size:13px;font-weight:600;color:var(--gold);">iPad</div>
+        <div style="font-size:10px;opacity:0.65;">2 cột</div>
+      </button>
+      <button class="layout-quick-btn" onclick="setLayoutMode('desktop');closeLayoutModal()" id="ql-desktop" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-md);padding:18px 12px;color:var(--text);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="font-size:28px;">💻</div>
+        <div style="font-size:13px;font-weight:600;color:var(--gold);">Laptop</div>
+        <div style="font-size:10px;opacity:0.65;">3 cột</div>
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- IMPORT SCREEN -->
@@ -1695,6 +1889,30 @@
         <div style="font-size:26px;margin-bottom:4px;font-family:var(--sys);">Aa</div>
         <div style="font-size:11px;letter-spacing:1px;font-family:var(--sys);">LỚN</div>
       </button>
+    </div>
+
+    <!-- LAYOUT MODE -->
+    <div class="section-label">Bố Cục Giao Diện</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
+      <button class="theme-size-btn active" id="layout-auto" onclick="setLayoutMode('auto')">
+        <div style="font-size:20px;margin-bottom:4px;">✨</div>
+        <div style="font-size:10px;letter-spacing:0.5px;font-family:var(--sys);">TỰ ĐỘNG</div>
+      </button>
+      <button class="theme-size-btn" id="layout-mobile" onclick="setLayoutMode('mobile')">
+        <div style="font-size:20px;margin-bottom:4px;">📱</div>
+        <div style="font-size:10px;letter-spacing:0.5px;font-family:var(--sys);">iPHONE</div>
+      </button>
+      <button class="theme-size-btn" id="layout-tablet" onclick="setLayoutMode('tablet')">
+        <div style="font-size:20px;margin-bottom:4px;">📱</div>
+        <div style="font-size:10px;letter-spacing:0.5px;font-family:var(--sys);">iPAD</div>
+      </button>
+      <button class="theme-size-btn" id="layout-desktop" onclick="setLayoutMode('desktop')">
+        <div style="font-size:20px;margin-bottom:4px;">💻</div>
+        <div style="font-size:10px;letter-spacing:0.5px;font-family:var(--sys);">LAPTOP</div>
+      </button>
+    </div>
+    <div style="font-size:11px;color:var(--gold);opacity:0.6;margin-bottom:24px;font-family:var(--sys);line-height:1.5;">
+      💡 Tự động: chọn theo kích thước màn hình. Bạn có thể ép giao diện iPhone/iPad/Laptop bất kể thiết bị.
     </div>
 
     <!-- PREVIEW -->
@@ -3415,6 +3633,94 @@ window.setFontSize = async function(size) {
   syncSettingsUI(themeSettings);
   await saveTheme();
 };
+
+// Layout mode: 'auto' | 'mobile' | 'tablet' | 'desktop'
+window.setLayoutMode = function(mode) {
+  // Update body class
+  document.body.classList.remove("force-mobile", "force-tablet", "force-desktop");
+  if(mode !== "auto") document.body.classList.add("force-" + mode);
+  // Update button active states (settings + quick modal)
+  ["auto","mobile","tablet","desktop"].forEach(m => {
+    const btn = document.getElementById("layout-" + m);
+    if(btn) btn.classList.toggle("active", m === mode);
+    const qbtn = document.getElementById("ql-" + m);
+    if(qbtn) {
+      qbtn.style.borderColor = (m === mode) ? "var(--gold)" : "var(--gold-faint)";
+      qbtn.style.background = (m === mode) ? "var(--gold-faint)" : "var(--bg3)";
+    }
+  });
+  // Persist
+  try { localStorage.setItem("tl_layout_mode", mode); } catch(e){}
+  // Re-apply screen logic so empty-state etc updates
+  if(typeof showScreen === "function") {
+    const active = document.querySelector(".screen.active");
+    if(active) {
+      const name = active.id.replace("screen-", "");
+      // Recalculate body classes & screen visibility for new mode
+      const isWide = mode === "tablet" || mode === "desktop" || (mode === "auto" && window.innerWidth >= 768);
+      const isDesktop = mode === "desktop" || (mode === "auto" && window.innerWidth >= 1200);
+      const rightPanes = ["detail","new","edit"];
+      const anyRightActive = rightPanes.some(s => document.getElementById("screen-"+s)?.classList.contains("active"));
+      document.body.classList.toggle("tablet-no-detail", isWide && !isDesktop && !anyRightActive);
+      document.body.classList.toggle("desktop-no-detail", isDesktop && !anyRightActive);
+      // Update FAB + bottom-nav
+      const fab = document.getElementById("fab-btn");
+      if(fab) {
+        const listActive = document.getElementById("screen-list")?.classList.contains("active");
+        fab.classList.toggle("visible", listActive && !isDesktop);
+      }
+      const bnEl = document.getElementById("bottom-nav");
+      if(bnEl) {
+        if(isDesktop) bnEl.style.display = "none";
+        else if(isWide) bnEl.style.display = "flex";
+        else {
+          const onRightPane = rightPanes.some(s => document.getElementById("screen-"+s)?.classList.contains("active"));
+          bnEl.style.display = onRightPane ? "none" : "flex";
+        }
+      }
+    }
+  }
+  showToast("✅ Đã đổi giao diện: " + (mode === "auto" ? "Tự động" : mode === "mobile" ? "iPhone" : mode === "tablet" ? "iPad" : "Laptop"));
+};
+
+// Apply persisted layout mode on load
+function applyPersistedLayoutMode() {
+  let mode = "auto";
+  try { mode = localStorage.getItem("tl_layout_mode") || "auto"; } catch(e){}
+  if(mode !== "auto") document.body.classList.add("force-" + mode);
+  // Update button active states
+  ["auto","mobile","tablet","desktop"].forEach(m => {
+    const btn = document.getElementById("layout-" + m);
+    if(btn) btn.classList.toggle("active", m === mode);
+    const qbtn = document.getElementById("ql-" + m);
+    if(qbtn) {
+      qbtn.style.borderColor = (m === mode) ? "var(--gold)" : "var(--gold-faint)";
+      qbtn.style.background = (m === mode) ? "var(--gold-faint)" : "var(--bg3)";
+    }
+  });
+}
+// Run after DOM ready
+if(document.readyState !== "loading") applyPersistedLayoutMode();
+else document.addEventListener("DOMContentLoaded", applyPersistedLayoutMode);
+
+// Open/close layout quick modal (from main screen header)
+window.openLayoutModal = function() {
+  // Sync active state for quick buttons
+  let mode = "auto";
+  try { mode = localStorage.getItem("tl_layout_mode") || "auto"; } catch(e){}
+  ["auto","mobile","tablet","desktop"].forEach(m => {
+    const qbtn = document.getElementById("ql-" + m);
+    if(qbtn) {
+      qbtn.style.borderColor = (m === mode) ? "var(--gold)" : "var(--gold-faint)";
+      qbtn.style.background = (m === mode) ? "var(--gold-faint)" : "var(--bg3)";
+    }
+  });
+  document.getElementById("modal-layout").style.display = "flex";
+};
+window.closeLayoutModal = function() {
+  document.getElementById("modal-layout").style.display = "none";
+};
+
 
 window.resetTheme = async function() {
   localStorage.removeItem("tl_theme_manual"); // Fix 7: clear manual flag so auto-theme works again
