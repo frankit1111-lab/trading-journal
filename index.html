@@ -3332,10 +3332,33 @@ window.teHandleFiles = async function(idx, input) {
   teRenderSecImgs(idx); input.value="";
 };
 function teRenderSecImgs(idx) {
-  const wrap=document.getElementById("te-imgs-"+idx); if(!wrap||!teImgSections[idx]) return;
-  const imgs=teImgSections[idx].images;
-  if(!imgs.length){wrap.innerHTML=`<div style="color:var(--gold);opacity:0.35;font-size:11px;font-family:var(--sys);padding:10px;">Chưa có ảnh — nhấn "+ Thêm ảnh" hoặc Ctrl+V để dán</div>`;return;}
-  wrap.innerHTML=imgs.map((src,i)=>`<div style="position:relative;flex:0 0 auto;"><img src="${src}" onclick="openTeImgFull(teImgSections[${idx}].images[${i}])" style="width:90px;height:68px;object-fit:cover;border-radius:6px;border:1px solid var(--gold-dim);display:block;cursor:zoom-in;"/><button onclick="teRemoveImg(${idx},${i})" style="position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:11px;cursor:pointer;line-height:1;">✕</button></div>`).join("");
+  const wrap = document.getElementById("te-imgs-"+idx);
+  if (!wrap || !teImgSections[idx]) return;
+  const imgs = teImgSections[idx].images;
+  wrap.innerHTML = "";
+  if (!imgs.length) {
+    wrap.innerHTML = `<div style="color:var(--gold);opacity:0.35;font-size:11px;padding:10px;">Chưa có ảnh — nhấn "+ Ảnh" hoặc Ctrl+V</div>`;
+    return;
+  }
+  imgs.forEach((src, i) => {
+    const div = document.createElement("div");
+    div.style.cssText = "position:relative;flex:0 0 auto;";
+    const img = document.createElement("img");
+    img.src = src;
+    img.style.cssText = "width:90px;height:68px;object-fit:cover;border-radius:6px;border:1px solid var(--gold-dim);display:block;cursor:zoom-in;";
+    img.addEventListener("click", () => openTeImgFull(src));
+    const del = document.createElement("button");
+    del.textContent = "✕";
+    del.style.cssText = "position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:11px;cursor:pointer;line-height:1;";
+    del.addEventListener("click", (e) => {
+      e.stopPropagation();
+      teImgSections[idx].images.splice(i, 1);
+      teRenderSecImgs(idx);
+    });
+    div.appendChild(img);
+    div.appendChild(del);
+    wrap.appendChild(div);
+  });
 }
 window.teRemoveImg=function(idx,i){teImgSections[idx].images.splice(i,1);teRenderSecImgs(idx);};
 window.openTeImgFull=function(src){const fs=document.getElementById("theory-img-fullscreen");document.getElementById("theory-img-fullscreen-img").src=src;fs.style.display="flex";};
@@ -3506,13 +3529,27 @@ function renderRuleImgs(idx) {
   const zone = document.getElementById("te-rule-imgs-"+idx);
   if (!zone || !teRuleItems[idx]) return;
   const imgs = teRuleItems[idx].imgs || [];
-  if (!imgs.length) { zone.innerHTML = ""; return; }
-  zone.innerHTML = imgs.map((src, i) =>
-    `<div style="position:relative;flex:0 0 auto;">
-      <img src="${src}" onclick="openTeImgFull(teRuleItems[${idx}].imgs[${i}])" style="width:80px;height:60px;object-fit:cover;border-radius:6px;border:1px solid var(--gold-dim);cursor:zoom-in;display:block;"/>
-      <button onclick="teRuleItems[${idx}].imgs.splice(${i},1);renderRuleImgs(${idx})" style="position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:16px;height:16px;color:#ef5350;font-size:10px;cursor:pointer;line-height:1;">✕</button>
-    </div>`
-  ).join("");
+  zone.innerHTML = "";
+  if (!imgs.length) return;
+  imgs.forEach((src, i) => {
+    const wrap = document.createElement("div");
+    wrap.style.cssText = "position:relative;flex:0 0 auto;";
+    const img = document.createElement("img");
+    img.src = src;
+    img.style.cssText = "width:80px;height:60px;object-fit:cover;border-radius:6px;border:1px solid var(--gold-dim);cursor:zoom-in;display:block;";
+    img.addEventListener("click", () => openTeImgFull(src));
+    const del = document.createElement("button");
+    del.textContent = "✕";
+    del.style.cssText = "position:absolute;top:2px;right:2px;background:#000a;border:none;border-radius:50%;width:18px;height:18px;color:#ef5350;font-size:10px;cursor:pointer;line-height:1;";
+    del.addEventListener("click", (e) => {
+      e.stopPropagation();
+      teRuleItems[idx].imgs.splice(i, 1);
+      renderRuleImgs(idx);
+    });
+    wrap.appendChild(img);
+    wrap.appendChild(del);
+    zone.appendChild(wrap);
+  });
 }
 
 // Paste handler — listen on document, only process when theory modal is open
