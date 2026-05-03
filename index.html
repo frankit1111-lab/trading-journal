@@ -1711,7 +1711,11 @@
 <!-- THEORY EDIT MODAL -->
 <div id="modal-theory-edit" style="display:none;" class="modal-overlay" onclick="closeTheoryEditModal(event)">
   <div class="modal-sheet" style="max-height:94vh;padding-bottom:16px;border-radius:var(--radius-xl) 20px 0 0;overflow-y:auto;-webkit-overflow-scrolling:touch;" onclick="event.stopPropagation()">
-    <div class="modal-title" id="theory-edit-modal-title">CHỈNH SỬA THẺ LÝ THUYẾT</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+      <div class="modal-title" id="theory-edit-modal-title" style="margin-bottom:0;flex:1;">CHỈNH SỬA THẺ LÝ THUYẾT</div>
+      <button id="te-undo-btn" onclick="teUndo()" title="Hoàn tác (Ctrl+Z)" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:6px 10px;color:var(--gold);font-size:14px;cursor:pointer;line-height:1;opacity:0.35;flex-shrink:0;">↶</button>
+      <button id="te-redo-btn" onclick="teRedo()" title="Làm lại (Ctrl+Y)" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:6px 10px;color:var(--gold);font-size:14px;cursor:pointer;line-height:1;opacity:0.35;flex-shrink:0;">↷</button>
+    </div>
 
     <div id="te-scroll-body" style="display:flex;flex-direction:column;gap:12px;overflow-y:auto;max-height:calc(94vh - 130px);padding-bottom:8px;">
 
@@ -4983,8 +4987,196 @@ window.rtSanitize = rtSanitize;
 window.rtPlain = rtPlain;
 window.escRich = escRich;
 
+// ════════════════════════════════════════════
+// ── UNDO / REDO ENGINE for theory edit modal ──
+// Snapshots teSectionsList + title/highlight/icon/cat on every meaningful action.
+// Triggered by Ctrl+Z / Ctrl+Y / Cmd+Z / Cmd+Shift+Z and on-screen buttons.
+// ════════════════════════════════════════════
+let teUndoStack = [];     // past states (oldest first)
+let teRedoStack = [];     // future states (after undo)
+const TE_UNDO_MAX = 50;   // cap memory
+let _teApplyingHistory = false; // prevent recursive snapshots while restoring
+
+function _teCaptureState() {
+  // Pull latest values from rich editors (DOM is source of truth)
+  let title = "", hl = "";
+  try { title = _rtEditors.titleE ? _rtEditors.titleE.getHTML() : ""; } catch(e){}
+  try { hl = _rtEditors.hlE ? _rtEditors.hlE.getHTML() : ""; } catch(e){}
+  // Also pull each section's tag from its editor (data may lag if user just typed)
+  const sectionsCopy = teSectionsList.map((sec, sIdx) => {
+    let tagHTML = sec.tag || "";
+    try {
+      const ed = _rtEditors["sec_tag_"+sIdx];
+      if(ed) tagHTML = ed.getHTML();
+    } catch(e){}
+    return {
+      tag: tagHTML,
+      rules: (sec.rules||[]).map(r => ({
+        t: r.t||"",
+        imgs: [...(r.imgs||[])],
+        imgCaptions: [...(r.imgCaptions||[])]
+      })),
+      examples: (sec.examples||[]).map((ex, eIdx) => {
+        let conclusion = ex.conclusion || "";
+        try {
+          const cEd = _rtEditors[`ex_concl_${sIdx}_${eIdx}`];
+          if(cEd) conclusion = cEd.getHTML();
+        } catch(e){}
+        return {
+          label: ex.label || "",
+          conclusion,
+          tfs: (ex.tfs||[]).map(tf => ({
+            tf: tf.tf || "",
+            notes: tf.notes || "",
+            images: [...(tf.images||[])]
+          }))
+        };
+      })
+    };
+  });
+  return {
+    sections: sectionsCopy,
+    title,
+    highlight: hl,
+    icon: (document.getElementById("te-icon")?.value) || "📌",
+    cat: (document.getElementById("te-cat")?.value) || "all",
+    hlType: (document.getElementById("te-hl-type")?.value) || "tip"
+  };
+}
+
+// Snapshot BEFORE making a change — call this at the start of any mutating action
+function teSnapshot() {
+  if(_teApplyingHistory) return;
+  try {
+    teUndoStack.push(_teCaptureState());
+    if(teUndoStack.length > TE_UNDO_MAX) teUndoStack.shift();
+    teRedoStack.length = 0; // any new action invalidates redo
+    _teUpdateUndoButtons();
+  } catch(e) { console.error("teSnapshot err:", e); }
+}
+
+function _teRestoreState(state) {
+  if(!state) return;
+  _teApplyingHistory = true;
+  try {
+    // Restore basic fields
+    const iconEl = document.getElementById("te-icon");
+    if(iconEl) iconEl.value = state.icon || "📌";
+    const catEl = document.getElementById("te-cat");
+    if(catEl) catEl.value = state.cat || "all";
+    const hlTypeEl = document.getElementById("te-hl-type");
+    if(hlTypeEl) hlTypeEl.value = state.hlType || "tip";
+
+    // Restore sections data (deep copy)
+    teSectionsList = (state.sections||[]).map(sec => ({
+      tag: sec.tag||"",
+      rules: (sec.rules||[]).map(r => ({
+        t: r.t||"",
+        imgs: [...(r.imgs||[])],
+        imgCaptions: [...(r.imgCaptions||[])]
+      })),
+      examples: (sec.examples||[]).map(ex => ({
+        label: ex.label||"",
+        conclusion: ex.conclusion||"",
+        tfs: (ex.tfs||[]).map(tf => ({
+          tf: tf.tf||"",
+          notes: tf.notes||"",
+          images: [...(tf.images||[])]
+        }))
+      }))
+    }));
+
+    // Re-render all sections (this rebuilds rich editors)
+    rerenderAllSections();
+
+    // Restore title/highlight rich content
+    if(_rtEditors.titleE) _rtEditors.titleE.setHTML(state.title||"");
+    if(_rtEditors.hlE) _rtEditors.hlE.setHTML(state.highlight||"");
+
+    // Restore each section's tag editor + example conclusions
+    state.sections?.forEach((sec, sIdx) => {
+      const tagEd = _rtEditors["sec_tag_"+sIdx];
+      if(tagEd) tagEd.setHTML(sec.tag || "");
+      sec.examples?.forEach((ex, eIdx) => {
+        const cEd = _rtEditors[`ex_concl_${sIdx}_${eIdx}`];
+        if(cEd) cEd.setHTML(ex.conclusion || "");
+      });
+    });
+  } catch(e) {
+    console.error("teRestoreState err:", e);
+  } finally {
+    _teApplyingHistory = false;
+    _teUpdateUndoButtons();
+  }
+}
+
+window.teUndo = function() {
+  if(!teUndoStack.length) { showToast("↶ Không có gì để hoàn tác"); return; }
+  // Push current state into redo, then restore the last undo
+  teRedoStack.push(_teCaptureState());
+  if(teRedoStack.length > TE_UNDO_MAX) teRedoStack.shift();
+  const prev = teUndoStack.pop();
+  _teRestoreState(prev);
+  try{if(navigator.vibrate)navigator.vibrate(10);}catch(e){}
+};
+
+window.teRedo = function() {
+  if(!teRedoStack.length) { showToast("↷ Không có gì để làm lại"); return; }
+  teUndoStack.push(_teCaptureState());
+  if(teUndoStack.length > TE_UNDO_MAX) teUndoStack.shift();
+  const next = teRedoStack.pop();
+  _teRestoreState(next);
+  try{if(navigator.vibrate)navigator.vibrate(10);}catch(e){}
+};
+
+function _teUpdateUndoButtons() {
+  try {
+    const u = document.getElementById("te-undo-btn");
+    const r = document.getElementById("te-redo-btn");
+    if(u) u.style.opacity = teUndoStack.length ? "1" : "0.35";
+    if(r) r.style.opacity = teRedoStack.length ? "1" : "0.35";
+  } catch(e){}
+}
+
+function _teResetHistory() {
+  teUndoStack = [];
+  teRedoStack = [];
+  _teUpdateUndoButtons();
+}
+
+// Keyboard shortcuts: Ctrl+Z, Ctrl+Y, Cmd+Z, Cmd+Shift+Z
+// Only when the theory edit modal is open. Don't interfere with browser undo inside contenteditable text input.
+document.addEventListener("keydown", (e) => {
+  const modal = document.getElementById("modal-theory-edit");
+  if(!modal || modal.style.display !== "flex") return;
+  const key = e.key.toLowerCase();
+  const ctrlOrMeta = e.ctrlKey || e.metaKey;
+  if(!ctrlOrMeta) return;
+
+  // If user is actively typing in a contenteditable / textarea / input, let browser handle text-level undo
+  const ae = document.activeElement;
+  const isTyping = ae && (
+    ae.tagName === "INPUT" ||
+    ae.tagName === "TEXTAREA" ||
+    ae.isContentEditable === true ||
+    ae.getAttribute && (ae.getAttribute("contenteditable") === "true" || ae.getAttribute("contenteditable") === "") ||
+    (ae.closest && ae.closest(".rt-content")) // inside our rich-text editor
+  );
+
+  if(key === "z" && !e.shiftKey) {
+    if(isTyping) return; // browser handles text undo
+    e.preventDefault();
+    teUndo();
+  } else if((key === "y") || (key === "z" && e.shiftKey)) {
+    if(isTyping) return;
+    e.preventDefault();
+    teRedo();
+  }
+});
+
 window.addSection = function(initData=null) {
   try {
+    teSnapshot();
     const sIdx = teSectionsList.length;
     const sec = initData ? {
       tag: initData.tag || "",
@@ -5008,6 +5200,7 @@ window.addSection = function(initData=null) {
 window.removeSection = function(sIdx) {
   if(teSectionsList.length <= 1) { showToast("⚠️ Phải có ít nhất 1 section"); return; }
   if(!confirm("Xóa Section " + (sIdx+1) + "?")) return;
+  teSnapshot();
   teSectionsList.splice(sIdx, 1);
   rerenderAllSections();
 };
@@ -5015,6 +5208,7 @@ window.removeSection = function(sIdx) {
 window.duplicateSection = function(sIdx) {
   const src = teSectionsList[sIdx];
   if(!src) return;
+  teSnapshot();
   const copy = JSON.parse(JSON.stringify(src));
   teSectionsList.splice(sIdx+1, 0, copy);
   rerenderAllSections();
@@ -5113,6 +5307,7 @@ function renderSection(sIdx) {
 
 window.addSectionRule = function(sIdx) {
   if(!teSectionsList[sIdx]) return;
+  teSnapshot();
   teSectionsList[sIdx].rules.push({t:"", imgs:[], imgCaptions:[]});
   renderSectionRule(sIdx, teSectionsList[sIdx].rules.length - 1);
 };
@@ -5140,6 +5335,7 @@ function renderSectionRule(sIdx, rIdx) {
   delBtn.textContent = "✕";
   delBtn.style.cssText = "background:none;border:1px solid #ef535044;border-radius:6px;padding:5px 8px;color:var(--loss);font-size:12px;cursor:pointer;flex-shrink:0;";
   delBtn.addEventListener("click", () => {
+    teSnapshot();
     teSectionsList[sIdx].rules.splice(rIdx, 1);
     // Re-render this section's rules
     const ll = document.getElementById("te-sec-rules-" + sIdx);
@@ -5164,6 +5360,7 @@ function renderSectionRule(sIdx, rIdx) {
   addImgBtn.style.cssText = "background:transparent;border:1px dashed var(--gold-faint);border-radius:6px;padding:4px 10px;color:var(--gold);font-size:11px;cursor:pointer;align-self:flex-start;";
   addImgBtn.addEventListener("click", () => fileInput.click());
   fileInput.addEventListener("change", async function() {
+    if(this.files.length) teSnapshot();
     for(const f of Array.from(this.files)) {
       await new Promise(res => {
         const r = new FileReader();
@@ -5212,6 +5409,7 @@ function renderSectionRuleImgs(sIdx, rIdx) {
     del.style.cssText = "position:absolute;top:-6px;right:-6px;background:#ef5350;border:none;border-radius:50%;width:18px;height:18px;color:#fff;font-size:10px;cursor:pointer;line-height:1;";
     del.addEventListener("click", e => {
       e.stopPropagation();
+      teSnapshot();
       item.imgs.splice(i, 1);
       if(item.imgCaptions) item.imgCaptions.splice(i, 1);
       renderSectionRuleImgs(sIdx, rIdx);
@@ -5233,6 +5431,7 @@ function renderSectionRuleImgs(sIdx, rIdx) {
 
 window.addSectionExample = function(sIdx, label="", tfs=[], conclusion="") {
   if(!teSectionsList[sIdx]) return;
+  teSnapshot();
   const ex = {
     label,
     conclusion,
@@ -5265,6 +5464,7 @@ function renderSectionExample(sIdx, eIdx) {
   exHdr.querySelector(".ex-label-input").addEventListener("input", e => { if(teSectionsList[sIdx]?.examples[eIdx]) teSectionsList[sIdx].examples[eIdx].label = e.target.value; });
   exHdr.querySelector(".ex-add-tf").addEventListener("click", () => addSectionExampleTf(sIdx, eIdx));
   exHdr.querySelector(".ex-remove").addEventListener("click", () => {
+    teSnapshot();
     teSectionsList[sIdx].examples.splice(eIdx, 1);
     const ll = document.getElementById("te-sec-examples-" + sIdx);
     if(ll) { ll.innerHTML = ""; teSectionsList[sIdx].examples.forEach((_, i) => renderSectionExample(sIdx, i)); }
@@ -5305,6 +5505,8 @@ function renderSectionExample(sIdx, eIdx) {
 window.addSectionExampleTf = function(sIdx, eIdx, tf="", notes="", images=[]) {
   const ex = teSectionsList[sIdx]?.examples[eIdx];
   if(!ex) return;
+  // Only snapshot user-driven adds (skip when called from initial load with empty values)
+  if(!_teApplyingHistory) teSnapshot();
   ex.tfs.push({tf, notes, images:[...images]});
   renderSectionExampleTf(sIdx, eIdx, ex.tfs.length - 1);
 };
@@ -5337,6 +5539,7 @@ function renderSectionExampleTf(sIdx, eIdx, tIdx) {
   addImg.style.cssText = "background:transparent;border:1px dashed var(--gold-faint);border-radius:4px;padding:4px 10px;color:var(--gold);font-size:11px;cursor:pointer;";
   addImg.addEventListener("click", () => fileIn.click());
   fileIn.addEventListener("change", async function() {
+    if(this.files.length) teSnapshot();
     for(const f of Array.from(this.files)) {
       await new Promise(res => {
         const r = new FileReader();
@@ -5353,6 +5556,7 @@ function renderSectionExampleTf(sIdx, eIdx, tIdx) {
   delTf.type = "button"; delTf.textContent = "✕";
   delTf.style.cssText = "margin-left:auto;background:none;border:1px solid #ef535044;border-radius:4px;padding:4px 8px;color:var(--loss);font-size:11px;cursor:pointer;";
   delTf.addEventListener("click", () => {
+    teSnapshot();
     teSectionsList[sIdx].examples[eIdx].tfs.splice(tIdx, 1);
     const bb = document.getElementById(`te-sec-${sIdx}-ex-${eIdx}-tfs`);
     if(bb) { bb.innerHTML = ""; teSectionsList[sIdx].examples[eIdx].tfs.forEach((_, i) => renderSectionExampleTf(sIdx, eIdx, i)); }
@@ -5398,6 +5602,7 @@ function renderSectionExampleTfImgs(sIdx, eIdx, tIdx) {
     del.style.cssText = "position:absolute;top:-6px;right:-6px;background:#ef5350;border:none;border-radius:50%;width:18px;height:18px;color:#fff;font-size:10px;cursor:pointer;line-height:1;";
     del.addEventListener("click", e => {
       e.stopPropagation();
+      teSnapshot();
       tfObj.images.splice(i, 1);
       renderSectionExampleTfImgs(sIdx, eIdx, tIdx);
     });
@@ -5467,25 +5672,32 @@ window.openAddTheoryCard = function() {
   teSectionsList = [];
   _teCleanupRichEditors();
   _setRtEditors({});
-  window._teRuleFocusIdx = null; window._teImgSectionFocusIdx = null;
-  document.getElementById("theory-edit-modal-title").textContent = "THÊM THẺ MỚI";
-  document.getElementById("te-icon").value = "📌";
-  document.getElementById("te-img").value = "";
-  populateTheoryCatSelect(theoryCategory!=="all"?theoryCategory:"");
-  document.getElementById("te-hl-type").value = "tip";
-  document.getElementById("te-delete-btn").style.display = "none";
-  document.getElementById("te-img-sections").innerHTML = "";
-  // Build rich editors for title + highlight
-  _teBuildTopRichEditors("", "");
-  // Build sections list (start with 1 empty section)
-  document.getElementById("te-sections-list").innerHTML = "";
-  addSection();
-  // Legacy hidden containers (no longer used)
-  const oldRules = document.getElementById("te-rules-list"); if(oldRules) oldRules.innerHTML = "";
-  const oldEx = document.getElementById("te-examples-list"); if(oldEx) oldEx.innerHTML = "";
-  if(window.resetPasteTarget) window.resetPasteTarget();
-  document.getElementById("modal-theory-edit").style.display = "flex";
-  setTimeout(()=>document.getElementById("te-scroll-body").scrollTop=0,50);
+  _teResetHistory();
+  _teApplyingHistory = true; // suppress snapshot during initialization
+  try {
+    window._teRuleFocusIdx = null; window._teImgSectionFocusIdx = null;
+    document.getElementById("theory-edit-modal-title").textContent = "THÊM THẺ MỚI";
+    document.getElementById("te-icon").value = "📌";
+    document.getElementById("te-img").value = "";
+    populateTheoryCatSelect(theoryCategory!=="all"?theoryCategory:"");
+    document.getElementById("te-hl-type").value = "tip";
+    document.getElementById("te-delete-btn").style.display = "none";
+    document.getElementById("te-img-sections").innerHTML = "";
+    // Build rich editors for title + highlight
+    _teBuildTopRichEditors("", "");
+    // Build sections list (start with 1 empty section)
+    document.getElementById("te-sections-list").innerHTML = "";
+    addSection();
+    // Legacy hidden containers (no longer used)
+    const oldRules = document.getElementById("te-rules-list"); if(oldRules) oldRules.innerHTML = "";
+    const oldEx = document.getElementById("te-examples-list"); if(oldEx) oldEx.innerHTML = "";
+    if(window.resetPasteTarget) window.resetPasteTarget();
+    document.getElementById("modal-theory-edit").style.display = "flex";
+    setTimeout(()=>document.getElementById("te-scroll-body").scrollTop=0,50);
+  } finally {
+    _teApplyingHistory = false;
+    _teUpdateUndoButtons();
+  }
 };
 
 window.openEditTheoryCard = function(id) {
@@ -5494,50 +5706,57 @@ window.openEditTheoryCard = function(id) {
   teSectionsList = [];
   _teCleanupRichEditors();
   _setRtEditors({});
-  window._teRuleFocusIdx = null; window._teImgSectionFocusIdx = null;
-  document.getElementById("theory-edit-modal-title").textContent = "CHỈNH SỬA THẺ";
-  document.getElementById("te-icon").value = t.icon || "📌";
-  populateTheoryCatSelect(t.cat||"");
-  document.getElementById("te-img").value = t.img || "";
-  document.getElementById("te-hl-type").value = t.highlight?.type || t.hlType || "tip";
-  document.getElementById("te-delete-btn").style.display = "block";
-  document.getElementById("te-img-sections").innerHTML = "";
+  _teResetHistory();
+  _teApplyingHistory = true; // suppress snapshot during initialization
+  try {
+    window._teRuleFocusIdx = null; window._teImgSectionFocusIdx = null;
+    document.getElementById("theory-edit-modal-title").textContent = "CHỈNH SỬA THẺ";
+    document.getElementById("te-icon").value = t.icon || "📌";
+    populateTheoryCatSelect(t.cat||"");
+    document.getElementById("te-img").value = t.img || "";
+    document.getElementById("te-hl-type").value = t.highlight?.type || t.hlType || "tip";
+    document.getElementById("te-delete-btn").style.display = "block";
+    document.getElementById("te-img-sections").innerHTML = "";
 
-  // Build rich editors
-  _teBuildTopRichEditors(t.title || "", t.highlight?.text || t.hlText || "");
+    // Build rich editors
+    _teBuildTopRichEditors(t.title || "", t.highlight?.text || t.hlText || "");
 
-  // Sections list — load new format if present, else migrate
-  document.getElementById("te-sections-list").innerHTML = "";
-  if(Array.isArray(t.sections) && t.sections.length) {
-    // New format
-    t.sections.forEach(sec => addSection({
-      tag: sec.tag || "",
-      rules: sec.rules || [],
-      examples: sec.examples || []
-    }));
-  } else {
-    // Legacy: 1 section with old tag + rules + examples
-    const legacyExamples = (t.examples||[]).length
-      ? t.examples
-      : (() => {
-          const tfs = [];
-          (t.imgSections||[]).forEach(s => { if(s?.tf||s?.images?.length) tfs.push({tf:s.tf||"",images:s.images||[],notes:s.caption||""}); });
-          (t.tfSections||[]).forEach(s => { if(s?.tf||s?.notes||s?.images?.length) tfs.push({tf:s.tf||"",images:s.images||[],notes:s.notes||""}); });
-          return tfs.length ? [{label:"", tfs}] : [];
-        })();
-    addSection({
-      tag: t.tag || "",
-      rules: t.rules || [],
-      examples: legacyExamples
-    });
+    // Sections list — load new format if present, else migrate
+    document.getElementById("te-sections-list").innerHTML = "";
+    if(Array.isArray(t.sections) && t.sections.length) {
+      // New format
+      t.sections.forEach(sec => addSection({
+        tag: sec.tag || "",
+        rules: sec.rules || [],
+        examples: sec.examples || []
+      }));
+    } else {
+      // Legacy: 1 section with old tag + rules + examples
+      const legacyExamples = (t.examples||[]).length
+        ? t.examples
+        : (() => {
+            const tfs = [];
+            (t.imgSections||[]).forEach(s => { if(s?.tf||s?.images?.length) tfs.push({tf:s.tf||"",images:s.images||[],notes:s.caption||""}); });
+            (t.tfSections||[]).forEach(s => { if(s?.tf||s?.notes||s?.images?.length) tfs.push({tf:s.tf||"",images:s.images||[],notes:s.notes||""}); });
+            return tfs.length ? [{label:"", tfs}] : [];
+          })();
+      addSection({
+        tag: t.tag || "",
+        rules: t.rules || [],
+        examples: legacyExamples
+      });
+    }
+
+    // Legacy hidden containers (no longer used)
+    const oldRules = document.getElementById("te-rules-list"); if(oldRules) oldRules.innerHTML = "";
+    const oldEx = document.getElementById("te-examples-list"); if(oldEx) oldEx.innerHTML = "";
+    if(window.resetPasteTarget) window.resetPasteTarget();
+    document.getElementById("modal-theory-edit").style.display = "flex";
+    setTimeout(()=>document.getElementById("te-scroll-body").scrollTop=0,50);
+  } finally {
+    _teApplyingHistory = false;
+    _teUpdateUndoButtons();
   }
-
-  // Legacy hidden containers (no longer used)
-  const oldRules = document.getElementById("te-rules-list"); if(oldRules) oldRules.innerHTML = "";
-  const oldEx = document.getElementById("te-examples-list"); if(oldEx) oldEx.innerHTML = "";
-  if(window.resetPasteTarget) window.resetPasteTarget();
-  document.getElementById("modal-theory-edit").style.display = "flex";
-  setTimeout(()=>document.getElementById("te-scroll-body").scrollTop=0,50);
 };
 
 // ── Rule items: each rule = {t: text, imgs: [base64...]} ──
