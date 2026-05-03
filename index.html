@@ -2156,12 +2156,16 @@ async function loadFolders() {
     const snap=await getDoc(doc(db,"app_config","folders"));
     if(snap.exists()&&Array.isArray(snap.data().list)) folders=snap.data().list;
     else {
-      const local=JSON.parse(localStorage.getItem("tl_folders")||"null");
-      if(Array.isArray(local)&&local.length>1){folders=local;await saveFolders();}
+      try {
+        const local=JSON.parse(localStorage.getItem("tl_folders")||"null");
+        if(Array.isArray(local)&&local.length>1){folders=local;await saveFolders();}
+      } catch(e){}
     }
   } catch(e) {
-    const local=JSON.parse(localStorage.getItem("tl_folders")||"null");
-    if(Array.isArray(local)) folders=local;
+    try {
+      const local=JSON.parse(localStorage.getItem("tl_folders")||"null");
+      if(Array.isArray(local)) folders=local;
+    } catch(e){}
   }
   if(!folders.includes("all")) folders.unshift("all");
 }
@@ -3664,12 +3668,16 @@ async function loadTheme() {
     const snap = await getDoc(doc(db,"app_config","theme"));
     if (snap.exists()) themeSettings = { ...themeSettings, ...snap.data() };
     else {
-      const local = JSON.parse(localStorage.getItem("tl_theme")||"null");
-      if (local) themeSettings = { ...themeSettings, ...local };
+      try {
+        const local = JSON.parse(localStorage.getItem("tl_theme")||"null");
+        if (local) themeSettings = { ...themeSettings, ...local };
+      } catch(e){}
     }
   } catch(e) {
-    const local = JSON.parse(localStorage.getItem("tl_theme")||"null");
-    if (local) themeSettings = { ...themeSettings, ...local };
+    try {
+      const local = JSON.parse(localStorage.getItem("tl_theme")||"null");
+      if (local) themeSettings = { ...themeSettings, ...local };
+    } catch(e){}
   }
   applyTheme(themeSettings);
   syncSettingsUI(themeSettings);
@@ -4083,11 +4091,13 @@ async function loadTheoryFolders() {
       }
     }
   } catch(e) {
-    const local = JSON.parse(localStorage.getItem("tl_theory_folders")||"null");
-    if (local) {
-      theoryFolders = clean(local);
-      if (!theoryFolders.find(f=>f.key==="all")) theoryFolders.unshift({key:"all",label:"Tất cả",icon:"📖",children:[]});
-    }
+    try {
+      const local = JSON.parse(localStorage.getItem("tl_theory_folders")||"null");
+      if (local) {
+        theoryFolders = clean(local);
+        if (!theoryFolders.find(f=>f.key==="all")) theoryFolders.unshift({key:"all",label:"Tất cả",icon:"📖",children:[]});
+      }
+    } catch(e){}
   }
 }
 async function saveTheoryFolders() {
@@ -4248,8 +4258,10 @@ async function loadCustomTheory() {
     const snap = await getDoc(doc(db,"app_config","theory_custom"));
     if (snap.exists()) theoryCustomData = snap.data().cards || {};
   } catch(e) {
-    const local = JSON.parse(localStorage.getItem("tl_theory_custom")||"null");
-    if (local) theoryCustomData = local;
+    try {
+      const local = JSON.parse(localStorage.getItem("tl_theory_custom")||"null");
+      if (local) theoryCustomData = local;
+    } catch(e){}
   }
 }
 async function saveCustomTheory() {
@@ -6306,8 +6318,10 @@ async function loadTheoryData() {
       theoryMastered = snap.data().mastered || {};
     }
   } catch(e) {
-    const local = JSON.parse(localStorage.getItem("tl_theory") || "null");
-    if (local) { theoryMastered = local.mastered||{}; }
+    try {
+      const local = JSON.parse(localStorage.getItem("tl_theory") || "null");
+      if (local) { theoryMastered = local.mastered||{}; }
+    } catch(e){}
   }
   await loadCustomTheory();
   await loadTheoryFolders();
