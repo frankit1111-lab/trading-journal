@@ -6008,12 +6008,32 @@ window.saveTheoryCard = async function() {
     }
   } catch(e) { console.error("folder switch err:", e); }
 
+  // Make sure we're on the Theory screen (in case modal was opened from elsewhere)
+  try {
+    if(typeof navSidebar === "function") navSidebar("theory");
+  } catch(e) { console.error("navSidebar err:", e); }
+
   try { renderTheory(); } catch(e) { console.error("renderTheory err:", e); }
   showToast("✅ Đã lưu thẻ!");
   saveCustomTheory().catch(e => {
     console.error("saveCustomTheory failed:", e);
     showToast("⚠️ Có thể chưa đồng bộ cloud — thử lại sau");
   });
+
+  // After a brief delay (so user sees the toast), scroll to the saved card and reopen edit modal
+  setTimeout(() => {
+    try {
+      const cardEl = document.getElementById("tc-" + id);
+      if(cardEl) {
+        cardEl.scrollIntoView({behavior: "smooth", block: "center"});
+        // Briefly highlight the card so user knows which one was saved
+        cardEl.classList.add("newly-saved");
+        setTimeout(() => cardEl.classList.remove("newly-saved"), 800);
+      }
+      // Reopen edit modal so user can continue editing
+      if(typeof openEditTheoryCard === "function") openEditTheoryCard(id);
+    } catch(e) { console.error("post-save reopen err:", e); }
+  }, 450);
   } catch(err) {
     console.error("saveTheoryCard FATAL:", err);
     showToast("❌ Lỗi khi lưu: " + (err.message||err));
