@@ -4943,6 +4943,7 @@ window.addSection = function(initData=null) {
       : {t: typeof r === "string" ? r : "", imgs:[], imgCaptions:[]}),
     examples: (initData.examples || []).map(ex => ({
       label: ex.label || "",
+      conclusion: ex.conclusion || "",
       tfs: (ex.tfs || []).map(tf => ({tf:tf.tf||"", notes:tf.notes||"", images:[...(tf.images||[])]}))
     }))
   } : {tag:"", rules:[{t:"",imgs:[],imgCaptions:[]}], examples:[]};
@@ -5171,9 +5172,13 @@ function renderSectionRuleImgs(sIdx, rIdx) {
   });
 }
 
-window.addSectionExample = function(sIdx, label="", tfs=[]) {
+window.addSectionExample = function(sIdx, label="", tfs=[], conclusion="") {
   if(!teSectionsList[sIdx]) return;
-  const ex = {label, tfs: tfs.length ? tfs.map(t => ({tf:t.tf||"", notes:t.notes||"", images:[...(t.images||[])]})) : []};
+  const ex = {
+    label,
+    conclusion,
+    tfs: tfs.length ? tfs.map(t => ({tf:t.tf||"", notes:t.notes||"", images:[...(t.images||[])]})) : []
+  };
   teSectionsList[sIdx].examples.push(ex);
   const eIdx = teSectionsList[sIdx].examples.length - 1;
   renderSectionExample(sIdx, eIdx);
@@ -5213,7 +5218,27 @@ function renderSectionExample(sIdx, eIdx) {
   tfsBox.style.cssText = "display:flex;flex-direction:column;";
   wrap.appendChild(tfsBox);
 
+  // ── KẾT LUẬN cho cả ví dụ (sau tất cả các TF) ──
+  const conclWrap = document.createElement("div");
+  conclWrap.id = `te-sec-${sIdx}-ex-${eIdx}-concl`;
+  conclWrap.style.cssText = "padding:8px 10px;border-top:1px dashed var(--gold-dim);background:var(--bg2);";
+  const conclLabel = document.createElement("div");
+  conclLabel.style.cssText = "font-size:10px;letter-spacing:0.5px;color:var(--gold);font-family:var(--sys);opacity:0.8;margin-bottom:6px;font-weight:600;";
+  conclLabel.textContent = "🎯 KẾT LUẬN VÍ DỤ";
+  conclWrap.appendChild(conclLabel);
+  const conclHost = document.createElement("div");
+  conclWrap.appendChild(conclHost);
+  wrap.appendChild(conclWrap);
+
   list.appendChild(wrap);
+
+  // Build rich editor for conclusion (after appending to DOM)
+  const conclEd = buildRichEditor(conclHost, {
+    value: ex.conclusion || "",
+    placeholder: "Bài học từ ví dụ này, lý do thắng/thua, điều cần nhớ...",
+    onChange: (h) => { if(teSectionsList[sIdx]?.examples[eIdx]) teSectionsList[sIdx].examples[eIdx].conclusion = h; }
+  });
+  _rtEditors[`ex_concl_${sIdx}_${eIdx}`] = conclEd;
 
   ex.tfs.forEach((_, i) => renderSectionExampleTf(sIdx, eIdx, i));
 }
@@ -5827,6 +5852,17 @@ window.saveTheoryCard = async function() {
             if(notesEl && !tf.notes && notesEl.innerHTML) tf.notes = notesEl.innerHTML;
           }
         });
+        // Sync example conclusion from rich editor / DOM
+        const conclEd = _rtEditors[`ex_concl_${sIdx}_${eIdx}`];
+        if(conclEd) {
+          let conclHTML = conclEd.getHTML();
+          if(!conclHTML) {
+            const conclWrap = document.getElementById(`te-sec-${sIdx}-ex-${eIdx}-concl`);
+            const conclEl = conclWrap?.querySelector(".rt-content");
+            if(conclEl) conclHTML = conclEl.innerHTML || "";
+          }
+          ex.conclusion = conclHTML;
+        }
       });
     } catch(e) { console.error("section sync error:", e); }
   });
@@ -5844,11 +5880,12 @@ window.saveTheoryCard = async function() {
     const cleanExamples = (sec.examples || [])
       .map(ex => ({
         label: ex.label || "",
+        conclusion: rtSanitize(ex.conclusion || ""),
         tfs: (ex.tfs || [])
           .map(tf => ({tf: tf.tf || "", notes: rtSanitize(tf.notes || ""), images: tf.images || []}))
           .filter(tf => tf.tf || rtPlain(tf.notes).trim() || tf.images.length)
       }))
-      .filter(ex => ex.tfs.length);
+      .filter(ex => ex.tfs.length || rtPlain(ex.conclusion).trim());
     return {tag: tagHTML, rules: cleanRules, examples: cleanExamples};
   }).filter(s => rtPlain(s.tag).trim() || s.rules.length || s.examples.length);
 
@@ -6133,6 +6170,8 @@ function renderTheory() {
           if(rtPlain(sec.tag||"").toLowerCase().includes(q)) return true;
           if((sec.rules||[]).some(r=>rtPlain(typeof r==="string"?r:(r.t||"")).toLowerCase().includes(q))) return true;
           for(const ex of (sec.examples||[])) {
+            if((ex.label||"").toLowerCase().includes(q)) return true;
+            if(rtPlain(ex.conclusion||"").toLowerCase().includes(q)) return true;
             for(const tf of (ex.tfs||[])) {
               if(rtPlain(tf.notes||"").toLowerCase().includes(q)) return true;
               if((tf.tf||"").toLowerCase().includes(q)) return true;
@@ -6219,7 +6258,7 @@ function renderTheory() {
     const _img = src => `<img alt="" src="${src}" onclick="document.getElementById('theory-img-fullscreen').style.display='flex';document.getElementById('theory-img-fullscreen-img').src=this.src" style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);cursor:zoom-in;display:block;margin-bottom:8px;" loading="lazy"/>`;
 
     const _renderExamples = (examples) => {
-      const exs = (examples||[]).filter(ex=>ex&&ex.tfs?.length);
+      const exs = (examples||[]).filter(ex => ex && (ex.tfs?.length || rtPlain(ex.conclusion||"").trim()));
       if(!exs.length) return "";
       return `<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;">
         <div style="font-size:10px;letter-spacing:1px;color:var(--gold);opacity:0.7;font-family:var(--sys);margin-bottom:10px;">VÍ DỤ</div>
@@ -6235,6 +6274,11 @@ function renderTheory() {
                 ${(tf.images||[]).map(src=>_img(src)).join("")}
                 ${tf.notes?`<div style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;">${escRich(tf.notes)}</div>`:""}
               </div>`).join("")}
+            ${rtPlain(ex.conclusion||"").trim() ? `
+              <div style="border-top:1px dashed var(--gold-dim);padding:10px 12px;background:linear-gradient(135deg,var(--gold-faint),transparent);">
+                <div style="font-size:10px;letter-spacing:0.5px;color:var(--gold);font-family:var(--sys);font-weight:700;margin-bottom:6px;">🎯 KẾT LUẬN</div>
+                <div style="font-size:13px;color:var(--text);line-height:1.7;">${escRich(ex.conclusion)}</div>
+              </div>` : ""}
           </div>`).join("")}
       </div>`;
     };
