@@ -844,6 +844,13 @@
   .rt-color-sw:hover{transform:scale(1.15);}
   .rt-content{min-height:36px;padding:8px 10px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;line-height:1.5;word-break:break-word;}
   .rt-content[contenteditable="true"]:empty::before{content:attr(data-placeholder);color:var(--gold);opacity:0.35;pointer-events:none;}
+  .rt-content ul, .rt-content ol{margin:4px 0 4px 22px;padding:0;}
+  .rt-content li{margin:2px 0;line-height:1.5;}
+  /* Lists inside rendered theory cards */
+  .theory-rule-text ul, .theory-rule-text ol, .theory-card-content ul, .theory-card-content ol{margin:6px 0 6px 22px;padding:0;}
+  .theory-rule-text li, .theory-card-content li{margin:3px 0;line-height:1.6;color:var(--text);}
+  .theory-rule-text ul li{list-style:disc;}
+  .theory-rule-text ol li{list-style:decimal;}
   .rt-content.rt-single{min-height:auto;padding:8px 10px;}
 
   /* ── SECTION BLOCK ── */
@@ -1934,7 +1941,7 @@ function escRich(s){
   const str = String(s||"");
   if(!str) return "";
   // Heuristic: contains a tag we allow → treat as rich HTML
-  if(/<(b|strong|i|em|u|span|font|br|div|p)\b/i.test(str)) {
+  if(/<(b|strong|i|em|u|span|font|br|div|p|ul|ol|li)\b/i.test(str)) {
     if(typeof rtSanitize === "function") return rtSanitize(str);
     return esc(str); // sanitizer not yet loaded; fall back to escape
   }
@@ -3602,7 +3609,7 @@ else document.addEventListener("DOMContentLoaded", applyPersistedDesktopMode);
 
 
 window.resetTheme = async function() {
-  localStorage.removeItem("tl_theme_manual"); // Fix 7: clear manual flag so auto-theme works again
+  try { localStorage.removeItem("tl_theme_manual"); } catch(e){} // Fix 7: clear manual flag so auto-theme works again
   themeSettings = { mode:"dark", color:0, fontSize:"medium" };
   applyTheme(themeSettings);
   syncSettingsUI(themeSettings);
@@ -4231,6 +4238,9 @@ function getMergedTheory() {
   });
   return base;
 }
+// Expose for debug + testing
+window.getMergedTheory = getMergedTheory;
+Object.defineProperty(window, "theoryCustomData", { get: () => theoryCustomData, configurable: true });
 
 // ══ UNIFIED MOVE MODAL ══
 let moveModalMode = "trade"; // "trade" | "theory"
@@ -4528,7 +4538,7 @@ function rtSanitize(html) {
     for(const k of kids) {
       if(k.nodeType === 1) { // element
         const tag = k.tagName.toLowerCase();
-        const allowed = ["b","strong","i","em","u","span","br","div","p","font"];
+        const allowed = ["b","strong","i","em","u","span","br","div","p","font","ul","ol","li"];
         if(!allowed.includes(tag)) {
           // unwrap (keep children)
           while(k.firstChild) node.insertBefore(k.firstChild, k);
@@ -4673,6 +4683,12 @@ function buildRichEditor(host, opts={}) {
   document.addEventListener("click", closePop);
 
   toolbar.appendChild(sep());
+  // Bullet & Numbered list (only for non-single mode)
+  if(!opts.single) {
+    toolbar.appendChild(mkBtn("•", "", () => { document.execCommand("insertUnorderedList"); triggerChange(); }));
+    toolbar.appendChild(mkBtn("1.", "", () => { document.execCommand("insertOrderedList"); triggerChange(); }));
+    toolbar.appendChild(sep());
+  }
   // Clear formatting
   toolbar.appendChild(mkBtn("Tx", "", () => document.execCommand("removeFormat")));
 
@@ -4730,6 +4746,181 @@ let _rtEditors = {};
 window._rtEditors = _rtEditors; // expose for debug/test (re-assigned on each modal open via internal var)
 // Helper to keep window in sync when we re-assign
 function _setRtEditors(obj) { _rtEditors = obj; window._rtEditors = obj; }
+
+// ════════════════════════════════════════════
+// ── BULLET / NUMBERED TOOLBAR for plain TEXTAREA & INPUT ──
+// Floating toolbar appears above any focused <textarea> or <input type="text">
+// (not inside .rt-wrap rich-text editors — those have their own toolbar)
+// ════════════════════════════════════════════
+(function setupPlainTextListsToolbar() {
+  // Single shared floating toolbar
+  let bar = null;
+  let currentEl = null;
+
+  function ensureBar() {
+    if(bar) return bar;
+    bar = document.createElement("div");
+    bar.id = "plain-list-toolbar";
+    bar.style.cssText = "position:absolute;display:none;z-index:9998;background:var(--bg3);border:1px solid var(--gold-dim);border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.4);padding:3px;gap:2px;display:none;flex-direction:row;align-items:center;";
+    bar.innerHTML = `
+      <button type="button" data-act="bullet" title="Danh sách dấu chấm" style="background:transparent;border:none;color:var(--gold);font-size:14px;font-family:var(--sys);cursor:pointer;padding:4px 9px;border-radius:4px;line-height:1;">•</button>
+      <button type="button" data-act="number" title="Danh sách đánh số" style="background:transparent;border:none;color:var(--gold);font-size:12px;font-family:var(--sys);cursor:pointer;padding:4px 9px;border-radius:4px;line-height:1;font-weight:600;">1.</button>
+    `;
+    bar.addEventListener("mousedown", e => e.preventDefault()); // keep selection
+    bar.addEventListener("click", e => {
+      const btn = e.target.closest("button");
+      if(!btn || !currentEl) return;
+      const act = btn.dataset.act;
+      applyListToTextField(currentEl, act);
+    });
+    // Hover effect
+    bar.querySelectorAll("button").forEach(b => {
+      b.addEventListener("mouseenter", () => { b.style.background = "var(--gold-faint)"; });
+      b.addEventListener("mouseleave", () => { b.style.background = "transparent"; });
+    });
+    document.body.appendChild(bar);
+    return bar;
+  }
+
+  function showBarFor(el) {
+    ensureBar();
+    currentEl = el;
+    const r = el.getBoundingClientRect();
+    bar.style.display = "flex";
+    // Position above element (or below if no room above)
+    const top = r.top + window.scrollY - bar.offsetHeight - 4;
+    bar.style.left = (r.left + window.scrollX) + "px";
+    bar.style.top = (top < 4 ? r.bottom + window.scrollY + 4 : top) + "px";
+  }
+
+  function hideBar() {
+    if(bar) bar.style.display = "none";
+    currentEl = null;
+  }
+
+  // Apply bullet/numbering to selected lines in textarea/input
+  function applyListToTextField(el, kind) {
+    const isTextarea = el.tagName === "TEXTAREA";
+    const val = el.value || "";
+    let selStart = el.selectionStart ?? val.length;
+    let selEnd   = el.selectionEnd   ?? val.length;
+
+    // Expand selection to whole lines
+    let lineStart = val.lastIndexOf("\n", selStart - 1) + 1;
+    let lineEnd = val.indexOf("\n", selEnd);
+    if(lineEnd === -1) lineEnd = val.length;
+
+    const before = val.slice(0, lineStart);
+    const middle = val.slice(lineStart, lineEnd);
+    const after  = val.slice(lineEnd);
+
+    // For inputs (single line), we just prepend marker
+    if(!isTextarea) {
+      const trimmed = val.replace(/^(\s*)([•\-\*]\s+|\d+\.\s+)/, "$1");
+      const prefix = kind === "bullet" ? "• " : "1. ";
+      el.value = prefix + trimmed;
+      el.dispatchEvent(new Event("input", {bubbles:true}));
+      el.focus();
+      return;
+    }
+
+    // Textarea: process each line
+    const lines = middle.split("\n");
+    // Detect existing list markers
+    const bulletRe = /^(\s*)[•\-\*]\s+/;
+    const numberRe = /^(\s*)\d+\.\s+/;
+    const allHaveBullet = lines.every(l => l.trim() === "" || bulletRe.test(l));
+    const allHaveNumber = lines.every(l => l.trim() === "" || numberRe.test(l));
+
+    let newLines;
+    if(kind === "bullet") {
+      if(allHaveBullet) {
+        // Toggle off
+        newLines = lines.map(l => l.replace(bulletRe, "$1"));
+      } else {
+        newLines = lines.map(l => {
+          if(l.trim() === "") return l;
+          // Strip existing number marker first
+          l = l.replace(numberRe, "$1");
+          // Add bullet if not present
+          if(!bulletRe.test(l)) {
+            const m = l.match(/^(\s*)/);
+            return (m ? m[1] : "") + "• " + l.replace(/^\s*/, "");
+          }
+          return l;
+        });
+      }
+    } else { // number
+      if(allHaveNumber) {
+        newLines = lines.map(l => l.replace(numberRe, "$1"));
+      } else {
+        let n = 1;
+        newLines = lines.map(l => {
+          if(l.trim() === "") return l;
+          l = l.replace(bulletRe, "$1");
+          l = l.replace(numberRe, "$1");
+          const m = l.match(/^(\s*)/);
+          const out = (m ? m[1] : "") + n + ". " + l.replace(/^\s*/, "");
+          n++;
+          return out;
+        });
+      }
+    }
+
+    const newMiddle = newLines.join("\n");
+    el.value = before + newMiddle + after;
+    // Restore selection roughly
+    const newSelStart = lineStart;
+    const newSelEnd = lineStart + newMiddle.length;
+    try { el.setSelectionRange(newSelStart, newSelEnd); } catch(e){}
+    el.dispatchEvent(new Event("input", {bubbles:true}));
+    el.focus();
+  }
+
+  // Eligibility: is element a focusable text input that should get the toolbar?
+  function isEligible(el) {
+    if(!el) return false;
+    if(el.tagName === "TEXTAREA") return true;
+    if(el.tagName === "INPUT" && /^(text|search|url|email)$/i.test(el.type || "text")) return true;
+    return false;
+  }
+  // Skip if inside rich text wrap (those have their own toolbar)
+  function isInsideRichWrap(el) {
+    return !!el.closest(".rt-wrap");
+  }
+  // Skip if too small (e.g. inline tag fields, single-char inputs)
+  function isTooSmall(el) {
+    const r = el.getBoundingClientRect();
+    return r.width < 80;
+  }
+
+  // Track focus
+  document.addEventListener("focusin", e => {
+    const el = e.target;
+    if(!isEligible(el) || isInsideRichWrap(el) || isTooSmall(el)) {
+      hideBar(); return;
+    }
+    // Skip the icon emoji input (very narrow)
+    if(el.id === "te-icon") { hideBar(); return; }
+    showBarFor(el);
+  });
+  document.addEventListener("focusout", e => {
+    // Hide on blur unless focus is moving to the toolbar
+    setTimeout(() => {
+      if(document.activeElement && (document.activeElement === bar || (bar && bar.contains(document.activeElement)))) return;
+      if(document.activeElement === currentEl) return;
+      // If focus moved to another eligible element, focusin will re-show
+      if(document.activeElement && isEligible(document.activeElement) && !isInsideRichWrap(document.activeElement)) return;
+      hideBar();
+    }, 50);
+  });
+  // Reposition on scroll/resize
+  window.addEventListener("scroll", () => { if(currentEl) showBarFor(currentEl); }, true);
+  window.addEventListener("resize", () => { if(currentEl) showBarFor(currentEl); });
+
+  // Expose for debug
+  window._plainListToolbar = { applyListToTextField, hideBar };
+})();
 
 // ════════════════════════════════════════════
 // ── SECTIONS ENGINE ──
@@ -5142,7 +5333,8 @@ window._renderExTfImgs = function(exIdx, tfIdx) {
 
 function populateTheoryCatSelect(selectedKey) {
   const sel = document.getElementById("te-cat");
-  sel.innerHTML = theoryFolders
+  // Build options: always start with "Tất cả" so user can save to root
+  const folderOpts = theoryFolders
     .filter(f => f.key!=="all" && f.key!=="quiz")
     .flatMap(f => {
       const opts = [`<option value="${f.key}">${f.icon} ${f.label}</option>`];
@@ -5150,8 +5342,10 @@ function populateTheoryCatSelect(selectedKey) {
         opts.push(`<option value="${f.key}/${c.key}">&nbsp;&nbsp;└ ${c.label||c.key}</option>`);
       });
       return opts;
-    }).join("") || `<option value="general">📁 Chung</option>`;
+    }).join("");
+  sel.innerHTML = `<option value="all">📖 Tất cả</option>` + (folderOpts || "");
   if (selectedKey) sel.value = selectedKey;
+  else sel.value = "all";
 }
 
 // Helper: cleanup all rich-text popovers when modal closes
@@ -5584,8 +5778,15 @@ function attachTePaste() {
 }
 
 window.saveTheoryCard = async function() {
-  // Read title from rich-text editor
-  const titleHTML = (_rtEditors.titleE ? _rtEditors.titleE.getHTML() : "").trim();
+  try {
+  // Read title from rich-text editor — with DOM fallback for safety
+  // (race condition: button click can fire before contenteditable commits)
+  let titleHTML = (_rtEditors.titleE ? _rtEditors.titleE.getHTML() : "").trim();
+  if(!titleHTML) {
+    // Fallback: read directly from DOM
+    const el = document.querySelector("#te-title-rt .rt-content");
+    if(el) titleHTML = (el.innerHTML || "").trim();
+  }
   const titlePlain = rtPlain(titleHTML).trim();
   if(!titlePlain){
     try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
@@ -5593,6 +5794,42 @@ window.saveTheoryCard = async function() {
   }
 
   const id = theoryEditingId || ("tc_"+Date.now());
+
+  // Force-sync data from any active rich editors (in case user typed but didn't blur,
+  // i.e. some browsers might delay the input event)
+  teSectionsList.forEach((sec, sIdx) => {
+    try {
+      const tagEd = _rtEditors["sec_tag_"+sIdx];
+      if(tagEd) {
+        let tagHTML = tagEd.getHTML();
+        // DOM fallback if editor returned empty
+        if(!tagHTML) {
+          const el = document.querySelector(`#te-section-${sIdx} > div:nth-of-type(1) .rt-content`);
+          if(el) tagHTML = el.innerHTML || "";
+        }
+        sec.tag = tagHTML;
+      }
+      // Also sync each rule's text from its DOM editor (rules don't have entry in _rtEditors)
+      const ruleEditors = document.querySelectorAll(`#te-sec-rules-${sIdx} .rt-content`);
+      ruleEditors.forEach((el, rIdx) => {
+        if(sec.rules[rIdx] && el) {
+          const html = el.innerHTML || "";
+          // Only override if data is empty but DOM has content
+          if(!sec.rules[rIdx].t && html) sec.rules[rIdx].t = html;
+        }
+      });
+      // Sync TF notes from DOM (each TF has a notes editor)
+      sec.examples.forEach((ex, eIdx) => {
+        ex.tfs.forEach((tf, tIdx) => {
+          const tfWrap = document.getElementById(`te-sec-${sIdx}-ex-${eIdx}-tf-${tIdx}`);
+          if(tfWrap) {
+            const notesEl = tfWrap.querySelector(".rt-content");
+            if(notesEl && !tf.notes && notesEl.innerHTML) tf.notes = notesEl.innerHTML;
+          }
+        });
+      });
+    } catch(e) { console.error("section sync error:", e); }
+  });
 
   // Build sections array — strip empty rules/examples/sections
   const sections = teSectionsList.map(sec => {
@@ -5621,8 +5858,12 @@ window.saveTheoryCard = async function() {
   const legacyExamples = firstSec.examples;
   const legacyTagPlain = rtPlain(firstSec.tag).trim();
 
-  // Highlight (rich)
-  const hlHTML = (_rtEditors.hlE ? _rtEditors.hlE.getHTML() : "").trim();
+  // Highlight (rich) — with DOM fallback
+  let hlHTML = (_rtEditors.hlE ? _rtEditors.hlE.getHTML() : "").trim();
+  if(!hlHTML) {
+    const hlEl = document.querySelector("#te-hl-text-rt .rt-content");
+    if(hlEl) hlHTML = (hlEl.innerHTML || "").trim();
+  }
 
   const card = {
     id,
@@ -5654,14 +5895,34 @@ window.saveTheoryCard = async function() {
   theoryCustomData[id] = card;
   // Close modal IMMEDIATELY
   document.getElementById("modal-theory-edit").style.display = "none";
-  _teCleanupRichEditors();
+  try { _teCleanupRichEditors(); } catch(e) { console.error("cleanup err:", e); }
   try{if(navigator.vibrate)navigator.vibrate([10,30,10]);}catch(e){}
-  renderTheory();
+
+  // Auto-switch to the folder of the saved card so user actually sees it.
+  // If the card's cat doesn't match the current view, switch to it (or "all" if cat is unknown).
+  try {
+    const cardCat = card.cat || "basic";
+    const matchesCurrent = (theoryCategory === "all")
+      || (theorySubfolder ? cardCat === theoryCategory + "/" + theorySubfolder : (cardCat === theoryCategory || cardCat.startsWith(theoryCategory + "/")));
+    if(!matchesCurrent) {
+      // Switch to the card's folder. cat may be "folder" or "folder/subfolder"
+      const parts = cardCat.split("/");
+      theoryCategory = parts[0] || "all";
+      theorySubfolder = parts[1] || "";
+    }
+  } catch(e) { console.error("folder switch err:", e); }
+
+  try { renderTheory(); } catch(e) { console.error("renderTheory err:", e); }
   showToast("✅ Đã lưu thẻ!");
   saveCustomTheory().catch(e => {
     console.error("saveCustomTheory failed:", e);
     showToast("⚠️ Có thể chưa đồng bộ cloud — thử lại sau");
   });
+  } catch(err) {
+    console.error("saveTheoryCard FATAL:", err);
+    showToast("❌ Lỗi khi lưu: " + (err.message||err));
+    // Don't let exception propagate to crash the page
+  }
 };
 
 window.deleteTheoryCard = async function() {
@@ -5848,9 +6109,11 @@ function renderTheory() {
   let list = getMergedTheory();
 
   // Filter by folder (cat field now stores folder key or "folder/subfolder")
+  // Cards with cat="all" appear in every folder (universal)
   if (theoryCategory !== "all") {
     list = list.filter(t => {
       const cat = t.cat||"basic";
+      if (cat === "all") return true; // universal cards visible everywhere
       if (theorySubfolder) return cat === theoryCategory+"/"+theorySubfolder;
       // show cards in parent folder AND all its subfolders
       return cat === theoryCategory || cat.startsWith(theoryCategory+"/");
@@ -6090,7 +6353,8 @@ function autoThemeByTime() {
   const h = new Date().getHours();
   const shouldBeLight = h >= 6 && h < 18;
   // Only auto-switch if user hasn't manually set a preference recently
-  const manualSet = localStorage.getItem("tl_theme_manual");
+  let manualSet = null;
+  try { manualSet = localStorage.getItem("tl_theme_manual"); } catch(e){}
   if (manualSet) return; // respect manual setting
   const targetMode = shouldBeLight ? "light" : "dark";
   if (themeSettings.mode !== targetMode) {
@@ -6103,11 +6367,15 @@ function autoThemeByTime() {
 // Fix 9: Today's Theory — spaced repetition pick
 function getTodayTheory() {
   const merged = getMergedTheory();
+  if(!merged.length) return null;
   const today = new Date().toDateString();
-  const stored = localStorage.getItem("tl_today_theory");
+  let stored = null;
+  try { stored = localStorage.getItem("tl_today_theory"); } catch(e) {}
   if (stored) {
-    const {date, id} = JSON.parse(stored);
-    if (date === today) return merged.find(t=>t.id===id)||merged[0];
+    try {
+      const {date, id} = JSON.parse(stored);
+      if (date === today) return merged.find(t=>t.id===id)||merged[0];
+    } catch(e){}
   }
   const unmastered = merged.filter(t=>!theoryMastered[t.id]);
   const pool = unmastered.length > 0 ? unmastered : merged;
