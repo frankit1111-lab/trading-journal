@@ -826,6 +826,38 @@
   .theory-tab.active{border-color:var(--gold);background:var(--gold-faint);opacity:1;}
   .theory-mastered{border-color:var(--win) !important;}
 
+  /* ── RICH TEXT EDITOR (formatting toolbar) ── */
+  .rt-wrap{display:flex;flex-direction:column;gap:0;border:1px solid var(--gold-faint);border-radius:var(--radius-sm);background:var(--bg);overflow:hidden;}
+  .rt-wrap:focus-within{border-color:var(--gold-dim);box-shadow:0 0 0 2px var(--gold-faint);}
+  .rt-toolbar{display:flex;flex-wrap:wrap;gap:2px;padding:4px 6px;background:var(--bg3);border-bottom:1px solid var(--gold-faint);align-items:center;}
+  .rt-btn{background:transparent;border:1px solid transparent;border-radius:4px;padding:3px 7px;color:var(--gold);font-size:12px;font-family:var(--sys);cursor:pointer;min-width:24px;line-height:1;transition:all 0.15s;}
+  .rt-btn:hover{background:var(--gold-faint);}
+  .rt-btn.active{background:var(--gold-faint);border-color:var(--gold-dim);}
+  .rt-btn.bold-btn{font-weight:900;}
+  .rt-btn.italic-btn{font-style:italic;}
+  .rt-btn.underline-btn{text-decoration:underline;}
+  .rt-sep{width:1px;height:16px;background:var(--gold-faint);margin:0 2px;}
+  .rt-select{background:var(--bg);border:1px solid var(--gold-faint);border-radius:4px;color:var(--text);font-size:11px;padding:2px 4px;outline:none;cursor:pointer;}
+  .rt-color-pop{display:none;position:absolute;background:var(--bg3);border:1px solid var(--gold-dim);border-radius:6px;padding:6px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.4);grid-template-columns:repeat(6,1fr);gap:4px;}
+  .rt-color-pop.show{display:grid;}
+  .rt-color-sw{width:20px;height:20px;border-radius:4px;cursor:pointer;border:1px solid rgba(255,255,255,0.15);}
+  .rt-color-sw:hover{transform:scale(1.15);}
+  .rt-content{min-height:36px;padding:8px 10px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;line-height:1.5;word-break:break-word;}
+  .rt-content[contenteditable="true"]:empty::before{content:attr(data-placeholder);color:var(--gold);opacity:0.35;pointer-events:none;}
+  .rt-content.rt-single{min-height:auto;padding:8px 10px;}
+
+  /* ── SECTION BLOCK ── */
+  .te-section{background:var(--bg2);border:1px solid var(--gold-dim);border-radius:var(--radius-md);padding:12px;display:flex;flex-direction:column;gap:10px;position:relative;}
+  .te-section-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid var(--gold-faint);}
+  .te-section-num{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:1px;font-family:var(--sys);color:var(--gold);font-weight:700;}
+  .te-section-num-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:50%;background:var(--gold);color:#000;font-size:11px;font-weight:700;padding:0 6px;}
+  .te-section-actions{display:flex;gap:4px;}
+  .te-section-act-btn{background:transparent;border:1px solid var(--gold-faint);border-radius:4px;padding:3px 8px;color:var(--gold);font-size:11px;cursor:pointer;}
+  .te-section-act-btn.danger{border-color:#ef535055;color:var(--loss);}
+  .te-section-act-btn:hover{background:var(--gold-faint);}
+  .te-section-act-btn.danger:hover{background:#ef535014;}
+  .te-section-sub-label{font-size:10px;letter-spacing:0.5px;color:var(--gold);font-family:var(--sys);opacity:0.7;margin-bottom:4px;}
+
   /* ── SETTINGS ── */
   .theme-mode-btn{padding:18px 8px;border-radius:var(--radius-lg);cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text);transition:all 0.2s;text-align:center;width:100%;}
   .theme-mode-btn.active{border-color:var(--gold);background:var(--gold-faint);box-shadow:0 0 20px var(--gold-faint);}
@@ -1691,13 +1723,10 @@
             </select>
           </div>
         </div>
-        <div style="margin-bottom:8px;">
-          <div style="font-size:11px;color:var(--gold);font-family:var(--sys);margin-bottom:4px;opacity:0.7;">TIÊU ĐỀ</div>
-          <input id="te-title" type="text" placeholder="VD: Ngày 03/11/2025 — BPR H1 + IFVG" style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);font-size:14px;font-family:var(--sys);outline:none;"/>
-        </div>
         <div>
-          <div style="font-size:11px;color:var(--gold);font-family:var(--sys);margin-bottom:4px;opacity:0.7;">TAG</div>
-          <input id="te-tag" type="text" placeholder="VD: BPR, IFVG, AMD..." style="width:100%;background:var(--bg);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);font-size:14px;font-family:var(--sys);outline:none;"/>
+          <div style="font-size:11px;color:var(--gold);font-family:var(--sys);margin-bottom:4px;opacity:0.7;">TIÊU ĐỀ</div>
+          <div id="te-title-rt" data-rt-target="title" data-placeholder="VD: Ngày 03/11/2025 — BPR H1 + IFVG"></div>
+          <input id="te-title" type="hidden"/>
         </div>
       </div>
 
@@ -1706,33 +1735,21 @@
       <!-- imgSections hidden container (legacy compat) -->
       <div id="te-img-sections" style="display:none;"></div>
 
-      <!-- ── NỘI DUNG / PHÂN TÍCH ── -->
-      <div style="background:var(--bg3);border-radius:var(--radius-md);padding:14px;border:1px solid var(--gold-faint);">
-        <div style="font-size:11px;letter-spacing:0.5px;color:var(--gold);font-family:var(--sys);margin-bottom:8px;opacity:0.8;">LÝ THUYẾT</div>
-        <div id="te-rules-list" style="display:flex;flex-direction:column;gap:6px;"></div>
-        <button onclick="addTheoryRuleField()" style="margin-top:8px;width:100%;padding:8px;border-radius:var(--radius-sm);border:1px dashed var(--gold-faint);background:transparent;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;letter-spacing:1px;">+ Thêm dòng phân tích</button>
-      </div>
-
-      <!-- ── VÍ DỤ ── -->
-      <div style="background:var(--bg3);border-radius:var(--radius-md);padding:14px;border:1px solid var(--gold-faint);">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div style="font-size:11px;letter-spacing:0.5px;color:var(--gold);font-family:var(--sys);opacity:0.8;">VÍ DỤ</div>
-          <div style="font-size:11px;color:var(--gold);opacity:0.45;font-family:var(--sys);">Mỗi ví dụ có các khung TF</div>
-        </div>
-        <div id="te-examples-list" style="display:flex;flex-direction:column;gap:14px;"></div>
-        <button onclick="addExample()" style="width:100%;margin-top:10px;padding:10px;border-radius:var(--radius-sm);border:1px dashed var(--gold-dim);background:transparent;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;letter-spacing:1px;">+ Thêm ví dụ</button>
-      </div>
+      <!-- ── SECTIONS (Tag + Lý thuyết + Ví dụ — lặp lại được) ── -->
+      <div id="te-sections-list" style="display:flex;flex-direction:column;gap:14px;"></div>
+      <button onclick="addSection()" style="width:100%;padding:12px;border-radius:var(--radius-md);border:1px dashed var(--gold);background:var(--gold-faint);color:var(--gold);font-size:12px;font-family:var(--sys);cursor:pointer;letter-spacing:1px;font-weight:600;">＋ THÊM SECTION (Tag + Lý thuyết + Ví dụ)</button>
 
       <!-- ── HIGHLIGHT ── -->
       <div style="background:var(--bg3);border-radius:var(--radius-md);padding:14px;border:1px solid var(--gold-faint);">
         <div style="font-size:11px;letter-spacing:0.5px;color:var(--gold);font-family:var(--sys);margin-bottom:8px;opacity:0.8;">KẾT LUẬN / HIGHLIGHT</div>
-        <div style="display:grid;grid-template-columns:90px 1fr;gap:8px;">
+        <div style="display:grid;grid-template-columns:90px 1fr;gap:8px;align-items:start;">
           <select id="te-hl-type" style="background:var(--bg);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:9px 6px;color:var(--text);font-size:12px;outline:none;">
             <option value="tip">💡 Tip</option>
             <option value="warn">⚠️ Warn</option>
             <option value="info">ℹ️ Info</option>
           </select>
-          <input id="te-hl-text" type="text" placeholder="Bài học rút ra, key takeaway..." style="background:var(--bg);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);font-size:13px;font-family:var(--sys);outline:none;"/>
+          <div id="te-hl-text-rt" data-rt-target="hl" data-placeholder="Bài học rút ra, key takeaway..."></div>
+          <input id="te-hl-text" type="hidden"/>
         </div>
       </div>
 
@@ -1911,6 +1928,18 @@ function compressImage(dataUrl, maxW=1200) {
   });
 }
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+// escRich: render rich-text HTML safely. Detects whether content is HTML (has tags) or plain.
+// If plain, escape it. If rich, sanitize & output as-is.
+function escRich(s){
+  const str = String(s||"");
+  if(!str) return "";
+  // Heuristic: contains a tag we allow → treat as rich HTML
+  if(/<(b|strong|i|em|u|span|font|br|div|p)\b/i.test(str)) {
+    if(typeof rtSanitize === "function") return rtSanitize(str);
+    return esc(str); // sanitizer not yet loaded; fall back to escape
+  }
+  return esc(str);
+}
 function estimateKB(obj) { return Math.round(JSON.stringify(obj).length/1024); }
 
 // Global image fullscreen viewer
@@ -4474,6 +4503,643 @@ function teRenderSecImgs(secIdx) {
 window.teRemoveImg=function(idx,i){teImgSections[idx].images.splice(i,1);teRenderSecImgs(idx);};
 window.openTeImgFull=function(src){const fs=document.getElementById("theory-img-fullscreen");document.getElementById("theory-img-fullscreen-img").src=src;fs.style.display="flex";};
 
+// ════════════════════════════════════════════
+// ── RICH TEXT EDITOR ENGINE ──
+// Wrap any element with toolbar (bold, italic, underline, size, color)
+// Stores HTML; sanitized on save & render
+// ════════════════════════════════════════════
+const RT_COLORS = ["#ede8da","#c9a84c","#3ddc84","#ff453a","#0a84ff","#ff9f0a","#bb86fc","#8e9bae","#ffd700","#ff6b9d","#5cd6c0","#ffffff"];
+const RT_SIZES = [
+  {label:"XS", val:"11px"},
+  {label:"S",  val:"13px"},
+  {label:"M",  val:"15px"},
+  {label:"L",  val:"18px"},
+  {label:"XL", val:"22px"},
+  {label:"2XL",val:"28px"}
+];
+
+// Sanitize: strip <script>, on*= attrs, javascript:; allow only safe tags & inline styles
+function rtSanitize(html) {
+  if(!html) return "";
+  const tpl = document.createElement("template");
+  tpl.innerHTML = String(html);
+  const walk = (node) => {
+    const kids = Array.from(node.childNodes);
+    for(const k of kids) {
+      if(k.nodeType === 1) { // element
+        const tag = k.tagName.toLowerCase();
+        const allowed = ["b","strong","i","em","u","span","br","div","p","font"];
+        if(!allowed.includes(tag)) {
+          // unwrap (keep children)
+          while(k.firstChild) node.insertBefore(k.firstChild, k);
+          node.removeChild(k);
+          continue;
+        }
+        // Strip dangerous attributes
+        for(const attr of Array.from(k.attributes)) {
+          const an = attr.name.toLowerCase();
+          if(an === "style") {
+            // keep only color/font-size/font-weight/font-style/text-decoration/background-color
+            const safe = String(attr.value).split(";").map(s=>s.trim()).filter(s=>{
+              const p = s.split(":")[0]?.trim().toLowerCase();
+              return ["color","font-size","font-weight","font-style","text-decoration","background-color"].includes(p)
+                && !/url\s*\(|expression|javascript:/i.test(s);
+            }).join(";");
+            if(safe) k.setAttribute("style", safe); else k.removeAttribute("style");
+          } else if(an === "color" || an === "size" || an === "face") {
+            // legacy <font> attrs — keep
+          } else {
+            k.removeAttribute(attr.name);
+          }
+        }
+        walk(k);
+      } else if(k.nodeType === 8) { // comment
+        node.removeChild(k);
+      }
+    }
+  };
+  walk(tpl.content);
+  return tpl.innerHTML;
+}
+
+// Plain text extract from rich HTML (for search, tag display)
+function rtPlain(html) {
+  if(!html) return "";
+  const d = document.createElement("div");
+  d.innerHTML = String(html);
+  return d.textContent || d.innerText || "";
+}
+
+// Build a rich-text editor inside `host` element
+// opts: {value, placeholder, single (no newlines), onChange}
+function buildRichEditor(host, opts={}) {
+  if(!host) return null;
+  host.innerHTML = "";
+  host.classList.add("rt-wrap");
+
+  const toolbar = document.createElement("div");
+  toolbar.className = "rt-toolbar";
+
+  const mkBtn = (label, cls, action) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "rt-btn " + (cls||"");
+    b.textContent = label;
+    b.addEventListener("mousedown", e => { e.preventDefault(); }); // keep selection
+    b.addEventListener("click", e => { e.preventDefault(); action(b); content.focus(); });
+    return b;
+  };
+
+  const sep = () => { const s = document.createElement("span"); s.className = "rt-sep"; return s; };
+
+  // Bold / Italic / Underline
+  toolbar.appendChild(mkBtn("B", "bold-btn", () => document.execCommand("bold")));
+  toolbar.appendChild(mkBtn("I", "italic-btn", () => document.execCommand("italic")));
+  toolbar.appendChild(mkBtn("U", "underline-btn", () => document.execCommand("underline")));
+  toolbar.appendChild(sep());
+
+  // Font size
+  const sizeSel = document.createElement("select");
+  sizeSel.className = "rt-select";
+  sizeSel.innerHTML = `<option value="">Cỡ</option>` + RT_SIZES.map(s=>`<option value="${s.val}">${s.label}</option>`).join("");
+  sizeSel.addEventListener("mousedown", e => e.stopPropagation());
+  sizeSel.addEventListener("change", () => {
+    const v = sizeSel.value;
+    if(!v) return;
+    document.execCommand("fontSize", false, "7"); // placeholder; we'll override
+    // Replace any <font size="7"> just-applied with span style
+    const fonts = content.querySelectorAll('font[size="7"]');
+    fonts.forEach(f => {
+      const sp = document.createElement("span");
+      sp.style.fontSize = v;
+      while(f.firstChild) sp.appendChild(f.firstChild);
+      f.parentNode.replaceChild(sp, f);
+    });
+    sizeSel.value = "";
+    triggerChange();
+    content.focus();
+  });
+  toolbar.appendChild(sizeSel);
+
+  // Color picker
+  const colorBtn = mkBtn("🎨", "", () => {
+    pop.classList.toggle("show");
+    const r = colorBtn.getBoundingClientRect();
+    pop.style.left = r.left + "px";
+    pop.style.top = (r.bottom + 4) + "px";
+  });
+  toolbar.appendChild(colorBtn);
+
+  // Color popover (positioned via fixed)
+  const pop = document.createElement("div");
+  pop.className = "rt-color-pop";
+  pop.style.position = "fixed";
+  RT_COLORS.forEach(c => {
+    const sw = document.createElement("div");
+    sw.className = "rt-color-sw";
+    sw.style.background = c;
+    sw.title = c;
+    sw.addEventListener("mousedown", e => e.preventDefault());
+    sw.addEventListener("click", e => {
+      e.preventDefault();
+      document.execCommand("foreColor", false, c);
+      pop.classList.remove("show");
+      triggerChange();
+      content.focus();
+    });
+    pop.appendChild(sw);
+  });
+  // "Reset" color
+  const resetSw = document.createElement("div");
+  resetSw.className = "rt-color-sw";
+  resetSw.style.cssText = "background:transparent;border:1px dashed var(--gold);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--gold);";
+  resetSw.textContent = "✕";
+  resetSw.title = "Bỏ màu";
+  resetSw.addEventListener("mousedown", e => e.preventDefault());
+  resetSw.addEventListener("click", e => {
+    e.preventDefault();
+    document.execCommand("removeFormat");
+    pop.classList.remove("show");
+    triggerChange();
+    content.focus();
+  });
+  pop.appendChild(resetSw);
+  document.body.appendChild(pop);
+
+  // Click outside closes popover
+  const closePop = (ev) => {
+    if(!pop.contains(ev.target) && ev.target !== colorBtn) pop.classList.remove("show");
+  };
+  document.addEventListener("click", closePop);
+
+  toolbar.appendChild(sep());
+  // Clear formatting
+  toolbar.appendChild(mkBtn("Tx", "", () => document.execCommand("removeFormat")));
+
+  // Content area
+  const content = document.createElement("div");
+  content.className = "rt-content" + (opts.single ? " rt-single" : "");
+  content.contentEditable = "true";
+  content.setAttribute("data-placeholder", opts.placeholder || "");
+  content.innerHTML = rtSanitize(opts.value || "");
+
+  if(opts.single) {
+    content.addEventListener("keydown", e => {
+      if(e.key === "Enter") { e.preventDefault(); }
+    });
+  }
+
+  let _changeTimer = null;
+  const triggerChange = () => {
+    if(_changeTimer) clearTimeout(_changeTimer);
+    _changeTimer = setTimeout(() => { if(opts.onChange) opts.onChange(content.innerHTML); }, 80);
+  };
+  content.addEventListener("input", triggerChange);
+  content.addEventListener("blur", triggerChange);
+
+  // Update active states for B/I/U on selection change
+  const updActive = () => {
+    if(document.activeElement !== content) return;
+    try {
+      toolbar.querySelector(".bold-btn")?.classList.toggle("active", document.queryCommandState("bold"));
+      toolbar.querySelector(".italic-btn")?.classList.toggle("active", document.queryCommandState("italic"));
+      toolbar.querySelector(".underline-btn")?.classList.toggle("active", document.queryCommandState("underline"));
+    } catch(e){}
+  };
+  content.addEventListener("keyup", updActive);
+  content.addEventListener("mouseup", updActive);
+
+  // Cleanup popover on host removal
+  host._rtCleanup = () => {
+    document.removeEventListener("click", closePop);
+    if(pop.parentNode) pop.parentNode.removeChild(pop);
+  };
+
+  host.appendChild(toolbar);
+  host.appendChild(content);
+
+  return {
+    getHTML: () => rtSanitize(content.innerHTML),
+    setHTML: (h) => { content.innerHTML = rtSanitize(h||""); },
+    getEl: () => content
+  };
+}
+
+// Map of active editors (so we can read values on save)
+let _rtEditors = {};
+window._rtEditors = _rtEditors; // expose for debug/test (re-assigned on each modal open via internal var)
+// Helper to keep window in sync when we re-assign
+function _setRtEditors(obj) { _rtEditors = obj; window._rtEditors = obj; }
+
+// ════════════════════════════════════════════
+// ── SECTIONS ENGINE ──
+// teSectionsList = [{tag, rules:[{t,imgs,imgCaptions}], examples:[{label,tfs:[{tf,images,notes}]}]}]
+// Each section reuses teRuleItems-like structure but namespaced per section
+// ════════════════════════════════════════════
+let teSectionsList = [];
+Object.defineProperty(window, "teSectionsList", { get: () => teSectionsList, configurable: true });
+// Also expose helpers for debug
+window.rtSanitize = rtSanitize;
+window.rtPlain = rtPlain;
+window.escRich = escRich;
+
+window.addSection = function(initData=null) {
+  const sIdx = teSectionsList.length;
+  const sec = initData ? {
+    tag: initData.tag || "",
+    rules: (initData.rules || []).map(r => typeof r === "object"
+      ? {t: r.t||"", imgs:[...(r.imgs||[])], imgCaptions:[...(r.imgCaptions||[])]}
+      : {t: typeof r === "string" ? r : "", imgs:[], imgCaptions:[]}),
+    examples: (initData.examples || []).map(ex => ({
+      label: ex.label || "",
+      tfs: (ex.tfs || []).map(tf => ({tf:tf.tf||"", notes:tf.notes||"", images:[...(tf.images||[])]}))
+    }))
+  } : {tag:"", rules:[{t:"",imgs:[],imgCaptions:[]}], examples:[]};
+  teSectionsList.push(sec);
+  renderSection(sIdx);
+};
+
+window.removeSection = function(sIdx) {
+  if(teSectionsList.length <= 1) { showToast("⚠️ Phải có ít nhất 1 section"); return; }
+  if(!confirm("Xóa Section " + (sIdx+1) + "?")) return;
+  teSectionsList.splice(sIdx, 1);
+  rerenderAllSections();
+};
+
+window.duplicateSection = function(sIdx) {
+  const src = teSectionsList[sIdx];
+  if(!src) return;
+  const copy = JSON.parse(JSON.stringify(src));
+  teSectionsList.splice(sIdx+1, 0, copy);
+  rerenderAllSections();
+};
+
+function rerenderAllSections() {
+  const list = document.getElementById("te-sections-list");
+  if(!list) return;
+  // Cleanup any popover from removed editors
+  list.querySelectorAll(".rt-wrap").forEach(w => { if(w._rtCleanup) w._rtCleanup(); });
+  list.innerHTML = "";
+  _setRtEditors(_rtEditors.titleE && _rtEditors.hlE ? {titleE:_rtEditors.titleE, hlE:_rtEditors.hlE} : {});
+  teSectionsList.forEach((_, i) => renderSection(i));
+}
+
+function renderSection(sIdx) {
+  const list = document.getElementById("te-sections-list");
+  if(!list) return;
+  const sec = teSectionsList[sIdx];
+
+  const wrap = document.createElement("div");
+  wrap.className = "te-section";
+  wrap.id = "te-section-" + sIdx;
+
+  // Header with number + actions
+  const hdr = document.createElement("div");
+  hdr.className = "te-section-header";
+  hdr.innerHTML = `
+    <div class="te-section-num">
+      <span class="te-section-num-badge">${sIdx+1}</span>
+      <span>SECTION ${sIdx+1}</span>
+    </div>
+    <div class="te-section-actions">
+      <button class="te-section-act-btn" title="Nhân đôi" data-act="dup">⎘ Nhân đôi</button>
+      <button class="te-section-act-btn danger" title="Xóa section" data-act="del">🗑 Xóa</button>
+    </div>`;
+  hdr.querySelector('[data-act="dup"]').addEventListener("click", () => duplicateSection(sIdx));
+  hdr.querySelector('[data-act="del"]').addEventListener("click", () => removeSection(sIdx));
+  wrap.appendChild(hdr);
+
+  // ── TAG ──
+  const tagBlock = document.createElement("div");
+  tagBlock.innerHTML = `<div class="te-section-sub-label">TAG</div>`;
+  const tagHost = document.createElement("div");
+  tagBlock.appendChild(tagHost);
+  wrap.appendChild(tagBlock);
+  const tagEd = buildRichEditor(tagHost, {
+    value: sec.tag,
+    placeholder: "VD: BPR, IFVG, AMD...",
+    single: true,
+    onChange: (h) => { if(teSectionsList[sIdx]) teSectionsList[sIdx].tag = h; }
+  });
+  _rtEditors["sec_tag_"+sIdx] = tagEd;
+
+  // ── LÝ THUYẾT (rules) ──
+  const rulesBlock = document.createElement("div");
+  rulesBlock.innerHTML = `<div class="te-section-sub-label">LÝ THUYẾT</div>`;
+  const rulesList = document.createElement("div");
+  rulesList.id = "te-sec-rules-" + sIdx;
+  rulesList.style.cssText = "display:flex;flex-direction:column;gap:6px;";
+  rulesBlock.appendChild(rulesList);
+  const addRuleBtn = document.createElement("button");
+  addRuleBtn.type = "button";
+  addRuleBtn.textContent = "+ Thêm dòng phân tích";
+  addRuleBtn.style.cssText = "margin-top:6px;width:100%;padding:8px;border-radius:var(--radius-sm);border:1px dashed var(--gold-faint);background:transparent;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;letter-spacing:1px;";
+  addRuleBtn.addEventListener("click", () => addSectionRule(sIdx));
+  rulesBlock.appendChild(addRuleBtn);
+  wrap.appendChild(rulesBlock);
+
+  // ── VÍ DỤ ──
+  const exBlock = document.createElement("div");
+  exBlock.innerHTML = `<div class="te-section-sub-label">VÍ DỤ <span style="opacity:0.5;font-weight:400;">(mỗi ví dụ có các khung TF)</span></div>`;
+  const exList = document.createElement("div");
+  exList.id = "te-sec-examples-" + sIdx;
+  exList.style.cssText = "display:flex;flex-direction:column;gap:10px;";
+  exBlock.appendChild(exList);
+  const addExBtn = document.createElement("button");
+  addExBtn.type = "button";
+  addExBtn.textContent = "+ Thêm ví dụ";
+  addExBtn.style.cssText = "margin-top:6px;width:100%;padding:8px;border-radius:var(--radius-sm);border:1px dashed var(--gold-dim);background:transparent;color:var(--gold);font-size:11px;font-family:var(--sys);cursor:pointer;letter-spacing:1px;";
+  addExBtn.addEventListener("click", () => addSectionExample(sIdx));
+  exBlock.appendChild(addExBtn);
+  wrap.appendChild(exBlock);
+
+  list.appendChild(wrap);
+
+  // Render initial rules & examples
+  sec.rules.forEach((_, i) => renderSectionRule(sIdx, i));
+  sec.examples.forEach((_, i) => renderSectionExample(sIdx, i));
+}
+
+window.addSectionRule = function(sIdx) {
+  if(!teSectionsList[sIdx]) return;
+  teSectionsList[sIdx].rules.push({t:"", imgs:[], imgCaptions:[]});
+  renderSectionRule(sIdx, teSectionsList[sIdx].rules.length - 1);
+};
+
+function renderSectionRule(sIdx, rIdx) {
+  const list = document.getElementById("te-sec-rules-" + sIdx);
+  if(!list) return;
+  const item = teSectionsList[sIdx]?.rules[rIdx];
+  if(!item) return;
+
+  const wrap = document.createElement("div");
+  wrap.id = `te-sec-${sIdx}-rule-${rIdx}`;
+  wrap.dataset.pasteTarget = `secrule:${sIdx}:${rIdx}`;
+  wrap.style.cssText = "background:var(--bg);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:8px;display:flex;flex-direction:column;gap:6px;";
+
+  const row1 = document.createElement("div");
+  row1.style.cssText = "display:flex;gap:6px;align-items:flex-start;";
+
+  const rtHost = document.createElement("div");
+  rtHost.style.cssText = "flex:1;min-width:0;";
+  row1.appendChild(rtHost);
+
+  const delBtn = document.createElement("button");
+  delBtn.type = "button";
+  delBtn.textContent = "✕";
+  delBtn.style.cssText = "background:none;border:1px solid #ef535044;border-radius:6px;padding:5px 8px;color:var(--loss);font-size:12px;cursor:pointer;flex-shrink:0;";
+  delBtn.addEventListener("click", () => {
+    teSectionsList[sIdx].rules.splice(rIdx, 1);
+    // Re-render this section's rules
+    const ll = document.getElementById("te-sec-rules-" + sIdx);
+    if(ll) { ll.innerHTML = ""; teSectionsList[sIdx].rules.forEach((_, i) => renderSectionRule(sIdx, i)); }
+  });
+  row1.appendChild(delBtn);
+  wrap.appendChild(row1);
+
+  // Images zone
+  const imgZone = document.createElement("div");
+  imgZone.id = `te-sec-rule-imgs-${sIdx}-${rIdx}`;
+  imgZone.style.cssText = "display:flex;flex-wrap:wrap;gap:4px;";
+  wrap.appendChild(imgZone);
+
+  // Add image button
+  const fileInput = document.createElement("input");
+  fileInput.type = "file"; fileInput.accept = "image/*"; fileInput.multiple = true;
+  fileInput.style.display = "none";
+  const addImgBtn = document.createElement("button");
+  addImgBtn.type = "button";
+  addImgBtn.textContent = "📎 Thêm ảnh minh họa";
+  addImgBtn.style.cssText = "background:transparent;border:1px dashed var(--gold-faint);border-radius:6px;padding:4px 10px;color:var(--gold);font-size:11px;cursor:pointer;align-self:flex-start;";
+  addImgBtn.addEventListener("click", () => fileInput.click());
+  fileInput.addEventListener("change", async function() {
+    for(const f of Array.from(this.files)) {
+      await new Promise(res => {
+        const r = new FileReader();
+        r.onload = async ev => {
+          try { const c = await compressImage(ev.target.result); if(teSectionsList[sIdx]?.rules[rIdx]) teSectionsList[sIdx].rules[rIdx].imgs.push(c); } catch(e){}
+          res();
+        };
+        r.readAsDataURL(f);
+      });
+    }
+    renderSectionRuleImgs(sIdx, rIdx);
+    this.value = "";
+  });
+  wrap.appendChild(fileInput);
+  wrap.appendChild(addImgBtn);
+
+  list.appendChild(wrap);
+
+  // Build editor AFTER appending so it can compute layout
+  buildRichEditor(rtHost, {
+    value: item.t,
+    placeholder: "Nhập nội dung phân tích...",
+    onChange: (h) => { if(teSectionsList[sIdx]?.rules[rIdx]) teSectionsList[sIdx].rules[rIdx].t = h; }
+  });
+
+  renderSectionRuleImgs(sIdx, rIdx);
+}
+
+function renderSectionRuleImgs(sIdx, rIdx) {
+  const zone = document.getElementById(`te-sec-rule-imgs-${sIdx}-${rIdx}`);
+  if(!zone) return;
+  zone.innerHTML = "";
+  const item = teSectionsList[sIdx]?.rules[rIdx];
+  if(!item || !item.imgs?.length) return;
+  if(!item.imgCaptions) item.imgCaptions = [];
+  item.imgs.forEach((src, i) => {
+    const cell = document.createElement("div");
+    cell.style.cssText = "display:flex;flex-direction:column;gap:4px;width:100%;";
+    const top = document.createElement("div");
+    top.style.cssText = "position:relative;display:inline-block;";
+    const img = document.createElement("img");
+    img.src = src; img.style.cssText = "max-width:120px;max-height:90px;border-radius:4px;border:1px solid var(--gold-dim);object-fit:cover;cursor:zoom-in;";
+    img.addEventListener("click", () => { document.getElementById("theory-img-fullscreen-img").src = src; document.getElementById("theory-img-fullscreen").style.display = "flex"; });
+    const del = document.createElement("button");
+    del.type = "button"; del.textContent = "✕";
+    del.style.cssText = "position:absolute;top:-6px;right:-6px;background:#ef5350;border:none;border-radius:50%;width:18px;height:18px;color:#fff;font-size:10px;cursor:pointer;line-height:1;";
+    del.addEventListener("click", e => {
+      e.stopPropagation();
+      item.imgs.splice(i, 1);
+      if(item.imgCaptions) item.imgCaptions.splice(i, 1);
+      renderSectionRuleImgs(sIdx, rIdx);
+    });
+    top.appendChild(img); top.appendChild(del);
+    cell.appendChild(top);
+    const cap = document.createElement("input");
+    cap.type = "text"; cap.placeholder = "Chú thích ảnh (tuỳ chọn)";
+    cap.value = item.imgCaptions[i] || "";
+    cap.style.cssText = "width:100%;max-width:240px;background:var(--bg2);border:1px solid var(--gold-faint);border-radius:4px;padding:4px 8px;color:var(--text);font-size:11px;font-family:var(--sys);outline:none;";
+    cap.addEventListener("input", () => {
+      if(!item.imgCaptions) item.imgCaptions = [];
+      item.imgCaptions[i] = cap.value;
+    });
+    cell.appendChild(cap);
+    zone.appendChild(cell);
+  });
+}
+
+window.addSectionExample = function(sIdx, label="", tfs=[]) {
+  if(!teSectionsList[sIdx]) return;
+  const ex = {label, tfs: tfs.length ? tfs.map(t => ({tf:t.tf||"", notes:t.notes||"", images:[...(t.images||[])]})) : []};
+  teSectionsList[sIdx].examples.push(ex);
+  const eIdx = teSectionsList[sIdx].examples.length - 1;
+  renderSectionExample(sIdx, eIdx);
+  if(!ex.tfs.length) addSectionExampleTf(sIdx, eIdx);
+};
+
+function renderSectionExample(sIdx, eIdx) {
+  const list = document.getElementById("te-sec-examples-" + sIdx);
+  if(!list) return;
+  const ex = teSectionsList[sIdx]?.examples[eIdx];
+  if(!ex) return;
+
+  const wrap = document.createElement("div");
+  wrap.id = `te-sec-${sIdx}-ex-${eIdx}`;
+  wrap.style.cssText = "background:var(--bg);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);overflow:hidden;";
+
+  // Example header
+  const exHdr = document.createElement("div");
+  exHdr.style.cssText = "display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--bg2);border-bottom:1px solid var(--gold-faint);";
+  exHdr.innerHTML = `
+    <span style="min-width:18px;height:18px;border-radius:50%;background:var(--gold);color:#000;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${eIdx+1}</span>
+    <input type="text" class="ex-label-input" value="${esc(ex.label)}" placeholder="Tên ví dụ (tuỳ chọn)" style="flex:1;background:transparent;border:none;color:var(--text);font-size:12px;font-family:var(--sys);outline:none;"/>
+    <button type="button" class="ex-add-tf" style="background:transparent;border:1px dashed var(--gold-faint);border-radius:4px;padding:3px 8px;color:var(--gold);font-size:10px;cursor:pointer;">+ TF</button>
+    <button type="button" class="ex-remove" style="background:none;border:1px solid #ef535044;border-radius:4px;padding:3px 8px;color:var(--loss);font-size:11px;cursor:pointer;">✕</button>`;
+  exHdr.querySelector(".ex-label-input").addEventListener("input", e => { if(teSectionsList[sIdx]?.examples[eIdx]) teSectionsList[sIdx].examples[eIdx].label = e.target.value; });
+  exHdr.querySelector(".ex-add-tf").addEventListener("click", () => addSectionExampleTf(sIdx, eIdx));
+  exHdr.querySelector(".ex-remove").addEventListener("click", () => {
+    teSectionsList[sIdx].examples.splice(eIdx, 1);
+    const ll = document.getElementById("te-sec-examples-" + sIdx);
+    if(ll) { ll.innerHTML = ""; teSectionsList[sIdx].examples.forEach((_, i) => renderSectionExample(sIdx, i)); }
+  });
+  wrap.appendChild(exHdr);
+
+  // TFs container
+  const tfsBox = document.createElement("div");
+  tfsBox.id = `te-sec-${sIdx}-ex-${eIdx}-tfs`;
+  tfsBox.style.cssText = "display:flex;flex-direction:column;";
+  wrap.appendChild(tfsBox);
+
+  list.appendChild(wrap);
+
+  ex.tfs.forEach((_, i) => renderSectionExampleTf(sIdx, eIdx, i));
+}
+
+window.addSectionExampleTf = function(sIdx, eIdx, tf="", notes="", images=[]) {
+  const ex = teSectionsList[sIdx]?.examples[eIdx];
+  if(!ex) return;
+  ex.tfs.push({tf, notes, images:[...images]});
+  renderSectionExampleTf(sIdx, eIdx, ex.tfs.length - 1);
+};
+
+function renderSectionExampleTf(sIdx, eIdx, tIdx) {
+  const box = document.getElementById(`te-sec-${sIdx}-ex-${eIdx}-tfs`);
+  if(!box) return;
+  const tfObj = teSectionsList[sIdx]?.examples[eIdx]?.tfs[tIdx];
+  if(!tfObj) return;
+
+  const wrap = document.createElement("div");
+  wrap.id = `te-sec-${sIdx}-ex-${eIdx}-tf-${tIdx}`;
+  wrap.dataset.pasteTarget = `secex:${sIdx}:${eIdx}:${tIdx}`;
+  wrap.style.cssText = "border-top:1px solid var(--border);padding:8px 10px;display:flex;flex-direction:column;gap:6px;";
+
+  // Row: TF input + delete
+  const r1 = document.createElement("div");
+  r1.style.cssText = "display:flex;gap:6px;align-items:center;";
+  const tfIn = document.createElement("input");
+  tfIn.type = "text"; tfIn.placeholder = "TF (H4, H1, M15...)"; tfIn.value = tfObj.tf || "";
+  tfIn.className = "extf-tf-input";
+  tfIn.style.cssText = "width:130px;background:var(--bg2);border:1px solid var(--gold-faint);border-radius:4px;padding:5px 8px;color:var(--gold);font-weight:700;font-size:12px;font-family:var(--sys);outline:none;";
+  tfIn.addEventListener("input", e => { if(teSectionsList[sIdx]?.examples[eIdx]?.tfs[tIdx]) teSectionsList[sIdx].examples[eIdx].tfs[tIdx].tf = e.target.value; });
+  r1.appendChild(tfIn);
+
+  const fileIn = document.createElement("input");
+  fileIn.type = "file"; fileIn.accept = "image/*"; fileIn.multiple = true; fileIn.style.display = "none";
+  const addImg = document.createElement("button");
+  addImg.type = "button"; addImg.textContent = "📷 Ảnh";
+  addImg.style.cssText = "background:transparent;border:1px dashed var(--gold-faint);border-radius:4px;padding:4px 10px;color:var(--gold);font-size:11px;cursor:pointer;";
+  addImg.addEventListener("click", () => fileIn.click());
+  fileIn.addEventListener("change", async function() {
+    for(const f of Array.from(this.files)) {
+      await new Promise(res => {
+        const r = new FileReader();
+        r.onload = async ev => { try { const c = await compressImage(ev.target.result); if(teSectionsList[sIdx]?.examples[eIdx]?.tfs[tIdx]) teSectionsList[sIdx].examples[eIdx].tfs[tIdx].images.push(c); } catch(e){} res(); };
+        r.readAsDataURL(f);
+      });
+    }
+    renderSectionExampleTfImgs(sIdx, eIdx, tIdx);
+    this.value = "";
+  });
+  r1.appendChild(fileIn); r1.appendChild(addImg);
+
+  const delTf = document.createElement("button");
+  delTf.type = "button"; delTf.textContent = "✕";
+  delTf.style.cssText = "margin-left:auto;background:none;border:1px solid #ef535044;border-radius:4px;padding:4px 8px;color:var(--loss);font-size:11px;cursor:pointer;";
+  delTf.addEventListener("click", () => {
+    teSectionsList[sIdx].examples[eIdx].tfs.splice(tIdx, 1);
+    const bb = document.getElementById(`te-sec-${sIdx}-ex-${eIdx}-tfs`);
+    if(bb) { bb.innerHTML = ""; teSectionsList[sIdx].examples[eIdx].tfs.forEach((_, i) => renderSectionExampleTf(sIdx, eIdx, i)); }
+  });
+  r1.appendChild(delTf);
+  wrap.appendChild(r1);
+
+  // Images zone
+  const imgZone = document.createElement("div");
+  imgZone.id = `te-sec-${sIdx}-ex-${eIdx}-tf-${tIdx}-imgs`;
+  imgZone.style.cssText = "display:flex;flex-wrap:wrap;gap:4px;";
+  wrap.appendChild(imgZone);
+
+  // Notes (rich text)
+  const notesHost = document.createElement("div");
+  wrap.appendChild(notesHost);
+
+  box.appendChild(wrap);
+
+  buildRichEditor(notesHost, {
+    value: tfObj.notes,
+    placeholder: "Ghi chú cho khung TF này...",
+    onChange: (h) => { if(teSectionsList[sIdx]?.examples[eIdx]?.tfs[tIdx]) teSectionsList[sIdx].examples[eIdx].tfs[tIdx].notes = h; }
+  });
+
+  renderSectionExampleTfImgs(sIdx, eIdx, tIdx);
+}
+
+function renderSectionExampleTfImgs(sIdx, eIdx, tIdx) {
+  const zone = document.getElementById(`te-sec-${sIdx}-ex-${eIdx}-tf-${tIdx}-imgs`);
+  if(!zone) return;
+  zone.innerHTML = "";
+  const tfObj = teSectionsList[sIdx]?.examples[eIdx]?.tfs[tIdx];
+  if(!tfObj || !tfObj.images?.length) return;
+  tfObj.images.forEach((src, i) => {
+    const div = document.createElement("div");
+    div.style.cssText = "position:relative;display:inline-block;";
+    const im = document.createElement("img");
+    im.src = src; im.style.cssText = "max-width:120px;max-height:90px;border-radius:4px;border:1px solid var(--gold-dim);object-fit:cover;cursor:zoom-in;";
+    im.addEventListener("click", () => { document.getElementById("theory-img-fullscreen-img").src = src; document.getElementById("theory-img-fullscreen").style.display = "flex"; });
+    const del = document.createElement("button");
+    del.type = "button"; del.textContent = "✕";
+    del.style.cssText = "position:absolute;top:-6px;right:-6px;background:#ef5350;border:none;border-radius:50%;width:18px;height:18px;color:#fff;font-size:10px;cursor:pointer;line-height:1;";
+    del.addEventListener("click", e => {
+      e.stopPropagation();
+      tfObj.images.splice(i, 1);
+      renderSectionExampleTfImgs(sIdx, eIdx, tIdx);
+    });
+    div.appendChild(im); div.appendChild(del);
+    zone.appendChild(div);
+  });
+}
+
+// Compatibility shim — old paste handler uses _renderExTfImgs
+window._renderExTfImgs = function(exIdx, tfIdx) {
+  // Legacy global examples (top-level) — keep for backward compat
+  if(typeof teExamples !== "undefined" && teExamples[exIdx]) {
+    const zone = document.getElementById(`te-extf-imgs-${exIdx}-${tfIdx}`);
+    if(zone && typeof window._legacyRenderExTfImgs === "function") window._legacyRenderExTfImgs(exIdx, tfIdx);
+  }
+};
+
 function populateTheoryCatSelect(selectedKey) {
   const sel = document.getElementById("te-cat");
   sel.innerHTML = theoryFolders
@@ -4488,51 +5154,111 @@ function populateTheoryCatSelect(selectedKey) {
   if (selectedKey) sel.value = selectedKey;
 }
 
+// Helper: cleanup all rich-text popovers when modal closes
+function _teCleanupRichEditors() {
+  document.querySelectorAll(".rt-color-pop").forEach(p => p.remove());
+}
+
+// Helper: build the title + highlight rich editors
+function _teBuildTopRichEditors(titleHTML, hlHTML) {
+  // Title
+  const titleHost = document.getElementById("te-title-rt");
+  if(titleHost) {
+    const titleEd = buildRichEditor(titleHost, {
+      value: titleHTML,
+      placeholder: "VD: Ngày 03/11/2025 — BPR H1 + IFVG",
+      single: true,
+      onChange: () => {}
+    });
+    _rtEditors.titleE = titleEd;
+  }
+  // Highlight
+  const hlHost = document.getElementById("te-hl-text-rt");
+  if(hlHost) {
+    const hlEd = buildRichEditor(hlHost, {
+      value: hlHTML,
+      placeholder: "Bài học rút ra, key takeaway...",
+      onChange: () => {}
+    });
+    _rtEditors.hlE = hlEd;
+  }
+}
+
 window.openAddTheoryCard = function() {
   theoryEditingId = null; teImgSections = []; teSections = []; teExamples = [];
+  teSectionsList = [];
+  _teCleanupRichEditors();
+  _setRtEditors({});
   window._teRuleFocusIdx = null; window._teImgSectionFocusIdx = null;
   document.getElementById("theory-edit-modal-title").textContent = "THÊM THẺ MỚI";
-  ["te-icon","te-title","te-tag","te-img","te-hl-text"].forEach(id=>document.getElementById(id).value="");
-  document.getElementById("te-icon").value="📌";
+  document.getElementById("te-icon").value = "📌";
+  document.getElementById("te-img").value = "";
   populateTheoryCatSelect(theoryCategory!=="all"?theoryCategory:"");
-  document.getElementById("te-hl-type").value="tip";
-  document.getElementById("te-delete-btn").style.display="none";
-  document.getElementById("te-img-sections").innerHTML="";
-  document.getElementById("te-examples-list").innerHTML="";
-  buildRuleFields([]);
+  document.getElementById("te-hl-type").value = "tip";
+  document.getElementById("te-delete-btn").style.display = "none";
+  document.getElementById("te-img-sections").innerHTML = "";
+  // Build rich editors for title + highlight
+  _teBuildTopRichEditors("", "");
+  // Build sections list (start with 1 empty section)
+  document.getElementById("te-sections-list").innerHTML = "";
+  addSection();
+  // Legacy hidden containers (no longer used)
+  const oldRules = document.getElementById("te-rules-list"); if(oldRules) oldRules.innerHTML = "";
+  const oldEx = document.getElementById("te-examples-list"); if(oldEx) oldEx.innerHTML = "";
   if(window.resetPasteTarget) window.resetPasteTarget();
-  document.getElementById("modal-theory-edit").style.display="flex";
+  document.getElementById("modal-theory-edit").style.display = "flex";
   setTimeout(()=>document.getElementById("te-scroll-body").scrollTop=0,50);
 };
 
 window.openEditTheoryCard = function(id) {
   const t = getMergedTheory().find(x=>x.id===id); if(!t) return;
   theoryEditingId = id; teImgSections = []; teSections = []; teExamples = [];
+  teSectionsList = [];
+  _teCleanupRichEditors();
+  _setRtEditors({});
   window._teRuleFocusIdx = null; window._teImgSectionFocusIdx = null;
   document.getElementById("theory-edit-modal-title").textContent = "CHỈNH SỬA THẺ";
-  document.getElementById("te-icon").value = t.icon||"📌";
+  document.getElementById("te-icon").value = t.icon || "📌";
   populateTheoryCatSelect(t.cat||"");
-  document.getElementById("te-title").value = t.title||"";
-  document.getElementById("te-tag").value = t.tag||"";
-  document.getElementById("te-img").value = t.img||"";
-  document.getElementById("te-hl-type").value = t.highlight?.type||t.hlType||"tip";
-  document.getElementById("te-hl-text").value = t.highlight?.text||t.hlText||"";
-  document.getElementById("te-delete-btn").style.display="block";
-  document.getElementById("te-img-sections").innerHTML="";
-  document.getElementById("te-examples-list").innerHTML="";
-  buildRuleFields(t.rules||[]);
-  // Load examples (new) — or migrate old imgSections/tfSections
-  if((t.examples||[]).length) {
-    t.examples.forEach(ex => addExample(ex.label||"", ex.tfs||[]));
-  } else if((t.imgSections||[]).length || (t.tfSections||[]).length) {
-    // Migrate: one auto example from old data
-    const tfs = [];
-    (t.imgSections||[]).forEach(s => { if(s?.tf||s?.images?.length) tfs.push({tf:s.tf||"",images:s.images||[],notes:s.caption||""}); });
-    (t.tfSections||[]).forEach(s => { if(s?.tf||s?.notes||s?.images?.length) tfs.push({tf:s.tf||"",images:s.images||[],notes:s.notes||""}); });
-    if(tfs.length) addExample("", tfs);
+  document.getElementById("te-img").value = t.img || "";
+  document.getElementById("te-hl-type").value = t.highlight?.type || t.hlType || "tip";
+  document.getElementById("te-delete-btn").style.display = "block";
+  document.getElementById("te-img-sections").innerHTML = "";
+
+  // Build rich editors
+  _teBuildTopRichEditors(t.title || "", t.highlight?.text || t.hlText || "");
+
+  // Sections list — load new format if present, else migrate
+  document.getElementById("te-sections-list").innerHTML = "";
+  if(Array.isArray(t.sections) && t.sections.length) {
+    // New format
+    t.sections.forEach(sec => addSection({
+      tag: sec.tag || "",
+      rules: sec.rules || [],
+      examples: sec.examples || []
+    }));
+  } else {
+    // Legacy: 1 section with old tag + rules + examples
+    const legacyExamples = (t.examples||[]).length
+      ? t.examples
+      : (() => {
+          const tfs = [];
+          (t.imgSections||[]).forEach(s => { if(s?.tf||s?.images?.length) tfs.push({tf:s.tf||"",images:s.images||[],notes:s.caption||""}); });
+          (t.tfSections||[]).forEach(s => { if(s?.tf||s?.notes||s?.images?.length) tfs.push({tf:s.tf||"",images:s.images||[],notes:s.notes||""}); });
+          return tfs.length ? [{label:"", tfs}] : [];
+        })();
+    addSection({
+      tag: t.tag || "",
+      rules: t.rules || [],
+      examples: legacyExamples
+    });
   }
+
+  // Legacy hidden containers (no longer used)
+  const oldRules = document.getElementById("te-rules-list"); if(oldRules) oldRules.innerHTML = "";
+  const oldEx = document.getElementById("te-examples-list"); if(oldEx) oldEx.innerHTML = "";
   if(window.resetPasteTarget) window.resetPasteTarget();
-  document.getElementById("modal-theory-edit").style.display="flex";
+  document.getElementById("modal-theory-edit").style.display = "flex";
   setTimeout(()=>document.getElementById("te-scroll-body").scrollTop=0,50);
 };
 
@@ -4858,29 +5584,80 @@ function attachTePaste() {
 }
 
 window.saveTheoryCard = async function() {
-  const title=document.getElementById("te-title").value.trim();
-  if(!title){try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
-  showToast("⚠️ Nhập tiêu đề!");return;}
-  const id=theoryEditingId||("tc_"+Date.now());
-  const rules = teRuleItems
-    .filter(r => r.t.trim() || r.imgs?.length)
-    .map(r => ({t: r.t.trim(), imgs: r.imgs||[], imgCaptions: r.imgCaptions||[]}));
-  const imgSections=teImgSections.filter(Boolean).filter(s=>s.images.length>0||s.caption||s.tf);
-  const tfSections=teSections.filter(Boolean).filter(s=>s.tf||s.notes||s.images?.length);
-  const examples=teExamples.filter(Boolean).map(ex=>({label:ex.label||"",tfs:(ex.tfs||[]).filter(tf=>tf.tf||tf.notes||tf.images?.length)})).filter(ex=>ex.tfs.length);
-  const card={id,icon:document.getElementById("te-icon").value.trim()||"📌",cat:document.getElementById("te-cat").value,title,tag:document.getElementById("te-tag").value.trim(),img:document.getElementById("te-img").value,rules,imgSections,tfSections,examples,highlight:{type:document.getElementById("te-hl-type").value,text:document.getElementById("te-hl-text").value.trim()}};
+  // Read title from rich-text editor
+  const titleHTML = (_rtEditors.titleE ? _rtEditors.titleE.getHTML() : "").trim();
+  const titlePlain = rtPlain(titleHTML).trim();
+  if(!titlePlain){
+    try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
+    showToast("⚠️ Nhập tiêu đề!");return;
+  }
+
+  const id = theoryEditingId || ("tc_"+Date.now());
+
+  // Build sections array — strip empty rules/examples/sections
+  const sections = teSectionsList.map(sec => {
+    const tagHTML = (sec.tag || "").trim();
+    const cleanRules = (sec.rules || [])
+      .map(r => ({
+        t: rtSanitize(r.t || "").trim(),
+        imgs: r.imgs || [],
+        imgCaptions: r.imgCaptions || []
+      }))
+      .filter(r => rtPlain(r.t).trim() || r.imgs.length);
+    const cleanExamples = (sec.examples || [])
+      .map(ex => ({
+        label: ex.label || "",
+        tfs: (ex.tfs || [])
+          .map(tf => ({tf: tf.tf || "", notes: rtSanitize(tf.notes || ""), images: tf.images || []}))
+          .filter(tf => tf.tf || rtPlain(tf.notes).trim() || tf.images.length)
+      }))
+      .filter(ex => ex.tfs.length);
+    return {tag: tagHTML, rules: cleanRules, examples: cleanExamples};
+  }).filter(s => rtPlain(s.tag).trim() || s.rules.length || s.examples.length);
+
+  // For backward compat: also write top-level rules/examples/tag from FIRST section
+  const firstSec = sections[0] || {tag:"", rules:[], examples:[]};
+  const legacyRules = firstSec.rules;
+  const legacyExamples = firstSec.examples;
+  const legacyTagPlain = rtPlain(firstSec.tag).trim();
+
+  // Highlight (rich)
+  const hlHTML = (_rtEditors.hlE ? _rtEditors.hlE.getHTML() : "").trim();
+
+  const card = {
+    id,
+    icon: document.getElementById("te-icon").value.trim() || "📌",
+    cat: document.getElementById("te-cat").value,
+    title: titleHTML,            // rich HTML
+    tag: legacyTagPlain,         // back-compat plain tag (from section 1)
+    img: document.getElementById("te-img").value,
+    sections,                    // NEW: array of sections
+    rules: legacyRules,          // back-compat
+    imgSections: [],             // legacy field cleared
+    tfSections: [],              // legacy field cleared
+    examples: legacyExamples,    // back-compat
+    highlight: {
+      type: document.getElementById("te-hl-type").value,
+      text: hlHTML
+    }
+  };
+
   const sizeKB = estimateKB(card);
-  if(sizeKB>950){try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
-  showToast("⚠️ Quá lớn ("+sizeKB+"KB)! Xóa bớt ảnh hoặc dùng ảnh nhỏ hơn.");return;}
-  if(sizeKB>600){try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
-  showToast("⚠️ Cảnh báo: thẻ nặng "+sizeKB+"KB — có thể lỗi khi lưu ảnh nhiều");}
-  theoryCustomData[id]=card;
-  // Close modal IMMEDIATELY — don't wait for save to finish
-  document.getElementById("modal-theory-edit").style.display="none";
+  if(sizeKB>950){
+    try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
+    showToast("⚠️ Quá lớn ("+sizeKB+"KB)! Xóa bớt ảnh hoặc dùng ảnh nhỏ hơn.");return;
+  }
+  if(sizeKB>600){
+    try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
+    showToast("⚠️ Cảnh báo: thẻ nặng "+sizeKB+"KB — có thể lỗi khi lưu ảnh nhiều");
+  }
+  theoryCustomData[id] = card;
+  // Close modal IMMEDIATELY
+  document.getElementById("modal-theory-edit").style.display = "none";
+  _teCleanupRichEditors();
   try{if(navigator.vibrate)navigator.vibrate([10,30,10]);}catch(e){}
   renderTheory();
   showToast("✅ Đã lưu thẻ!");
-  // Save to Firestore in background — modal already closed
   saveCustomTheory().catch(e => {
     console.error("saveCustomTheory failed:", e);
     showToast("⚠️ Có thể chưa đồng bộ cloud — thử lại sau");
@@ -4920,8 +5697,10 @@ window.deleteAllTheoryCards = async function() {
 };
 
 window.closeTheoryEditModal = function(e) {
-  if (e.target === document.getElementById("modal-theory-edit"))
+  if (e.target === document.getElementById("modal-theory-edit")) {
     document.getElementById("modal-theory-edit").style.display = "none";
+    if(typeof _teCleanupRichEditors === "function") _teCleanupRichEditors();
+  }
 };
 
 async function loadTheoryData() {
@@ -5079,7 +5858,27 @@ function renderTheory() {
   }
   if (theorySearchQ) {
     const q = theorySearchQ.toLowerCase();
-    list = list.filter(t => t.title.toLowerCase().includes(q) || (t.rules||[]).some(r=>(typeof r==="string"?r:r.t).toLowerCase().includes(q)) || (t.tag||"").toLowerCase().includes(q));
+    list = list.filter(t => {
+      const titleP = rtPlain(t.title||"").toLowerCase();
+      const tagP = rtPlain(t.tag||"").toLowerCase();
+      if(titleP.includes(q) || tagP.includes(q)) return true;
+      // Search legacy rules
+      if((t.rules||[]).some(r=>rtPlain(typeof r==="string"?r:(r.t||"")).toLowerCase().includes(q))) return true;
+      // Search sections
+      if(Array.isArray(t.sections)) {
+        for(const sec of t.sections) {
+          if(rtPlain(sec.tag||"").toLowerCase().includes(q)) return true;
+          if((sec.rules||[]).some(r=>rtPlain(typeof r==="string"?r:(r.t||"")).toLowerCase().includes(q))) return true;
+          for(const ex of (sec.examples||[])) {
+            for(const tf of (ex.tfs||[])) {
+              if(rtPlain(tf.notes||"").toLowerCase().includes(q)) return true;
+              if((tf.tf||"").toLowerCase().includes(q)) return true;
+            }
+          }
+        }
+      }
+      return false;
+    });
   }
 
   const allCards = getMergedTheory();
@@ -5106,12 +5905,18 @@ function renderTheory() {
   if (theoryCategory === "all" && !theorySearchQ && !theoryEditMode) {
     const todayCard = getTodayTheory();
     if (todayCard) {
-      const firstRule = (todayCard.rules||[])[0];
-      const ruleText = typeof firstRule==="string" ? firstRule : (firstRule?.t||"");
+      // Pull first rule from sections (new) or legacy rules
+      let firstRule = null;
+      if(Array.isArray(todayCard.sections) && todayCard.sections.length) {
+        firstRule = (todayCard.sections[0].rules||[])[0];
+      }
+      if(!firstRule) firstRule = (todayCard.rules||[])[0];
+      const ruleText = rtPlain(typeof firstRule==="string" ? firstRule : (firstRule?.t||""));
+      const titlePlain = rtPlain(todayCard.title||"");
       todayHtml = `<div class="today-card" onclick="scrollToCard('${todayCard.id}')">
         <div class="today-label">📅 BÀI HỌC HÔM NAY</div>
-        <div style="font-family:var(--sys);font-size:14px;color:var(--gold);margin-bottom:6px;">${esc(todayCard.icon)} ${esc(todayCard.title)}</div>
-        <div style="font-size:13px;color:var(--text);opacity:0.7;line-height:1.5;">${esc(ruleText.replace(/<[^>]+>/g,"")).slice(0,80)}...</div>
+        <div style="font-family:var(--sys);font-size:14px;color:var(--gold);margin-bottom:6px;">${esc(todayCard.icon)} ${esc(titlePlain)}</div>
+        <div style="font-size:13px;color:var(--text);opacity:0.7;line-height:1.5;">${esc(ruleText).slice(0,80)}${ruleText.length>80?"...":""}</div>
         <div style="margin-top:10px;font-size:11px;color:var(--gold);opacity:0.85;font-family:var(--sys);letter-spacing:1px;">Nhấn để ôn bài →</div>
       </div>`;
     }
@@ -5126,11 +5931,105 @@ function renderTheory() {
       <button onclick="event.stopPropagation();openEditTheoryCard('${t.id}')" style="background:var(--gold-faint);border:1px solid var(--gold-dim);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:13px;cursor:pointer;flex-shrink:0;" title="Sửa">✏️</button>
       <button onclick="event.stopPropagation();openMoveTheoryCard('${t.id}')" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--gold);font-size:13px;cursor:pointer;flex-shrink:0;" title="Di chuyển">🗂</button>
       <button onclick="event.stopPropagation();quickDeleteTheoryCard('${t.id}')" style="background:#ef535014;border:1px solid #ef535055;border-radius:6px;padding:8px 12px;color:var(--loss);font-size:13px;cursor:pointer;flex-shrink:0;" title="Xóa">🗑</button>`;
+    // Helper: render a single legacy "rules + examples" block
+    const _renderRules = (rules) => (rules||[]).map(r => {
+      const text = typeof r === "string" ? r : (r.t||"");
+      const imgs = (typeof r === "object" && Array.isArray(r.imgs) && r.imgs.length) ? r.imgs : [];
+      const caps = (typeof r === "object" && Array.isArray(r.imgCaptions)) ? r.imgCaptions : [];
+      if (!text && !imgs.length) return "";
+      return `<div class="theory-rule">
+        <div class="theory-rule-dot" style="flex-shrink:0;margin-top:6px;"></div>
+        <div style="flex:1;min-width:0;">
+          ${text ? `<div class="theory-rule-text">${escRich(text)}</div>` : ""}
+          ${imgs.map((src,i)=>`
+            <div style="margin-top:8px;">
+              <img alt="" src="${src}"
+                onclick="document.getElementById('theory-img-fullscreen').style.display='flex';document.getElementById('theory-img-fullscreen-img').src=this.src"
+                style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);cursor:zoom-in;display:block;"
+                loading="lazy"/>
+              ${caps[i] ? `<div style="font-size:14px;color:var(--text);opacity:0.95;font-family:var(--sys);margin-top:6px;padding:8px 12px;background:var(--bg3);border-left:3px solid var(--gold-dim);border-radius:0 6px 6px 0;line-height:1.5;">${esc(caps[i])}</div>` : ""}
+            </div>`).join("")}
+        </div>
+      </div>`;
+    }).join("");
+
+    const _img = src => `<img alt="" src="${src}" onclick="document.getElementById('theory-img-fullscreen').style.display='flex';document.getElementById('theory-img-fullscreen-img').src=this.src" style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);cursor:zoom-in;display:block;margin-bottom:8px;" loading="lazy"/>`;
+
+    const _renderExamples = (examples) => {
+      const exs = (examples||[]).filter(ex=>ex&&ex.tfs?.length);
+      if(!exs.length) return "";
+      return `<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;">
+        <div style="font-size:10px;letter-spacing:1px;color:var(--gold);opacity:0.7;font-family:var(--sys);margin-bottom:10px;">VÍ DỤ</div>
+        ${exs.map((ex,ei)=>`
+          <div style="margin-bottom:14px;border:1px solid var(--gold-dim);border-radius:var(--radius-md);overflow:hidden;">
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg2);">
+              <div style="min-width:20px;height:20px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700;flex-shrink:0;">${ei+1}</div>
+              ${ex.label?`<div style="font-size:12px;color:var(--gold);font-weight:600;font-family:var(--sys);">${esc(ex.label)}</div>`:""}
+            </div>
+            ${(ex.tfs||[]).map(tf=>`
+              <div style="border-top:1px solid var(--border);padding:10px 12px;">
+                ${tf.tf?`<div style="font-size:11px;color:var(--gold);font-weight:700;font-family:var(--sys);letter-spacing:0.5px;margin-bottom:8px;padding:3px 8px;background:var(--gold-faint);border-radius:4px;display:inline-block;">${esc(tf.tf)}</div>`:""}
+                ${(tf.images||[]).map(src=>_img(src)).join("")}
+                ${tf.notes?`<div style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;">${escRich(tf.notes)}</div>`:""}
+              </div>`).join("")}
+          </div>`).join("")}
+      </div>`;
+    };
+
+    // Build sections HTML (NEW format) or fallback to legacy single block
+    let bodyContent = "";
+    if(Array.isArray(t.sections) && t.sections.length) {
+      bodyContent = t.sections.map((sec, si) => {
+        const tagText = (sec.tag||"").trim();
+        const showSecHeader = t.sections.length > 1 || tagText;
+        return `<div style="margin-bottom:18px;${si>0?'padding-top:18px;border-top:2px dashed var(--gold-faint);':''}">
+          ${showSecHeader ? `
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              ${t.sections.length>1 ? `<span style="display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;border-radius:50%;background:var(--gold);color:#000;font-size:11px;font-weight:700;padding:0 7px;">${si+1}</span>` : ""}
+              ${tagText ? `<span style="font-size:12px;letter-spacing:0.3px;font-family:var(--sys);padding:5px 11px;border-radius:var(--radius-xl);background:var(--gold-faint);color:var(--gold);font-weight:600;text-transform:uppercase;">${escRich(tagText)}</span>` : ""}
+            </div>` : ""}
+          ${_renderRules(sec.rules)}
+          ${_renderExamples(sec.examples)}
+        </div>`;
+      }).join("");
+    } else {
+      // LEGACY render: single block with rules + examples
+      bodyContent = _renderRules(t.rules);
+      const exs = (t.examples||[]).filter(ex=>ex&&ex.tfs?.length);
+      const legacySecs = (t.imgSections||[]).filter(s=>s&&(s.images?.length||s.caption));
+      const legacyTf  = (t.tfSections||[]).filter(s=>s&&(s.tf||s.notes||s.images?.length));
+      if(exs.length) {
+        bodyContent += _renderExamples(exs);
+      } else if(legacySecs.length || legacyTf.length) {
+        bodyContent += `<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;">
+          ${legacySecs.map(s=>`<div style="margin-bottom:10px;">
+            ${s.tf?`<div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px;">${esc(s.tf)}</div>`:""}
+            ${(s.images||[]).map(src=>_img(src)).join("")}
+            ${s.caption?`<div style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;">${esc(s.caption)}</div>`:""}
+          </div>`).join("")}
+          ${legacyTf.map(s=>`<div style="margin-bottom:10px;">
+            ${s.tf?`<div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px;">${esc(s.tf)}</div>`:""}
+            ${(s.images||[]).map(src=>_img(src)).join("")}
+            ${s.notes?`<div style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;">${esc(s.notes)}</div>`:""}
+          </div>`).join("")}
+        </div>`;
+      }
+    }
+
+    // Header tag — show first section's tag if exists, else legacy t.tag
+    const headerTag = (() => {
+      if(Array.isArray(t.sections) && t.sections.length) {
+        const firstTag = t.sections[0]?.tag;
+        if(firstTag && rtPlain(firstTag).trim()) return firstTag;
+      }
+      return t.tag || catLabel;
+    })();
+
     return `<div class="theory-card${mastered?" theory-mastered":""}" id="tc-${t.id}">
       <div class="theory-card-header" onclick="toggleTheoryCard('${t.id}')">
         <span class="theory-card-icon">${esc(t.icon||"📌")}</span>
-        <span class="theory-card-title">${esc(t.title||"")}</span>
-        <span class="theory-card-tag">${esc(t.tag||catLabel)}</span>
+        <span class="theory-card-title">${escRich(t.title||"")}</span>
+        <span class="theory-card-tag">${escRich(headerTag)}</span>
         ${mastered?'<span style="color:var(--win);font-size:14px;">✓</span>':''}
         ${editBtns}
         <span class="theory-card-chevron">▼</span>
@@ -5139,69 +6038,11 @@ function renderTheory() {
         <div class="theory-card-content">
           ${(()=>{
             const svg = getTheoryDiagramSVG(t.id);
-            if (svg) return `<div style="margin:14px 0;">${svg}<div class="theory-diagram-caption">${t.tag}</div></div>`;
+            if (svg) return `<div style="margin:14px 0;">${svg}<div class="theory-diagram-caption">${esc(rtPlain(t.tag||""))}</div></div>`;
             return "";
           })()}
-          ${(t.rules||[]).map(r => {
-            const text = typeof r === "string" ? r : (r.t||"");
-            const imgs = (typeof r === "object" && Array.isArray(r.imgs) && r.imgs.length) ? r.imgs : [];
-            const caps = (typeof r === "object" && Array.isArray(r.imgCaptions)) ? r.imgCaptions : [];
-            if (!text && !imgs.length) return "";
-            return `<div class="theory-rule">
-              <div class="theory-rule-dot" style="flex-shrink:0;margin-top:6px;"></div>
-              <div style="flex:1;min-width:0;">
-                ${text ? `<div class="theory-rule-text">${text}</div>` : ""}
-                ${imgs.map((src,i)=>`
-                  <div style="margin-top:8px;">
-                    <img alt="" src="${src}"
-                      onclick="document.getElementById('theory-img-fullscreen').style.display='flex';document.getElementById('theory-img-fullscreen-img').src=this.src"
-                      style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);cursor:zoom-in;display:block;"
-                      loading="lazy"/>
-                    ${caps[i] ? `<div style="font-size:14px;color:var(--text);opacity:0.95;font-family:var(--sys);margin-top:6px;padding:8px 12px;background:var(--bg3);border-left:3px solid var(--gold-dim);border-radius:0 6px 6px 0;line-height:1.5;">${esc(caps[i])}</div>` : ""}
-                  </div>`).join("")}
-              </div>
-            </div>`;
-          }).join("")}
-          ${(()=>{
-            // Render examples (new) — with fallback to old imgSections/tfSections
-            const exs = (t.examples||[]).filter(ex=>ex&&ex.tfs?.length);
-            const legacySecs = (t.imgSections||[]).filter(s=>s&&(s.images?.length||s.caption));
-            const legacyTf  = (t.tfSections||[]).filter(s=>s&&(s.tf||s.notes||s.images?.length));
-            if(!exs.length && !legacySecs.length && !legacyTf.length) return "";
-            const _img = src => `<img alt="" src="${src}" onclick="document.getElementById('theory-img-fullscreen').style.display='flex';document.getElementById('theory-img-fullscreen-img').src=this.src" style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);cursor:zoom-in;display:block;margin-bottom:8px;" loading="lazy"/>`;
-            if(exs.length) {
-              return `<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;">
-                <div style="font-size:10px;letter-spacing:1px;color:var(--gold);opacity:0.7;font-family:var(--sys);margin-bottom:10px;">VÍ DỤ</div>
-                ${exs.map((ex,ei)=>`
-                  <div style="margin-bottom:14px;border:1px solid var(--gold-dim);border-radius:var(--radius-md);overflow:hidden;">
-                    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg2);">
-                      <div style="min-width:20px;height:20px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700;flex-shrink:0;">${ei+1}</div>
-                      ${ex.label?`<div style="font-size:12px;color:var(--gold);font-weight:600;font-family:var(--sys);">${esc(ex.label)}</div>`:""}
-                    </div>
-                    ${(ex.tfs||[]).map(tf=>`
-                      <div style="border-top:1px solid var(--border);padding:10px 12px;">
-                        ${tf.tf?`<div style="font-size:11px;color:var(--gold);font-weight:700;font-family:var(--sys);letter-spacing:0.5px;margin-bottom:8px;padding:3px 8px;background:var(--gold-faint);border-radius:4px;display:inline-block;">${esc(tf.tf)}</div>`:""}
-                        ${(tf.images||[]).map(src=>_img(src)).join("")}
-                        ${tf.notes?`<div style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;">${esc(tf.notes)}</div>`:""}
-                      </div>`).join("")}
-                  </div>`).join("")}
-              </div>`;
-            }
-            // Legacy fallback
-            return `<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;">
-              ${legacySecs.map(s=>`<div style="margin-bottom:10px;">
-                ${s.tf?`<div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px;">${esc(s.tf)}</div>`:""}
-                ${(s.images||[]).map(src=>_img(src)).join("")}
-                ${s.caption?`<div style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;">${esc(s.caption)}</div>`:""}
-              </div>`).join("")}
-              ${legacyTf.map(s=>`<div style="margin-bottom:10px;">
-                ${s.tf?`<div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px;">${esc(s.tf)}</div>`:""}
-                ${(s.images||[]).map(src=>_img(src)).join("")}
-                ${s.notes?`<div style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;">${esc(s.notes)}</div>`:""}
-              </div>`).join("")}
-            </div>`;
-          })()}
-          ${highlight?.text?`<div class="theory-highlight ${highlight.type==="warn"?"warn":highlight.type==="info"?"info":""}">💡 ${esc(highlight.text)}</div>`:""}
+          ${bodyContent}
+          ${highlight?.text?`<div class="theory-highlight ${highlight.type==="warn"?"warn":highlight.type==="info"?"info":""}">💡 ${escRich(highlight.text)}</div>`:""}
           <button onclick="toggleMastered('${t.id}')" style="width:100%;margin-top:14px;padding:12px;border-radius:var(--radius-md);border:1px solid ${mastered?"var(--win)":"var(--gold-faint)"};background:${mastered?"#4caf5018":"transparent"};color:${mastered?"var(--win)":"var(--gold)"};font-family:var(--sys);font-size:11px;cursor:pointer;transition:all 0.2s;">
             ${mastered?"✓ ĐÃ THUỘC":"○ ĐÁNH DẤU ĐÃ THUỘC"}
           </button>
@@ -7246,6 +8087,23 @@ document.addEventListener("paste", async e => {
           teRuleItems[idx].imgs.push(c);
           renderRuleImgs(idx);
           showToast("📎 Dán ảnh vào dòng " + (idx+1));
+        }
+      } else if(type === "secrule") {
+        // type:secrule:sIdx:rIdx
+        const sIdx = parseInt(parts[1]), rIdx = parseInt(parts[2]);
+        if(teSectionsList[sIdx]?.rules[rIdx]) {
+          teSectionsList[sIdx].rules[rIdx].imgs.push(c);
+          renderSectionRuleImgs(sIdx, rIdx);
+          showToast("📎 Dán ảnh · Section " + (sIdx+1) + " · Dòng " + (rIdx+1));
+        }
+      } else if(type === "secex") {
+        // type:secex:sIdx:eIdx:tIdx
+        const sIdx = parseInt(parts[1]), eIdx = parseInt(parts[2]), tIdx = parseInt(parts[3]);
+        if(teSectionsList[sIdx]?.examples[eIdx]?.tfs[tIdx]) {
+          teSectionsList[sIdx].examples[eIdx].tfs[tIdx].images.push(c);
+          renderSectionExampleTfImgs(sIdx, eIdx, tIdx);
+          const tfName = teSectionsList[sIdx].examples[eIdx].tfs[tIdx].tf || "TF";
+          showToast("📷 Dán · Section " + (sIdx+1) + " · Ví dụ " + (eIdx+1) + " · " + tfName);
         }
       } else if(type === "example") {
         // type:example:exIdx:tfIdx
