@@ -1880,6 +1880,39 @@
 <script>
 // Bootstrap: load Firebase via dynamic import then run app
 (async () => {
+
+// ── GLOBAL ERROR HANDLER (debug aid for crashes on iOS/iPad) ──
+// Shows the error on-screen since mobile users can't open DevTools easily
+function _showFatalError(msg, source) {
+  try {
+    let bar = document.getElementById("__fatal_err_bar");
+    if(!bar) {
+      bar = document.createElement("div");
+      bar.id = "__fatal_err_bar";
+      bar.style.cssText = "position:fixed;bottom:0;left:0;right:0;background:#ef5350;color:#fff;padding:10px 14px;font-family:-apple-system,sans-serif;font-size:12px;z-index:99999;max-height:40vh;overflow-y:auto;border-top:2px solid #fff;line-height:1.4;";
+      const close = document.createElement("button");
+      close.textContent = "✕";
+      close.style.cssText = "float:right;background:transparent;border:1px solid #fff;color:#fff;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:14px;";
+      close.onclick = () => bar.remove();
+      bar.appendChild(close);
+      document.body.appendChild(bar);
+    }
+    const line = document.createElement("div");
+    line.style.cssText = "margin-top:6px;word-break:break-word;";
+    line.textContent = "🐛 " + (source ? "["+source+"] " : "") + msg;
+    bar.appendChild(line);
+  } catch(e) { /* nothing we can do */ }
+}
+window.addEventListener("error", (ev) => {
+  _showFatalError((ev.message || ev.error?.message || "unknown error") + (ev.filename ? " @ " + ev.filename.split("/").pop() + ":" + ev.lineno : ""), "error");
+});
+window.addEventListener("unhandledrejection", (ev) => {
+  const msg = ev.reason?.message || String(ev.reason || "unknown rejection");
+  // Skip Firebase offline noise
+  if(/firestore|firebase|offline|unavailable/i.test(msg)) return;
+  _showFatalError(msg, "promise");
+});
+window._showFatalError = _showFatalError; // expose for manual logging
 const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js");
 const { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, updateDoc, getDoc, setDoc, limit, startAfter } = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js");
 const firebaseConfig = {
@@ -4531,53 +4564,63 @@ const RT_SIZES = [
 // Sanitize: strip <script>, on*= attrs, javascript:; allow only safe tags & inline styles
 function rtSanitize(html) {
   if(!html) return "";
-  const tpl = document.createElement("template");
-  tpl.innerHTML = String(html);
-  const walk = (node) => {
-    const kids = Array.from(node.childNodes);
-    for(const k of kids) {
-      if(k.nodeType === 1) { // element
-        const tag = k.tagName.toLowerCase();
-        const allowed = ["b","strong","i","em","u","span","br","div","p","font","ul","ol","li"];
-        if(!allowed.includes(tag)) {
-          // unwrap (keep children)
-          while(k.firstChild) node.insertBefore(k.firstChild, k);
-          node.removeChild(k);
-          continue;
-        }
-        // Strip dangerous attributes
-        for(const attr of Array.from(k.attributes)) {
-          const an = attr.name.toLowerCase();
-          if(an === "style") {
-            // keep only color/font-size/font-weight/font-style/text-decoration/background-color
-            const safe = String(attr.value).split(";").map(s=>s.trim()).filter(s=>{
-              const p = s.split(":")[0]?.trim().toLowerCase();
-              return ["color","font-size","font-weight","font-style","text-decoration","background-color"].includes(p)
-                && !/url\s*\(|expression|javascript:/i.test(s);
-            }).join(";");
-            if(safe) k.setAttribute("style", safe); else k.removeAttribute("style");
-          } else if(an === "color" || an === "size" || an === "face") {
-            // legacy <font> attrs — keep
-          } else {
-            k.removeAttribute(attr.name);
+  try {
+    const tpl = document.createElement("template");
+    tpl.innerHTML = String(html);
+    const walk = (node) => {
+      const kids = Array.from(node.childNodes);
+      for(const k of kids) {
+        if(k.nodeType === 1) { // element
+          const tag = k.tagName.toLowerCase();
+          const allowed = ["b","strong","i","em","u","span","br","div","p","font","ul","ol","li"];
+          if(!allowed.includes(tag)) {
+            // unwrap (keep children)
+            while(k.firstChild) node.insertBefore(k.firstChild, k);
+            node.removeChild(k);
+            continue;
           }
+          // Strip dangerous attributes
+          for(const attr of Array.from(k.attributes)) {
+            const an = attr.name.toLowerCase();
+            if(an === "style") {
+              // keep only color/font-size/font-weight/font-style/text-decoration/background-color
+              const safe = String(attr.value).split(";").map(s=>s.trim()).filter(s=>{
+                const p = s.split(":")[0]?.trim().toLowerCase();
+                return ["color","font-size","font-weight","font-style","text-decoration","background-color"].includes(p)
+                  && !/url\s*\(|expression|javascript:/i.test(s);
+              }).join(";");
+              if(safe) k.setAttribute("style", safe); else k.removeAttribute("style");
+            } else if(an === "color" || an === "size" || an === "face") {
+              // legacy <font> attrs — keep
+            } else {
+              k.removeAttribute(attr.name);
+            }
+          }
+          walk(k);
+        } else if(k.nodeType === 8) { // comment
+          node.removeChild(k);
         }
-        walk(k);
-      } else if(k.nodeType === 8) { // comment
-        node.removeChild(k);
       }
-    }
-  };
-  walk(tpl.content);
-  return tpl.innerHTML;
+    };
+    walk(tpl.content);
+    return tpl.innerHTML;
+  } catch(e) {
+    console.error("rtSanitize error:", e);
+    // On any failure, fall back to plain-text escape
+    return String(html).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
 }
 
 // Plain text extract from rich HTML (for search, tag display)
 function rtPlain(html) {
   if(!html) return "";
-  const d = document.createElement("div");
-  d.innerHTML = String(html);
-  return d.textContent || d.innerText || "";
+  try {
+    const d = document.createElement("div");
+    d.innerHTML = String(html);
+    return d.textContent || d.innerText || "";
+  } catch(e) {
+    return String(html).replace(/<[^>]+>/g, "");
+  }
 }
 
 // Build a rich-text editor inside `host` element
@@ -4735,8 +4778,14 @@ function buildRichEditor(host, opts={}) {
   host.appendChild(content);
 
   return {
-    getHTML: () => rtSanitize(content.innerHTML),
-    setHTML: (h) => { content.innerHTML = rtSanitize(h||""); },
+    getHTML: () => {
+      try { return rtSanitize(content.innerHTML); }
+      catch(e) { return content.innerHTML || ""; }
+    },
+    setHTML: (h) => {
+      try { content.innerHTML = rtSanitize(h||""); }
+      catch(e) { content.innerHTML = String(h||"").replace(/<script[\s\S]*?<\/script>/gi, ""); }
+    },
     getEl: () => content
   };
 }
@@ -4935,20 +4984,25 @@ window.rtPlain = rtPlain;
 window.escRich = escRich;
 
 window.addSection = function(initData=null) {
-  const sIdx = teSectionsList.length;
-  const sec = initData ? {
-    tag: initData.tag || "",
-    rules: (initData.rules || []).map(r => typeof r === "object"
-      ? {t: r.t||"", imgs:[...(r.imgs||[])], imgCaptions:[...(r.imgCaptions||[])]}
-      : {t: typeof r === "string" ? r : "", imgs:[], imgCaptions:[]}),
-    examples: (initData.examples || []).map(ex => ({
-      label: ex.label || "",
-      conclusion: ex.conclusion || "",
-      tfs: (ex.tfs || []).map(tf => ({tf:tf.tf||"", notes:tf.notes||"", images:[...(tf.images||[])]}))
-    }))
-  } : {tag:"", rules:[{t:"",imgs:[],imgCaptions:[]}], examples:[]};
-  teSectionsList.push(sec);
-  renderSection(sIdx);
+  try {
+    const sIdx = teSectionsList.length;
+    const sec = initData ? {
+      tag: initData.tag || "",
+      rules: (initData.rules || []).map(r => typeof r === "object"
+        ? {t: r.t||"", imgs:[...(r.imgs||[])], imgCaptions:[...(r.imgCaptions||[])]}
+        : {t: typeof r === "string" ? r : "", imgs:[], imgCaptions:[]}),
+      examples: (initData.examples || []).map(ex => ({
+        label: ex.label || "",
+        conclusion: ex.conclusion || "",
+        tfs: (ex.tfs || []).map(tf => ({tf:tf.tf||"", notes:tf.notes||"", images:[...(tf.images||[])]}))
+      }))
+    } : {tag:"", rules:[{t:"",imgs:[],imgCaptions:[]}], examples:[]};
+    teSectionsList.push(sec);
+    renderSection(sIdx);
+  } catch(e) {
+    console.error("addSection error:", e);
+    if(window._showFatalError) window._showFatalError(e.message, "addSection");
+  }
 };
 
 window.removeSection = function(sIdx) {
@@ -4977,6 +5031,7 @@ function rerenderAllSections() {
 }
 
 function renderSection(sIdx) {
+  try {
   const list = document.getElementById("te-sections-list");
   if(!list) return;
   const sec = teSectionsList[sIdx];
@@ -5050,6 +5105,10 @@ function renderSection(sIdx) {
   // Render initial rules & examples
   sec.rules.forEach((_, i) => renderSectionRule(sIdx, i));
   sec.examples.forEach((_, i) => renderSectionExample(sIdx, i));
+  } catch(e) {
+    console.error("renderSection error:", e);
+    if(window._showFatalError) window._showFatalError(e.message, "renderSection " + sIdx);
+  }
 }
 
 window.addSectionRule = function(sIdx) {
@@ -6142,6 +6201,7 @@ function getTheoryDiagramSVG(id) {
 }
 
 function renderTheory() {
+  try {
   renderTheoryFolderBar();
   let list = getMergedTheory();
 
@@ -6225,6 +6285,7 @@ function renderTheory() {
   }
 
   el.innerHTML = todayHtml + list.map(t => {
+    try {
     const mastered = theoryMastered[t.id];
     const highlight = t.highlight || (t.hlText ? {type:t.hlType||"tip",text:t.hlText} : null);
     const quiz = t.quiz || (t.qQ ? {q:t.qQ,opts:t.qOpts||[],ans:t.qAns||0} : null);
@@ -6356,7 +6417,22 @@ function renderTheory() {
         </div>
       </div>
     </div>`;
+    } catch(cardErr) {
+      console.error("Card render error for id=" + (t?.id||"?") + ":", cardErr);
+      if(window._showFatalError) window._showFatalError("card " + (t?.id||"?") + ": " + cardErr.message, "renderCard");
+      // Return a minimal placeholder so the list renders the rest
+      return `<div class="theory-card" style="border-color:#ef535066"><div class="theory-card-header"><span class="theory-card-icon">⚠️</span><span class="theory-card-title" style="color:var(--loss);">Lỗi hiển thị thẻ ${t?.id||""}</span></div></div>`;
+    }
   }).join("");
+  } catch(e) {
+    console.error("renderTheory error:", e);
+    if(window._showFatalError) window._showFatalError(e.message, "renderTheory");
+    // Try to at least show empty state instead of breaking the page
+    try {
+      const el = document.getElementById("theory-list");
+      if(el && !el.children.length) el.innerHTML = '<div class="empty"><div style="font-size:13px;opacity:0.6;padding:20px;text-align:center;">⚠️ Lỗi hiển thị: ' + (e.message||"unknown") + '</div></div>';
+    } catch(_e){}
+  }
 }
 
 window.toggleTheoryCard = function(id) {
