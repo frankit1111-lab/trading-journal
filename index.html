@@ -179,7 +179,7 @@
   }
   html,body{
   scroll-behavior:smooth;height:100%;background:var(--bg);color:var(--text);font-family:var(--sys);overflow:hidden;font-size:15px;overscroll-behavior:none;}
-  .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;-webkit-overflow-scrolling:touch;}
+  .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;}
   .screen.active{display:flex;}
   ::-webkit-scrollbar{display:none;}
 
@@ -791,12 +791,15 @@
   .theory-card.expanded{border-color:var(--gold-dim);box-shadow:0 4px 24px var(--gold-faint);}
   .theory-card-header{padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;}
   .theory-card-icon{font-size:24px;flex-shrink:0;}
-  .theory-card-title{font-family:var(--sys);font-size:15px;color:var(--gold);letter-spacing:0.1px;flex:1;line-height:1.4;font-weight:600;}
+  .theory-card-title{font-family:var(--sys);font-size:15px;color:var(--gold);letter-spacing:0.1px;flex:1;line-height:1.4;font-weight:600;;flex:1;min-width:0;;word-break:break-word;}
   .theory-card-tag{font-size:11px;letter-spacing:0.3px;font-family:var(--sys);padding:6px 10px;border-radius:var(--radius-xl);background:var(--gold-faint);color:var(--gold);opacity:0.9;flex-shrink:0;text-transform:uppercase;font-weight:600;}
   .theory-card-chevron{font-size:14px;color:var(--gold);opacity:0.7;transition:transform 0.3s;flex-shrink:0;}
   .theory-card.expanded .theory-card-chevron{transform:rotate(180deg);}
-  .theory-card-body{max-height:0;overflow:hidden;transition:max-height 0.4s ease;}
-  .theory-card.expanded .theory-card-body{max-height:3000px;}
+  .theory-card-body{max-height:0;overflow:hidden;transition:max-height 0.35s ease;will-change:max-height;}
+  .theory-card.expanded .theory-card-body{max-height:none;}
+  .theory-card.expanded{-webkit-overflow-scrolling:touch;}
+  .theory-card img{touch-action:pan-y;}
+  #theory-list{-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;}
   .theory-card-content{padding:4px 18px 18px;border-top:1px solid var(--border);}
 
   /* Theory image */
@@ -1767,7 +1770,7 @@
     </div><!-- end scroll body -->
 
     <!-- Action buttons — sticky bottom -->
-    <div style="position:sticky;bottom:0;z-index:10;background:var(--bg2);display:flex;flex-direction:column;gap:8px;margin-top:10px;border-top:1px solid var(--gold-faint);padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px)) 0;">
+    <div style="position:sticky;bottom:0;z-index:10;background:var(--bg2);display:flex;flex-direction:column;gap:8px;margin-top:10px;border-top:1px solid var(--gold-faint);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));">
       <button id="te-delete-btn" onclick="deleteTheoryCard()" style="display:none;width:100%;padding:12px;border-radius:var(--radius-md);background:#ef535014;border:1px solid #ef535066;color:var(--loss);font-family:var(--sys);font-size:11px;letter-spacing:2px;cursor:pointer;">🗑 XÓA THẺ NÀY</button>
       <button id="te-save-btn" onclick="saveTheoryCard()" style="width:100%;padding:14px;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--gold-faint),var(--gold-dim));border:1px solid var(--gold);color:var(--gold);font-family:var(--sys);font-size:11px;letter-spacing:0.5px;cursor:pointer;">💾 LƯU THẺ</button>
     </div>
@@ -4086,7 +4089,7 @@ window.execMove = async function(destType, destKey) {
       if (!card) return;
       const updated = {...(theoryCustomData[moveModalItemId]||card), cat: destKey};
       theoryCustomData[moveModalItemId] = updated;
-      await saveOneCard(moveModalItemId, updated);
+      try { await saveOneCard(moveModalItemId, updated); } catch(e) { console.error("saveOneCard move:", e); }
       showToast("✅ Đã chuyển: "+theoryFolderLabel(destKey));
       renderTheory();
     } else if (currentTrade) {
@@ -4114,7 +4117,7 @@ window.execMove = async function(destType, destKey) {
         _fromTrade: currentTrade.id
       };
       theoryCustomData[newId] = card;
-      await saveOneCard(newId, card);
+      try { await saveOneCard(newId, card); } catch(e) { console.error("saveOneCard copy:", e); }
       showToast("✅ Đã copy sang lý thuyết: "+theoryFolderLabel(destKey));
       showScreen("theory");
     }
@@ -5990,7 +5993,7 @@ window.deleteTheoryCard = async function() {
   if (!confirm("Xóa thẻ này?")) return;
   const delId = theoryEditingId;
   theoryCustomData[delId] = { id: delId, _deleted: true };
-  await saveOneCard(delId, theoryCustomData[delId]);
+  try { await saveOneCard(delId, theoryCustomData[delId]); } catch(e) { console.error("saveOneCard delete:", e); }
   document.getElementById("modal-theory-edit").style.display = "none";
   renderTheory();
   showToast("🗑 Đã xóa thẻ");
@@ -5999,7 +6002,7 @@ window.deleteTheoryCard = async function() {
 window.quickDeleteTheoryCard = async function(id) {
   if (!confirm("Xóa thẻ này?")) return;
   theoryCustomData[id] = { id, _deleted: true };
-  await saveOneCard(id, theoryCustomData[id]);
+  try { await saveOneCard(id, theoryCustomData[id]); } catch(e) { console.error("saveOneCard qdelete:", e); }
   renderTheory();
   showToast("🗑 Đã xóa thẻ");
 };
@@ -6283,7 +6286,7 @@ function renderTheory() {
       </div>`;
     }).join("");
 
-    const _img = src => `<img alt="" src="${src}" onclick="document.getElementById('theory-img-fullscreen').style.display='flex';document.getElementById('theory-img-fullscreen-img').src=this.src" style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);cursor:zoom-in;display:block;margin-bottom:8px;" loading="lazy"/>`;
+    const _img = src => `<img alt="" src="${src}" onclick="var _f=document.getElementById('theory-img-fullscreen');var _fi=document.getElementById('theory-img-fullscreen-img');if(_f&&_fi){_fi.src=this.src||'${src.replace(/'/g,"\'")}';_f.style.display='flex';}" style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--gold-dim);cursor:zoom-in;display:block;margin-bottom:8px;" loading="lazy"/>`;
 
     const _renderExamples = (examples) => {
       const exs = (examples||[]).filter(ex => ex && (ex.tfs?.length || rtPlain(ex.conclusion||"").trim()));
@@ -6405,7 +6408,11 @@ function renderTheory() {
 window.toggleTheoryCard = function(id) {
   const el = document.getElementById("tc-"+id);
   if (!el) return;
+  const list = document.getElementById("theory-list");
+  const scrollBefore = list ? list.scrollTop : 0;
   el.classList.toggle("expanded");
+  // Giữ nguyên scroll position sau khi expand/collapse (không nhảy)
+  if(list) requestAnimationFrame(() => { list.scrollTop = scrollBefore; });
 };
 
 window.toggleMastered = async function(id) {
