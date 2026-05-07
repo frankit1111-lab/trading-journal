@@ -1710,14 +1710,14 @@
 
 <!-- THEORY EDIT MODAL -->
 <div id="modal-theory-edit" style="display:none;" class="modal-overlay" onclick="closeTheoryEditModal(event)">
-  <div class="modal-sheet" style="max-height:94vh;padding-bottom:16px;border-radius:var(--radius-xl) 20px 0 0;overflow-y:auto;-webkit-overflow-scrolling:touch;" onclick="event.stopPropagation()">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+  <div class="modal-sheet" style="max-height:94vh;padding-bottom:0;border-radius:var(--radius-xl) 20px 0 0;overflow-y:hidden;display:flex;flex-direction:column;" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-shrink:0;">
       <div class="modal-title" id="theory-edit-modal-title" style="margin-bottom:0;flex:1;">CHỈNH SỬA THẺ LÝ THUYẾT</div>
       <button id="te-undo-btn" onclick="teUndo()" title="Hoàn tác (Ctrl+Z)" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:6px 10px;color:var(--gold);font-size:14px;cursor:pointer;line-height:1;opacity:0.35;flex-shrink:0;">↶</button>
       <button id="te-redo-btn" onclick="teRedo()" title="Làm lại (Ctrl+Y)" style="background:var(--bg3);border:1px solid var(--gold-faint);border-radius:var(--radius-sm);padding:6px 10px;color:var(--gold);font-size:14px;cursor:pointer;line-height:1;opacity:0.35;flex-shrink:0;">↷</button>
     </div>
 
-    <div id="te-scroll-body" style="display:flex;flex-direction:column;gap:12px;overflow-y:auto;max-height:calc(94vh - 130px);padding-bottom:8px;">
+    <div id="te-scroll-body" style="display:flex;flex-direction:column;gap:12px;overflow-y:auto;flex:1;min-height:0;padding-bottom:8px;-webkit-overflow-scrolling:touch;">
 
       <!-- ── THÔNG TIN CƠ BẢN ── -->
       <div style="background:var(--bg3);border-radius:var(--radius-md);padding:14px;border:1px solid var(--gold-faint);">
@@ -1766,10 +1766,10 @@
 
     </div><!-- end scroll body -->
 
-    <!-- Action buttons — Xóa TRÊN, Lưu DƯỚI -->
-    <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;border-top:1px solid var(--gold-faint);padding-top:10px;">
+    <!-- Action buttons — sticky bottom -->
+    <div style="position:sticky;bottom:0;z-index:10;background:var(--bg2);display:flex;flex-direction:column;gap:8px;margin-top:10px;border-top:1px solid var(--gold-faint);padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px)) 0;">
       <button id="te-delete-btn" onclick="deleteTheoryCard()" style="display:none;width:100%;padding:12px;border-radius:var(--radius-md);background:#ef535014;border:1px solid #ef535066;color:var(--loss);font-family:var(--sys);font-size:11px;letter-spacing:2px;cursor:pointer;">🗑 XÓA THẺ NÀY</button>
-      <button onclick="saveTheoryCard()" style="width:100%;padding:14px;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--gold-faint),var(--gold-dim));border:1px solid var(--gold);color:var(--gold);font-family:var(--sys);font-size:11px;letter-spacing:0.5px;cursor:pointer;">💾 LƯU THẺ</button>
+      <button id="te-save-btn" onclick="saveTheoryCard()" style="width:100%;padding:14px;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--gold-faint),var(--gold-dim));border:1px solid var(--gold);color:var(--gold);font-family:var(--sys);font-size:11px;letter-spacing:0.5px;cursor:pointer;">💾 LƯU THẺ</button>
     </div>
   </div>
 </div>
@@ -1985,6 +1985,10 @@ function escRich(s){
   return esc(str);
 }
 function estimateKB(obj) { return Math.round(JSON.stringify(obj).length/1024); }
+// Expose utility functions globally for use outside IIFE
+window.showToast = showToast;
+window.estimateKB = estimateKB;
+window.compressImage = compressImage;
 
 // Global image fullscreen viewer
 window.viewImg = function(src) {
@@ -4273,6 +4277,7 @@ async function saveCustomTheory() {
     // Continue silently — Firestore is the source of truth
   }
 }
+window.saveCustomTheory = saveCustomTheory;
 
 // Merge: THEORY_DATA + custom overrides
 function getMergedTheory() {
@@ -4290,6 +4295,10 @@ function getMergedTheory() {
 // Expose for debug + testing
 window.getMergedTheory = getMergedTheory;
 Object.defineProperty(window, "theoryCustomData", { get: () => theoryCustomData, configurable: true });
+// Expose mutable theory state for use outside IIFE (saveTheoryCard, etc.)
+Object.defineProperty(window, "theoryEditingId", { get: () => theoryEditingId, set: v => { theoryEditingId = v; }, configurable: true });
+Object.defineProperty(window, "theoryCategory",  { get: () => theoryCategory,  set: v => { theoryCategory = v; },  configurable: true });
+Object.defineProperty(window, "theorySubfolder", { get: () => theorySubfolder, set: v => { theorySubfolder = v; }, configurable: true });
 
 // ══ UNIFIED MOVE MODAL ══
 let moveModalMode = "trade"; // "trade" | "theory"
