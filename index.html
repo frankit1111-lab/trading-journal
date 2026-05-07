@@ -6140,6 +6140,14 @@ window.saveTheoryCard = async function() {
 
   const id = theoryEditingId || ("tc_"+Date.now());
 
+  // Force blur tất cả contenteditable đang active để flush pending onChange (80ms timer)
+  // Quan trọng: execCommand changes (bullet, color) cần DOM flush trước khi đọc innerHTML
+  const activeEl = document.activeElement;
+  if(activeEl && activeEl.contentEditable === "true") activeEl.blur();
+
+  // Đợi 100ms để đảm bảo tất cả onChange timers (80ms) đã fire
+  await new Promise(r => setTimeout(r, 100));
+
   // Force-sync data from any active rich editors (in case user typed but didn't blur,
   // i.e. some browsers might delay the input event)
   teSectionsList.forEach((sec, sIdx) => {
@@ -6154,13 +6162,12 @@ window.saveTheoryCard = async function() {
         }
         sec.tag = tagHTML;
       }
-      // Also sync each rule's text from its DOM editor (rules don't have entry in _rtEditors)
+      // Sync mỗi rule từ DOM editor — LUÔN LUÔN override để đảm bảo lấy state mới nhất
       const ruleEditors = document.querySelectorAll(`#te-sec-rules-${sIdx} .rt-content`);
       ruleEditors.forEach((el, rIdx) => {
         if(sec.rules[rIdx] && el) {
-          const html = el.innerHTML || "";
-          // Only override if data is empty but DOM has content
-          if(!sec.rules[rIdx].t && html) sec.rules[rIdx].t = html;
+          const html = (el.innerHTML || "").trim();
+          if(html) sec.rules[rIdx].t = html; // luôn sync, kể cả khi đã có data
         }
       });
       // Sync TF notes from DOM (each TF has a notes editor)
@@ -6169,7 +6176,7 @@ window.saveTheoryCard = async function() {
           const tfWrap = document.getElementById(`te-sec-${sIdx}-ex-${eIdx}-tf-${tIdx}`);
           if(tfWrap) {
             const notesEl = tfWrap.querySelector(".rt-content");
-            if(notesEl && !tf.notes && notesEl.innerHTML) tf.notes = notesEl.innerHTML;
+            if(notesEl && notesEl.innerHTML.trim()) tf.notes = notesEl.innerHTML; // luôn sync
           }
         });
         // Sync example conclusion from rich editor / DOM
