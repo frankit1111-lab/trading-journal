@@ -4258,70 +4258,92 @@ window.deleteTheorySubfolder = async function(parentKey, childKey) {
 
 // ══ LOAD CUSTOM THEORY FROM FIREBASE ══
 async function loadCustomTheory() {
-  // Load từ localStorage trước (nhanh, offline-safe)
+  // Load localStorage trước (offline-safe, nhanh)
   try {
     const lsRaw = localStorage.getItem("tl_theory_custom");
-    console.log("[loadCustomTheory] localStorage raw length:", lsRaw ? lsRaw.length : 0);
     const local = JSON.parse(lsRaw||"null");
-    if (local && typeof local === "object") {
+    if (local && typeof local === "object" && Object.keys(local).length > 0) {
       theoryCustomData = local;
-      console.log("[loadCustomTheory] localStorage loaded, keys:", Object.keys(local).length);
-    } else {
-      console.log("[loadCustomTheory] localStorage empty/null");
     }
-  } catch(e) { console.warn("[loadCustomTheory] localStorage err:", e); }
+  } catch(e) {}
 
-  // Sau đó override bằng Firestore nếu có (source of truth khi online)
+  // Load từng thẻ riêng lẻ từ collection theory_cards (không bị giới hạn 1MB)
   try {
-    const snap = await getDoc(doc(db,"app_config","theory_custom"));
-    console.log("[loadCustomTheory] Firestore snap exists:", snap.exists());
-    if (snap.exists()) {
-      const fsData = snap.data().cards || {};
-      console.log("[loadCustomTheory] Firestore keys:", Object.keys(fsData).length);
-      if (Object.keys(fsData).length > 0) {
-        theoryCustomData = fsData;
-        try { localStorage.setItem("tl_theory_custom", JSON.stringify(fsData)); } catch(e){}
-      }
+    const snap = await getDocs(collection(db,"theory_cards"));
+    if(!snap.empty) {
+      const fsData = {};
+      snap.forEach(d => { fsData[d.id] = d.data(); });
+      theoryCustomData = fsData;
+      // Sync về localStorage để dùng offline
+      try { localStorage.setItem("tl_theory_custom", JSON.stringify(fsData)); } catch(e){}
+    } else if(Object.keys(theoryCustomData).length === 0) {
+      // Fallback: thử đọc document cũ (migration)
+      try {
+        const oldSnap = await getDoc(doc(db,"app_config","theory_custom"));
+        if(oldSnap.exists()) {
+          const oldData = oldSnap.data().cards || {};
+          if(Object.keys(oldData).length > 0) {
+            theoryCustomData = oldData;
+            // Migrate: ghi lại thành collection mới
+            await _migrateTheoryToCollection(oldData);
+          }
+        }
+      } catch(e) {}
     }
   } catch(e) {
     console.warn("[loadCustomTheory] Firestore err:", e.code || e.message);
   }
-  console.log("[loadCustomTheory] FINAL theoryCustomData keys:", Object.keys(theoryCustomData).length);
 }
-async function saveCustomTheory() {
-  let lsOk = false, fsOk = false, lsErr = "", fsErr = "";
 
-  // 1. localStorage TRƯỚC
+// Migration: chuyển từ 1 document lớn sang collection (mỗi thẻ 1 doc)
+async function _migrateTheoryToCollection(data) {
   try {
-    const json = JSON.stringify(theoryCustomData);
-    console.log("[saveCustomTheory] localStorage size:", Math.round(json.length/1024), "KB");
-    localStorage.setItem("tl_theory_custom", json);
-    lsOk = true;
-    console.log("[saveCustomTheory] localStorage OK");
+    const entries = Object.entries(data);
+    for(const [id, card] of entries) {
+      try {
+        await setDoc(doc(db,"theory_cards",id), card);
+      } catch(e) { console.warn("migrate card", id, "fail:", e.message); }
+    }
+    console.log("[migrate] Đã migrate", entries.length, "thẻ sang theory_cards");
+  } catch(e) { console.warn("[migrate] err:", e); }
+}
+// saveCustomTheory: lưu TẤT CẢ thẻ (dùng khi bulk changes)
+async function saveCustomTheory() {
+  // localStorage (toàn bộ)
+  try {
+    localStorage.setItem("tl_theory_custom", JSON.stringify(theoryCustomData));
   } catch(e) {
-    lsErr = e.message || String(e);
-    console.error("[saveCustomTheory] localStorage FAIL:", lsErr);
     try { localStorage.removeItem("tl_theory_custom"); } catch(e2){}
   }
-
-  // 2. Firestore
-  try {
-    await setDoc(doc(db,"app_config","theory_custom"),{cards:theoryCustomData});
-    fsOk = true;
-    console.log("[saveCustomTheory] Firestore OK");
-  } catch(e) {
-    fsErr = e.message || String(e);
-    console.error("[saveCustomTheory] Firestore FAIL:", fsErr);
+  // Firestore: mỗi thẻ 1 document riêng trong collection theory_cards
+  const errs = [];
+  for(const [id, card] of Object.entries(theoryCustomData)) {
+    try {
+      await setDoc(doc(db,"theory_cards",id), card);
+    } catch(e) {
+      errs.push(id + ": " + (e.message||e));
+    }
   }
-
-  // Nếu cả 2 đều fail → throw để caller biết
-  if(!lsOk && !fsOk) {
-    throw new Error("Lưu thất bại — LS: " + lsErr + " | FS: " + fsErr);
-  }
-  if(!lsOk) console.warn("[saveCustomTheory] Chỉ lưu được Firestore (LS fail:", lsErr, ")");
-  if(!fsOk) console.warn("[saveCustomTheory] Chỉ lưu được localStorage (FS fail:", fsErr, ")");
+  if(errs.length) throw new Error("Firestore lỗi " + errs.length + " thẻ: " + errs[0]);
 }
 window.saveCustomTheory = saveCustomTheory;
+
+// saveOneCard: chỉ lưu 1 thẻ (dùng sau khi edit/delete 1 thẻ — nhanh hơn)
+async function saveOneCard(id, card) {
+  // Cập nhật localStorage (ghi toàn bộ để đồng bộ)
+  try {
+    localStorage.setItem("tl_theory_custom", JSON.stringify(theoryCustomData));
+  } catch(e) {
+    try { localStorage.removeItem("tl_theory_custom"); } catch(e2){}
+  }
+  // Firestore: chỉ ghi 1 document
+  if(card._deleted) {
+    try { await deleteDoc(doc(db,"theory_cards",id)); } catch(e) { throw e; }
+  } else {
+    try { await setDoc(doc(db,"theory_cards",id), card); } catch(e) { throw e; }
+  }
+}
+window.saveOneCard = saveOneCard;
 
 // Merge: THEORY_DATA + custom overrides
 function getMergedTheory() {
@@ -4436,7 +4458,7 @@ window.execMove = async function(destType, destKey) {
       if (!card) return;
       const updated = {...(theoryCustomData[moveModalItemId]||card), cat: destKey};
       theoryCustomData[moveModalItemId] = updated;
-      await saveCustomTheory();
+      await saveOneCard(moveModalItemId, updated);
       showToast("✅ Đã chuyển: "+theoryFolderLabel(destKey));
       renderTheory();
     } else if (currentTrade) {
@@ -4464,7 +4486,7 @@ window.execMove = async function(destType, destKey) {
         _fromTrade: currentTrade.id
       };
       theoryCustomData[newId] = card;
-      await saveCustomTheory();
+      await saveOneCard(newId, card);
       showToast("✅ Đã copy sang lý thuyết: "+theoryFolderLabel(destKey));
       showScreen("theory");
     }
@@ -6307,10 +6329,10 @@ window.saveTheoryCard = async function() {
   try { renderTheory(); } catch(e) { console.error("renderTheory err:", e); }
   // Save và show kết quả thật sự
   showToast("💾 Đang lưu...");
-  saveCustomTheory().then(() => {
+  saveOneCard(id, card).then(() => {
     showToast("✅ Đã lưu thẻ!");
   }).catch(e => {
-    console.error("saveCustomTheory failed:", e);
+    console.error("saveOneCard failed:", e);
     showToast("⚠️ Lỗi lưu: " + (e.message||e));
   });
 
@@ -6338,8 +6360,9 @@ window.saveTheoryCard = async function() {
 window.deleteTheoryCard = async function() {
   if (!theoryEditingId) return;
   if (!confirm("Xóa thẻ này?")) return;
-  theoryCustomData[theoryEditingId] = { id: theoryEditingId, _deleted: true };
-  await saveCustomTheory();
+  const delId = theoryEditingId;
+  theoryCustomData[delId] = { id: delId, _deleted: true };
+  await saveOneCard(delId, theoryCustomData[delId]);
   document.getElementById("modal-theory-edit").style.display = "none";
   renderTheory();
   showToast("🗑 Đã xóa thẻ");
@@ -6348,7 +6371,7 @@ window.deleteTheoryCard = async function() {
 window.quickDeleteTheoryCard = async function(id) {
   if (!confirm("Xóa thẻ này?")) return;
   theoryCustomData[id] = { id, _deleted: true };
-  await saveCustomTheory();
+  await saveOneCard(id, theoryCustomData[id]);
   renderTheory();
   showToast("🗑 Đã xóa thẻ");
 };
@@ -8212,7 +8235,7 @@ async function executeTool(name, input) {
       };
       if(typeof theoryCustomData !== "undefined") {
         theoryCustomData[id] = card;
-        await saveCustomTheory();
+        await saveOneCard(id, card);
         if(typeof renderTheory === "function") renderTheory();
       }
       return { success: true, id, message: "Đã tạo thẻ '"+input.title+"'" };
@@ -8235,7 +8258,7 @@ async function executeTool(name, input) {
       if(input.highlight) updated.highlight = {type: updated.highlight?.type || "tip", text: input.highlight};
       if(typeof theoryCustomData !== "undefined") {
         theoryCustomData[input.id] = updated;
-        await saveCustomTheory();
+        await saveOneCard(input.id, updated);
         if(typeof renderTheory === "function") renderTheory();
       }
       return { success: true, id: input.id, message: "Đã cập nhật" };
@@ -8249,7 +8272,7 @@ async function executeTool(name, input) {
       }
       if(typeof theoryCustomData !== "undefined") {
         theoryCustomData[input.id] = { id: input.id, _deleted: true };
-        await saveCustomTheory();
+        await saveOneCard(input.id, theoryCustomData[input.id]);
         if(typeof renderTheory === "function") renderTheory();
       }
       return { success: true, message: "Đã xoá '"+c.title+"'" };
