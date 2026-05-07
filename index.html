@@ -3688,386 +3688,7 @@ async function loadTheme() {
 }
 
 // ══ THEORY SYSTEM ══
-const THEORY_DATA = [
-  // ─── CƠ BẢN ───
-  {
-    id:"t001", img:`ERL (Bên ngoài)          IRL (Bên trong)
-─────────────────────────────────────
-EQH ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔    ←  BSL
-                              FVG ░░░░
-PDH ──────────────────    ←  IFVG ▓▓
-                              BPR ████
-PDL ══════════════════    ←  SSL
-EQL ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁    
-Giá: ERL → IRL → ERL (chu kỳ liên tục)`, cat:"basic", icon:"⚖️",
-    title:"ERL vs IRL — Thanh Khoản Ngoài & Trong",
-    tag:"Thanh khoản",
-    rules:[
-      {t:"<b>ERL (External Range Liquidity)</b> — thanh khoản bên ngoài: EQH/EQL, PDL/PDH, Major BSL/SSL, LRLR/HRLR (tối thiểu 3 râu nến)"},
-      {t:"<b>IRL (Internal Range Liquidity)</b> — thanh khoản bên trong cấu trúc: FVG, IFVG, BPR"},
-      {t:"Thứ tự ưu tiên ERL: <b>HRLR/LRLR > Smooth Edge > EQH/EQL > BSL/SSL</b>"},
-      {t:"Giá di chuyển từ quét ERL → fill IRL → ERL (chu kỳ liên tục)"},
-    ],
-    highlight:{type:"tip", text:"MAJOR = thanh khoản bên ngoài (ERL) │ MINOR = thanh khoản bên trong (IRL)"},
-    quiz:{q:"EQL là viết tắt của?", opts:["Equal Lows","External Liquidity","Entry Level","Equal Level"], ans:0}
-  },
-  {
-    id:"t002", img:`Độ mạnh PDA (yếu → mạnh):
-━━━━━━━━━━━━━━━━━━━━━━━━━
-FVG     ░░░  — Cơ bản, phải đục PDA khác
-IFVG    ▒▒▒  — FVG bị đảo, mạnh hơn
-BPR     ███  — Mạnh nhất, cân bằng 2 FVG
-━━━━━━━━━━━━━━━━━━━━━━━━━
-FVG A+ = MSS + đóng qua TK (HTF+LTF)`, cat:"basic", icon:"📊",
-    title:"FVG < IFVG < BPR — Thứ tự ưu tiên PDA",
-    tag:"Cấu trúc",
-    rules:[
-      {t:"<b>FVG (Fair Value Gap)</b> — yếu nhất. Phải đục qua PDA khác và tạo MSS mới có giá trị"},
-      {t:"<b>FVG A+</b>: FVG tạo MSS + đóng qua thanh khoản (HTF+LTF). FVG mạnh nhất khi đóng qua FVG tạo MSS"},
-      {t:"<b>IFVG (Inverse FVG)</b> — mạnh hơn FVG. Hình thành khi FVG bị phá ngược, đổi vai trò từ support→resistance hoặc ngược lại"},
-      {t:"<b>BPR (Balanced Price Range)</b> — mạnh nhất. Khi BPR được tạo từ đáy đã quét Buyside Liquidity → cấu trúc tiếp diễn"},
-    ],
-    highlight:{type:"warn", text:"BPR phía trên KHÔNG được tôn trọng khi thanh khoản bên trên chưa được lấy. BPR phía dưới tôn trọng khi tạo từ đáy đã quét liquidity."},
-    quiz:{q:"Thứ tự ưu tiên PDA từ yếu đến mạnh là?", opts:["BPR < IFVG < FVG","FVG < IFVG < BPR","IFVG < FVG < BPR","FVG < BPR < IFVG"], ans:1}
-  },
-  {
-    id:"t003", img:`   Deathmark Examples:
-   ┌──┐  ← Chỉ râu trên
-   │  │    Body đóng thấp
-   └──┘    → TT sẽ lấy TK dưới
-   
-   ┌──┐    Body đóng cao  
-   │  │  ← Chỉ râu dưới
-   └──┘    → TT sẽ lấy TK trên`, cat:"basic", icon:"🕯️",
-    title:"Deathmark — Nến Thiếu Thanh Khoản",
-    tag:"Nến học",
-    rules:[
-      {t:"Deathmark là nến <b>chỉ có râu về một chiều</b>, chiều còn lại chưa hình thành râu"},
-      {t:"Đây là tín hiệu TT <b>đang chừa lại thanh khoản</b> cần phải lấy ở phía không có râu"},
-      {t:"Khi giá hồi về vùng cũ, luôn kiểm tra Deathmark còn hiệu lực không"},
-      {t:"Deathmark + Price Gap = hai dấu hiệu xác nhận điểm đảo chiều/tiếp diễn"},
-    ],
-    highlight:{type:"tip", text:"Nến chỉ có râu một phía → phía còn lại chưa có thanh khoản → TT sẽ quay lại lấy."},
-    quiz:{q:"Deathmark báo hiệu điều gì?", opts:["Xu hướng đảo chiều","TT sẽ quay lấy thanh khoản phía không có râu","Nến mạnh nhất trong chuỗi","Không có ý nghĩa"], ans:1}
-  },
-  {
-    id:"t004", img:`ITH Formation:
-  ┌─────────────┐
-  │  Quét BSL   │→ FVG + MSS↓ = ITH
-  └─────────────┘
-         ↓ MSS
-  
-ITL Formation:  
-         ↑ Hồi
-  ┌─────────────┐
-  │  Quét SSL   │→ Cấu trúc hồi = ITL
-  └─────────────┘`, cat:"basic", icon:"🏔️",
-    title:"ITH / ITL — Đỉnh & Đáy Trung Hạn",
-    tag:"Cấu trúc",
-    rules:[
-      {t:"<b>ITH (Intermediate Term High)</b> — hình thành khi giá quét BSL rồi tạo FVG + MSS đi xuống"},
-      {t:"<b>ITL (Intermediate Term Low)</b> — hình thành khi giá quét Sellside tạo ra cấu trúc hồi"},
-      {t:"ITH/ITL là đỉnh/đáy trung hạn có giá trị xác định <b>bias lớn</b>"},
-      {t:"Luôn kiểm tra ITH/ITL trên HTF <b>trước khi xác định hướng giao dịch</b>"},
-    ],
-    highlight:{type:"info", text:"ITH = Quét BSL + FVG + MSS xuống. ITL = Quét Sellside + cấu trúc hồi."},
-    quiz:{q:"ITH hình thành khi nào?", opts:["Giá chạm kháng cự","Giá quét BSL + tạo FVG + MSS xuống","Giá tạo Higher High","Giá quét SSL"], ans:1}
-  },
-  {
-    id:"t005", img:`   Macro Time Windows:
-   ┌────────────────────────────┐
-   │ xx:17 ──────────── xx:33  │
-   │ xx:45 ──────────── xx:15  │
-   └────────────────────────────┘
-   Đỉnh/Đáy TRONG window = Uy tín cao
-   Đỉnh 09:55 > Đỉnh 09:37 (09:55 ∈ 45→15)`, cat:"basic", icon:"🕐",
-    title:"Macro Time — Khung Giờ Quan Trọng",
-    tag:"Time",
-    rules:[
-      {t:"Khung Macro: <b>xx:17 → xx:33</b> và <b>xx:45 → xx:15</b> tạo đỉnh/đáy quan trọng"},
-      {t:"Đỉnh/đáy hình thành TRONG Macro Time = <b>uy tín cao hơn</b> đỉnh/đáy ngoài Macro"},
-      {t:"Đỉnh 9:55 uy tín hơn đỉnh 9:37 vì 9:55 nằm trong window xx:45→xx:15"},
-      {t:"Kết hợp Macro Time + PDA + SMT = xác suất cao nhất"},
-    ],
-    highlight:{type:"tip", text:"Macro windows: 17→33 và 45→15. Đỉnh/đáy trong window này → uy tín cao."},
-    quiz:{q:"Macro Time window nào đúng?", opts:["xx:00→xx:30","xx:17→xx:33 và xx:45→xx:15","xx:30→xx:00","xx:10→xx:40"], ans:1}
-  },
-  // ─── PDA ───
-  {
-    id:"t006", img:`OB = Nến ngược chiều CUỐI CÙNG trước sóng:
-   
-   Sóng tăng:     Sóng giảm:
-   ↑↑↑            ↓↓↓
-   [OB] ← Bear    [OB] ← Bull
-   ↑↑↑            ↓↓↓
-   
-OB A+: Discount (Long) / Premium (Short)
-Chờ 2-3 nến tôn trọng OB → Entry`, cat:"pda", icon:"🟦",
-    title:"Order Block (OB) — Xác định & Phân loại",
-    tag:"OB",
-    rules:[
-      {t:"<b>OB</b> = nến hoặc chuỗi nến cuối cùng <b>ngược chiều</b> so với sóng chính. Sau đó phải có nến đóng thân qua được râu nến trước"},
-      {t:"<b>OB A+</b>: CHỈ dùng đánh tiếp diễn, phải có DOL cặp chéo, nến tôn trọng trong 1-2 cây nến, phải thấy tiền còn, đóng MSS chỉ trong 1 sóng"},
-      {t:"OB A+ nằm ở <b>Discount</b> nếu long, <b>Premium</b> nếu short"},
-      {t:"Quy trình: Xuất hiện OB → chờ 2-3 nến tôn trọng OB → mới canh entry"},
-    ],
-    highlight:{type:"tip", text:"OB A+: tiếp diễn + DOL cặp chéo + tôn trọng 1-2 nến + thấy tiền + MSS 1 sóng."},
-    quiz:{q:"OB A+ chỉ dùng để đánh?", opts:["Reversal","Tiếp diễn (với DOL cặp chéo)","Scalp ngắn","Bất kỳ hướng nào"], ans:1}
-  },
-  {
-    id:"t007", img:`BB = Nến cùng chiều CUỐI CÙNG trước đảo:
-   
-   Bearish BB:    Bullish BB:  
-   ↑↑↑  ← [BB]   ↓↓↓  ← [BB]
-   ↓↓↓ Reversal  ↑↑↑ Reversal
-   
-BB: Hợp lưu FVG/IFVG + gần đỉnh/đáy
-OB → Tiếp diễn | BB → Đảo chiều`, cat:"pda", icon:"🟧",
-    title:"BB (Breaker Block) — Đánh Ngược Chiều",
-    tag:"BB",
-    rules:[
-      {t:"<b>BB</b> = nến hoặc chuỗi nến cuối cùng <b>cùng chiều</b> so với sóng chính. Sau đó phải có nến đóng thân qua được râu nến trước"},
-      {t:"BB dùng để <b>đánh reversal</b> (ngược chiều xu hướng) — khác OB dùng tiếp diễn"},
-      {t:"Điều kiện: hợp lưu FVG/IFVG + phải nằm gần đỉnh hoặc gần đáy"},
-      {t:"Phân biệt OB vs BB: OB ngược chiều sóng → tiếp diễn; BB cùng chiều sóng → reversal"},
-    ],
-    highlight:{type:"info", text:"OB = ngược chiều sóng → tiếp diễn. BB = cùng chiều sóng → reversal. Hợp lưu FVG/IFVG."},
-    quiz:{q:"BB khác OB ở điểm nào chính?", opts:["BB mạnh hơn OB","BB cùng chiều sóng, dùng reversal","BB dùng tiếp diễn","BB không cần hợp lưu"], ans:1}
-  },
-  {
-    id:"t008", img:`BOLO PD Array:
-   ┌─────────────────────┐ ← Rejection Block (cạnh trên)
-   │     BOLO ZONE       │
-   │   (Không trade!)    │
-   └─────────────────────┘ ← Wick C.E. 50% (cạnh dưới)
-   
-   Giá tôn trọng → Bias hợp lệ ✓
-   Giá phá C.E.  → Cảnh báo! Xem lại bias`, cat:"pda", icon:"🛡️",
-    title:"BOLO PD Array — Vùng Phòng Thủ",
-    tag:"BOLO",
-    rules:[
-      {t:"<b>BOLO</b> = 'Be On the Look Out' — vùng phòng thủ, <b>KHÔNG trade vào</b>, chỉ quan sát"},
-      {t:"Cấu trúc 3 phần: <b>Rejection Block</b> (cạnh trên) + <b>Wick C.E. 50%</b> (cạnh dưới) + BOLO Zone"},
-      {t:"Bearish RB: wick đâm lên trên IL, body đóng bên dưới. Bullish RB: wick đâm xuống dưới, body đóng phía trên"},
-      {t:"Giá tôn trọng BOLO → bias hợp lệ. Giá phá qua (đặc biệt xuyên Wick C.E.) → cảnh báo, cân nhắc thoát/đảo bias"},
-    ],
-    highlight:{type:"warn", text:"KHÔNG trade vào vùng BOLO. Giá phá Wick C.E. = tín hiệu cảnh báo mạnh — xem xét đảo bias."},
-    quiz:{q:"BOLO PD Array dùng để làm gì?", opts:["Entry điểm mua tốt","Chỉ quan sát, đánh giá bias còn hợp lệ không","Exit lệnh","Xác định SL"], ans:1}
-  },
-  {
-    id:"t009", img:`PDA A+ = 5 điều kiện:
-   ① Quét TK HTF + LTF ────── Bias + Entry
-   ② SMT hợp lưu PDA ─────── Xác nhận
-   ③ OB / BB đủ tiêu chuẩn ── Vùng entry
-   ④ Manipulation + MSS ───── Tín hiệu
-   ⑤ MSS phải có FVG đi kèm ─ Bắt buộc!
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   MSS không FVG = KHÔNG VÀO LỆNH`, cat:"pda", icon:"🎯",
-    title:"Điều Kiện PDA A+ — 5 Tiêu Chí",
-    tag:"A+ Setup",
-    rules:[
-      {t:"<b>1. Quét thanh khoản</b> HTF (xác định bias) + LTF (xác định PDA mạnh/yếu)"},
-      {t:"<b>2. Có SMT</b> (Smart Money Technique) hợp lưu với PDA hoặc model"},
-      {t:"<b>3. OB hoặc BB</b> đủ điều kiện A+"},
-      {t:"<b>4. Manipulation + MSS</b> phải rõ ràng trước khi vào lệnh"},
-      {t:"<b>5. Khi TT tạo MSS phải có FVG đi kèm</b> — MSS không có FVG = tín hiệu yếu"},
-    ],
-    highlight:{type:"warn", text:"MSS không có FVG → KHÔNG vào lệnh. MSS kèm FVG → tín hiệu mạnh."},
-    quiz:{q:"MSS không có FVG đi kèm thì sao?", opts:["Vào lệnh mạnh hơn","Tín hiệu yếu, không vào","Chờ thêm 1 nến","Đặt SL rộng hơn"], ans:1}
-  },
-  // ─── VÀO LỆNH ───
-  {
-    id:"t010", img:`Pre-market Checklist:
-   □ Note BPR, FVG phá Pha A, Deathmark
-   □ Xác định DOL trên H4/H1
-   □ Check đỉnh/đáy + SMT
-   □ TT đi ngang? → Không trade
-   □ Trước Killzone: đã sweep chưa?
-   ─────────────────────────────
-   HRLR → Short | LRLR → Long`, cat:"entry", icon:"📋",
-    title:"Checklist Đầu Phiên",
-    tag:"Workflow",
-    rules:[
-      {t:"Note lại tất cả <b>BPR, FVG phá Pha A, Deathmark</b> trên H4, H1, M15, M5 + xác định DOL"},
-      {t:"Kiểm tra <b>đỉnh/đáy H4, H1</b> kết hợp SMT"},
-      {t:"Tránh ngày <b>thị trường sideway</b> — liquidity và FVG cả 2 phía fill và sát nhau"},
-      {t:"Kiểm tra pha tăng/giảm: HRLR → canh Pha A M SHORT; LPLR → canh Pha A M LONG"},
-      {t:"<b>Trước 9:30/Killzone</b>: check H4,H1,M15,M5 — chưa sweep liquidity → chưa vào lệnh"},
-    ],
-    highlight:{type:"tip", text:"Trước Killzone chưa sweep → CHƯA vào lệnh. Đợi manipulation trước."},
-    quiz:{q:"Khi TT sideway không trend, nên làm gì?", opts:["Vào 2 chiều","Tránh giao dịch — không có edge","Đánh breakout","Đặt lệnh chờ cả 2 phía"], ans:1}
-  },
-  {
-    id:"t011", img:`ICT Logic Flow:
-   1. Xác định DOL (mục tiêu TK HTF)
-          ↓
-   2. Thấy quét TK + PDA HTF tôn trọng
-          ↓
-   3. Model rõ ràng ở LTF (FVG/OB/BPR)
-          ↓
-   4. Đợi retrace → Confirm → Entry
-   ─────────────────────────────
-   Muốn biết Manip? → Đợi IFVG hình thành`, cat:"entry", icon:"🔄",
-    title:"ICT Logic — Quy Trình Chuẩn",
-    tag:"Logic",
-    rules:[
-      {t:"<b>Bước 1:</b> Xác định mục tiêu thanh khoản cần quét trên HTF (DOL)"},
-      {t:"<b>Bước 2:</b> Thấy sự quét thanh khoản thực sự + tôn trọng PDA HTF"},
-      {t:"<b>Bước 3:</b> Có model rõ ràng ở LTF để vào lệnh (FVG, OB, BPR...)"},
-      {t:"<b>Bước 4:</b> Đợi retrace → tôn trọng model → confirm entry → vào lệnh với RR tốt"},
-      {t:"Muốn biết pha Manip hay không → <b>đợi IFVG</b> hình thành sau khi giá quét thanh khoản"},
-    ],
-    highlight:{type:"info", text:"Sau khi giá quét TK → đợi IFVG hình thành → xác nhận pha Manipulation thực sự."},
-    quiz:{q:"Sau khi giá quét thanh khoản, làm sao biết là pha Manipulation?", opts:["Giá tăng mạnh","Đợi IFVG hình thành","Volume tăng","Giá đóng cửa cao"], ans:1}
-  },
-  {
-    id:"t012", img:`Unicorn Setup:
-   ┌─ Quét BSL ─┐  Không có PDA trên
-   │    Top     │  → Không đẩy giá xuống ✓
-   └────────────┘
-   
-   ┌────────────┐
-   │   Bottom   │  Có PDA dưới
-   └─ Quét SSL ─┘  → Đẩy giá lên ✓
-   
-OB trong FVG = Vùng entry chất lượng nhất`, cat:"entry", icon:"🦄",
-    title:"Unicorn Model + OB trong FVG",
-    tag:"Setup đặc biệt",
-    rules:[
-      {t:"<b>Unicorn</b>: giá quét cả trên lẫn dưới. Phía trên KHÔNG có PDA → không đẩy xuống. Phía dưới CÓ PDA → đẩy lên"},
-      {t:"<b>SMT kèm OB H4</b>: khu vực đó là đáy đáng tin cậy để canh mua"},
-      {t:"<b>OB trong FVG</b> = vùng hội tụ mạnh nhất — ưu tiên tuyệt đối cho entry"},
-      {t:"Hai cấu trúc hội tụ tại một vùng giá = xác suất cao nhất, RR tốt nhất"},
-    ],
-    highlight:{type:"tip", text:"OB nằm trong FVG = điểm entry chất lượng cao nhất. Unicorn = quét 2 phía, chỉ 1 phía có PDA."},
-    quiz:{q:"Unicorn Model xảy ra khi?", opts:["Giá chỉ quét 1 phía","Giá quét cả 2 phía, phía dưới có PDA, phía trên không","Volume giảm","FVG bị fill hoàn toàn"], ans:1}
-  },
-  {
-    id:"t013", img:`Pullback vs Pha D:
-   PULLBACK: New liquidity → Manip → Entry
-   PHA D:    TT chạy mạnh (chưa pullback)
-   ─────────────────────────────────────
-   Bẫy phổ biến:
-   ↑↑↑ Quét minor SSL ← Đây là PHA D!
-   ↓    ← Không phải Pullback
-   (ES chưa sweep → chờ)`, cat:"entry", icon:"↩️",
-    title:"Pha Pullback — Điều Kiện & Bẫy",
-    tag:"Pullback",
-    rules:[
-      {t:"Sau Pha D chạy mạnh → đợi TT tạo <b>new liquidity</b> → canh Pha Manipulation → vào lệnh"},
-      {t:"Pullback không có <b>PDA HTF + SMT</b>: hoặc FVG đã fill hết, không sweep → tiếp tục đánh theo xu hướng chính"},
-      {t:"<b>IFVG HTF bị vô hiệu</b>: khi AMD LTF phải quét dưới trước để chừa liquidity trên → dấu hiệu đảo chiều"},
-      {t:"<b>Bẫy phổ biến</b>: nhầm Pha D với Pha Pullback. Pha D ≠ Pullback — phân biệt qua sweep liquidity cặp ES"},
-    ],
-    highlight:{type:"warn", text:"Bẫy: TT Manip thêm 1 lần ở đỉnh vừa quét minor sellside → đây là Pha D, KHÔNG phải Pullback!"},
-    quiz:{q:"Khi nào IFVG HTF bị vô hiệu?", opts:["Khi IFVG bị fill","Khi AMD LTF quét dưới trước để chừa liquidity trên","Khi giá không phản ứng","Khi volume thấp"], ans:1}
-  },
-  // ─── DRILL 2026 ───
-  {
-    id:"t014", img:`Opening Range Gap (VN time):
-   Settlement hôm qua: 04:14 SA
-   Open hôm nay:       21:30 (9:30 AM ET)
-   CE = (Gap High + Gap Low) / 2
-   ────────────────────────────────
-   Open > Settlement = Premium → SHORT
-   Open < Settlement = Discount → LONG
-   70% xác suất test CE trong ngày`, cat:"drill", icon:"🎯",
-    title:"Opening Range Gap (ORG) — La Bàn Hàng Ngày",
-    tag:"ORG",
-    rules:[
-      {t:"<b>Gap Low</b> = Settlement hôm qua (4:14 PM ET). <b>Gap High</b> = Open hôm nay (9:30 AM ET). <b>CE</b> = điểm giữa gap (50%)"},
-      {t:"<b>Premium Gap</b> (Open > Settlement): Bias BEARISH → chỉ tìm short. Target: CE → Lower Quadrant → Full Gap Closure"},
-      {t:"<b>Discount Gap</b> (Open < Settlement): Bias BULLISH → chỉ tìm long. 70% xác suất test CE trong ngày"},
-      {t:"Opening Range = 30 phút đầu (9:30–10:00) — <b>không vào lệnh trong 30 phút này</b>"},
-    ],
-    highlight:{type:"tip", text:"Premium Gap → bias bearish, chỉ short. Discount Gap → bias bullish, chỉ long. Quan sát 30 phút đầu."},
-    quiz:{q:"Discount Gap (Open < Settlement) cho bias?", opts:["Bearish — chỉ short","Bullish — chỉ long","Neutral","Không có bias"], ans:1}
-  },
-  {
-    id:"t015", img:`Low Resistance (Trade live ✓):
-   ╔════════╗        ╔════════╗
-   ║ Clean  ║        ║ Clear  ║
-   ╚════════╝        ╚════════╝
-   
-High Resistance (Demo only ✗):
-   ▓▒░▓▒░▓▒░▓▒░▓▒░ ← UPC Barcode
-   Fuzzy, overlap, no acceleration`, cat:"drill", icon:"📈",
-    title:"High vs Low Resistance Day — Phân loại ngày",
-    tag:"Market Type",
-    rules:[
-      {t:"<b>Low-Resistance (ngày tốt)</b>: nến clean, không overlap, FVG rõ ràng, price rip mạnh sau entry → có thể trade live"},
-      {t:"<b>High-Resistance (ngày khó)</b>: nến fuzzy/overlap, UPC barcode pattern, price không acceleration sau break → KHÔNG trade live, chỉ drill demo"},
-      {t:"<b>Time Distortion</b>: price consolidate trong range của wick lớn → không trade, chờ body đóng bên ngoài wick"},
-      {t:"High-Resistance kết thúc khi body đóng rõ ràng bên ngoài range"},
-    ],
-    highlight:{type:"warn", text:"UPC barcode pattern = High Resistance → KHÔNG trade live, chỉ drill demo."},
-    quiz:{q:"UPC barcode pattern → nên làm gì?", opts:["Trade live với SL rộng","Chỉ drill demo, không trade live","Đánh breakout","Tăng size"], ans:1}
-  },
-  {
-    id:"t016", img:`Drill Framework:
-   Goal: 10-15 handles ONLY
-   ─────────────────────────
-   Demo → Drill → Journal → Repeat
-   
-   Muscle of Indifference:
-   Lệnh thắng = Lệnh thua = Chỉ là data
-   Không post SM, không khoe, không tự ti
-   ─────────────────────────
-   Yellow Belt: Đạt target → Next setup`, cat:"drill", icon:"🏋️",
-    title:"Drill Methodology — Tâm Lý & Muscle of Indifference",
-    tag:"Mindset",
-    rules:[
-      {t:"Drill <b>KHÔNG phải trading thực</b> — bài tập tham gia nhỏ vào price action, demo only, không hy vọng kiếm tiền"},
-      {t:"Mục tiêu duy nhất: <b>10–15 handles</b>. Đạt target → chuyển setup tiếp theo ngay (Yellow Belt)"},
-      {t:"<b>Muscle of Indifference</b>: khả năng thờ ơ với kết quả từng lệnh. Rèn bằng drill hàng ngày + ghi nhật ký"},
-      {t:"Character Flaws lộ ra trong drill: không cắt lỗ, tham không chốt, trả thù TT → phát hiện trong demo trước khi phá acc thật"},
-    ],
-    highlight:{type:"info", text:"Muscle of Indifference: thờ ơ với kết quả từng lệnh. Chỉ focus vào quy trình. Không post social media."},
-    quiz:{q:"Mục tiêu của Drill là gì?", opts:["Kiếm tiền tối đa","Rèn quy trình, 10-15 handles, thờ ơ kết quả","Thắng liên tiếp","Trade nhiều nhất"], ans:1}
-  },
-  {
-    id:"t017", img:`Sick Sister (ES vs NQ):
-   NQ ─────────────── HH (Higher High)
-   ES ──────────── ? (Chưa confirm)
-   
-   ES catch up → Trend tiếp tục ↑
-   ES không catch up + Lunchtime → REVERSAL
-   
-   ES không catch + Bearish ORG = SHORT`, cat:"drill", icon:"🔗",
-    title:"Sick Sister — Correlation ES/NQ",
-    tag:"Correlation",
-    rules:[
-      {t:"<b>Sick Sister</b> = một index (thường ES) lag so với NQ"},
-      {t:"NQ tạo higher high nhưng ES chưa confirm → move <b>không có nền tảng vững</b>"},
-      {t:"ES catch up (decoupling biến mất) → trend tiếp tục"},
-      {t:"ES không catch up gần lunchtime → báo hiệu <b>reversal</b> → tìm short. Double confirmation khi kết hợp bearish ORG bias"},
-    ],
-    highlight:{type:"info", text:"ES không catch up NQ gần lunchtime + bearish ORG = double confirmation → tìm short."},
-    quiz:{q:"Sick Sister ES không catch up NQ gần lunchtime báo hiệu?", opts:["Trend tiếp tục","Consolidation","Reversal — tìm short","Tăng volume"], ans:2}
-  },
-  {
-    id:"t018", img:`FVG Body Rule (Core):
-   
-   Bullish FVG:  Body đóng TRÊN CE → Long ✓
-                 Body đóng DƯỚI CE → Fail ✗
-   
-   Bearish FVG:  Body đóng DƯỚI CE → Short ✓
-                 Body đóng TRÊN CE → Fail ✗
-   
-   Wick qua CE được — Body thì KHÔNG!`, cat:"drill", icon:"📋",
-    title:"FVG Drill — Quy Tắc Body",
-    tag:"FVG Drill",
-    rules:[
-      {t:"FVG drill khung <b>1-phút và 15-giây</b>. Target: 10–15 handles"},
-      {t:"<b>Quy tắc body (core rule)</b>: Wick có thể qua CE — Body thì KHÔNG"},
-      {t:"Bullish FVG valid: body đóng trên CE → vào long. Body đóng dưới CE → fail"},
-      {t:"Bearish FVG valid: body đóng dưới CE → vào short. Body đóng trên CE → fail"},
-      {t:"<b>Inversion FVG</b>: FVG bị trade xuyên qua hoàn toàn → đổi vai trò. Quy tắc body giống nhau"},
-    ],
-    highlight:{type:"tip", text:"Quy tắc vàng: Wick qua CE được — Body thì KHÔNG. Body sai phía CE = setup fail."},
-    quiz:{q:"Bullish FVG valid khi?", opts:["Wick đóng trên CE","Body đóng trên CE","Volume tăng","Giá break high"], ans:1}
-  },
-];
+const THEORY_DATA = [];
 
 let theoryCategory = "all"; // current top-level folder key
 let theorySubfolder = "";   // current subfolder (empty = show all in folder)
@@ -4258,7 +3879,7 @@ window.deleteTheorySubfolder = async function(parentKey, childKey) {
 
 // ══ LOAD CUSTOM THEORY FROM FIREBASE ══
 async function loadCustomTheory() {
-  // Load localStorage trước (offline-safe, nhanh)
+  // Bước 1: Load localStorage (offline fallback)
   try {
     const lsRaw = localStorage.getItem("tl_theory_custom");
     const local = JSON.parse(lsRaw||"null");
@@ -4267,28 +3888,30 @@ async function loadCustomTheory() {
     }
   } catch(e) {}
 
-  // Load từng thẻ riêng lẻ từ collection theory_cards (không bị giới hạn 1MB)
+  // Bước 2: Thử load từ collection theory_cards (format mới, mỗi thẻ 1 doc)
   try {
     const snap = await getDocs(collection(db,"theory_cards"));
     if(!snap.empty) {
+      // Có data trong collection mới → dùng luôn
       const fsData = {};
       snap.forEach(d => { fsData[d.id] = d.data(); });
       theoryCustomData = fsData;
-      // Sync về localStorage để dùng offline
       try { localStorage.setItem("tl_theory_custom", JSON.stringify(fsData)); } catch(e){}
-    } else if(Object.keys(theoryCustomData).length === 0) {
-      // Fallback: thử đọc document cũ (migration)
+    } else {
+      // Collection mới rỗng → LUÔN thử đọc document cũ để migrate
       try {
         const oldSnap = await getDoc(doc(db,"app_config","theory_custom"));
         if(oldSnap.exists()) {
           const oldData = oldSnap.data().cards || {};
           if(Object.keys(oldData).length > 0) {
             theoryCustomData = oldData;
-            // Migrate: ghi lại thành collection mới
-            await _migrateTheoryToCollection(oldData);
+            // Sync localStorage ngay
+            try { localStorage.setItem("tl_theory_custom", JSON.stringify(oldData)); } catch(e){}
+            // Migrate sang collection mới (background)
+            _migrateTheoryToCollection(oldData).catch(e => console.warn("migrate err:", e));
           }
         }
-      } catch(e) {}
+      } catch(e) { console.warn("[loadCustomTheory] old doc err:", e.message); }
     }
   } catch(e) {
     console.warn("[loadCustomTheory] Firestore err:", e.code || e.message);
