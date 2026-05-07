@@ -3879,7 +3879,7 @@ window.deleteTheorySubfolder = async function(parentKey, childKey) {
 
 // ══ LOAD CUSTOM THEORY FROM FIREBASE ══
 async function loadCustomTheory() {
-  // Bước 1: Load localStorage (offline fallback)
+  // Load localStorage trước (offline fallback)
   try {
     const lsRaw = localStorage.getItem("tl_theory_custom");
     const local = JSON.parse(lsRaw||"null");
@@ -3888,33 +3888,38 @@ async function loadCustomTheory() {
     }
   } catch(e) {}
 
-  // Bước 2: Thử load từ collection theory_cards (format mới, mỗi thẻ 1 doc)
   try {
-    const snap = await getDocs(collection(db,"theory_cards"));
-    if(!snap.empty) {
-      // Có data trong collection mới → dùng luôn
-      const fsData = {};
-      snap.forEach(d => { fsData[d.id] = d.data(); });
-      theoryCustomData = fsData;
-      try { localStorage.setItem("tl_theory_custom", JSON.stringify(fsData)); } catch(e){}
-    } else {
-      // Collection mới rỗng → LUÔN thử đọc document cũ để migrate
-      try {
-        const oldSnap = await getDoc(doc(db,"app_config","theory_custom"));
-        if(oldSnap.exists()) {
-          const oldData = oldSnap.data().cards || {};
-          if(Object.keys(oldData).length > 0) {
-            theoryCustomData = oldData;
-            // Sync localStorage ngay
-            try { localStorage.setItem("tl_theory_custom", JSON.stringify(oldData)); } catch(e){}
-            // Migrate sang collection mới (background)
-            _migrateTheoryToCollection(oldData).catch(e => console.warn("migrate err:", e));
-          }
-        }
-      } catch(e) { console.warn("[loadCustomTheory] old doc err:", e.message); }
+    // Luôn đọc cả 2 nguồn và merge lại
+    // Nguồn 1: app_config/theory_custom (document cũ — có thể có nhiều thẻ)
+    let oldData = {};
+    try {
+      const oldSnap = await getDoc(doc(db,"app_config","theory_custom"));
+      if(oldSnap.exists()) oldData = oldSnap.data().cards || {};
+    } catch(e) {}
+
+    // Nguồn 2: theory_cards collection (mới — mỗi thẻ 1 doc)
+    let newData = {};
+    try {
+      const snap = await getDocs(collection(db,"theory_cards"));
+      snap.forEach(d => { newData[d.id] = d.data(); });
+    } catch(e) {}
+
+    // Merge: newData ghi đè oldData (newData mới hơn)
+    const merged = {...oldData, ...newData};
+    if(Object.keys(merged).length > 0) {
+      theoryCustomData = merged;
+      try { localStorage.setItem("tl_theory_custom", JSON.stringify(merged)); } catch(e){}
+
+      // Migrate toàn bộ oldData sang collection mới (nếu chưa có)
+      const oldKeys = Object.keys(oldData).filter(k => !newData[k]);
+      if(oldKeys.length > 0) {
+        _migrateTheoryToCollection(
+          Object.fromEntries(oldKeys.map(k => [k, oldData[k]]))
+        ).catch(e => console.warn("migrate err:", e));
+      }
     }
   } catch(e) {
-    console.warn("[loadCustomTheory] Firestore err:", e.code || e.message);
+    console.warn("[loadCustomTheory] err:", e.message);
   }
 }
 
