@@ -4258,23 +4258,44 @@ window.deleteTheorySubfolder = async function(parentKey, childKey) {
 
 // ══ LOAD CUSTOM THEORY FROM FIREBASE ══
 async function loadCustomTheory() {
+  // Load từ localStorage trước (nhanh, offline-safe)
+  try {
+    const local = JSON.parse(localStorage.getItem("tl_theory_custom")||"null");
+    if (local && typeof local === "object") theoryCustomData = local;
+  } catch(e) { console.warn("loadCustomTheory localStorage err:", e); }
+
+  // Sau đó override bằng Firestore nếu có (source of truth khi online)
   try {
     const snap = await getDoc(doc(db,"app_config","theory_custom"));
-    if (snap.exists()) theoryCustomData = snap.data().cards || {};
+    if (snap.exists()) {
+      const fsData = snap.data().cards || {};
+      // Merge: Firestore win nếu có data; giữ localStorage nếu Firestore empty
+      if (Object.keys(fsData).length > 0) {
+        theoryCustomData = fsData;
+        // Sync localStorage với Firestore data mới nhất
+        try { localStorage.setItem("tl_theory_custom", JSON.stringify(fsData)); } catch(e){}
+      }
+    }
   } catch(e) {
-    try {
-      const local = JSON.parse(localStorage.getItem("tl_theory_custom")||"null");
-      if (local) theoryCustomData = local;
-    } catch(e){}
+    console.warn("loadCustomTheory Firestore err (dùng localStorage):", e);
+    // Đã có localStorage data từ trên rồi — không cần làm gì thêm
   }
 }
 async function saveCustomTheory() {
-  try { await setDoc(doc(db,"app_config","theory_custom"),{cards:theoryCustomData}); } catch(e){}
+  // 1. localStorage TRƯỚC — đảm bảo data luôn được ghi dù Firestore fail
   try {
     localStorage.setItem("tl_theory_custom", JSON.stringify(theoryCustomData));
   } catch(e) {
-    console.warn("localStorage quota exceeded for theory_custom", e);
-    // Continue silently — Firestore is the source of truth
+    console.warn("localStorage quota exceeded for theory_custom:", e);
+    // Thẻ có thể quá nặng (ảnh), xóa bớt dữ liệu cũ nếu cần
+    try { localStorage.removeItem("tl_theory_custom"); } catch(e2){}
+  }
+  // 2. Firestore sau — nếu fail thì localStorage đã có backup
+  try {
+    await setDoc(doc(db,"app_config","theory_custom"),{cards:theoryCustomData});
+  } catch(e) {
+    console.warn("Firestore saveCustomTheory failed:", e);
+    // Không throw — localStorage đã lưu rồi
   }
 }
 window.saveCustomTheory = saveCustomTheory;
@@ -6254,10 +6275,13 @@ window.saveTheoryCard = async function() {
   } catch(e) { console.error("navSidebar err:", e); }
 
   try { renderTheory(); } catch(e) { console.error("renderTheory err:", e); }
-  showToast("✅ Đã lưu thẻ!");
-  saveCustomTheory().catch(e => {
+  // Save và show kết quả thật sự
+  showToast("💾 Đang lưu...");
+  saveCustomTheory().then(() => {
+    showToast("✅ Đã lưu thẻ!");
+  }).catch(e => {
     console.error("saveCustomTheory failed:", e);
-    showToast("⚠️ Có thể chưa đồng bộ cloud — thử lại sau");
+    showToast("⚠️ Lỗi lưu: " + (e.message||e));
   });
 
   // After a brief delay (so user sees the toast), scroll to the saved card and reopen edit modal
