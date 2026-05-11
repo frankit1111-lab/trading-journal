@@ -1777,6 +1777,10 @@
 
     <!-- Action buttons — sticky bottom -->
     <div style="position:sticky;bottom:0;z-index:10;background:var(--bg2);display:flex;flex-direction:column;gap:8px;margin-top:10px;border-top:1px solid var(--gold-faint);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));">
+      <div id="te-size-warn" style="display:none;background:rgba(255,159,10,0.12);border:1px solid rgba(255,159,10,0.5);border-radius:var(--radius-md);padding:10px 14px;flex-direction:row;align-items:center;gap:10px;">
+        <span style="color:#ff9f0a;font-size:12px;flex:1;font-family:var(--sys);">⚠️ <span id="te-size-warn-text"></span></span>
+        <button id="te-compress-btn" onclick="teForceCompress()" style="background:#ff9f0a22;border:1px solid #ff9f0a66;border-radius:6px;padding:6px 10px;color:#ff9f0a;font-size:11px;font-family:var(--sys);cursor:pointer;white-space:nowrap;flex-shrink:0;">🗜 Nén ngay</button>
+      </div>
       <button id="te-delete-btn" onclick="deleteTheoryCard()" style="display:none;width:100%;padding:12px;border-radius:var(--radius-md);background:#ef535014;border:1px solid #ef535066;color:var(--loss);font-family:var(--sys);font-size:11px;letter-spacing:2px;cursor:pointer;">🗑 XÓA THẺ NÀY</button>
       <button id="te-save-btn" onclick="saveTheoryCard()" style="width:100%;padding:14px;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--gold-faint),var(--gold-dim));border:1px solid var(--gold);color:var(--gold);font-family:var(--sys);font-size:11px;letter-spacing:0.5px;cursor:pointer;">💾 LƯU THẺ</button>
     </div>
@@ -4017,6 +4021,53 @@ async function saveOneCard(id, card) {
 }
 window.saveOneCard = saveOneCard;
 
+// Show/hide te-size-warn banner
+function _teUpdateSizeWarn(card) {
+  const kb = estimateKB(card);
+  const el = document.getElementById('te-size-warn');
+  const txt = document.getElementById('te-size-warn-text');
+  if(!el) return;
+  if(kb > 1000) {
+    txt.textContent = kb + 'KB — thẻ nặng, nên tách bớt nội dung.';
+    el.style.display = 'flex';
+  } else {
+    el.style.display = 'none';
+  }
+}
+window._teUpdateSizeWarn = _teUpdateSizeWarn;
+
+window.teForceCompress = async function() {
+  const btn = document.getElementById('te-compress-btn');
+  if(btn) { btn.textContent = '⏳...'; btn.disabled = true; }
+  try {
+    const id = theoryEditingId;
+    const card = theoryCustomData[id];
+    if(!card) return;
+    let changed = false;
+    for(const sec of (card.sections||[])) {
+      if(!sec) continue;
+      for(const ex of (sec.examples||[])) {
+        for(const tf of (ex&&ex.tfs||[])) {
+          if(tf&&tf.images) {
+            const newImgs = await Promise.all(tf.images.map(function(img){ return recompressDataUrlIfNeeded(img,120); }));
+            newImgs.forEach(function(img,i){ if(img!==tf.images[i]){tf.images[i]=img;changed=true;} });
+          }
+        }
+      }
+      for(const rule of (sec.rules||[])) {
+        if(rule&&rule.imgs) {
+          const newImgs = await Promise.all(rule.imgs.map(function(img){ return recompressDataUrlIfNeeded(img,120); }));
+          newImgs.forEach(function(img,i){ if(img!==rule.imgs[i]){rule.imgs[i]=img;changed=true;} });
+        }
+      }
+    }
+    if(changed) { try { await saveOneCard(id, card); } catch(e) { console.warn('compress save err',e); } }
+    _teUpdateSizeWarn(card);
+    showToast('✅ Đã nén ảnh — ' + estimateKB(card) + 'KB');
+  } catch(e) { console.error('teForceCompress err',e); }
+  if(btn) { btn.textContent = '🗜 Nén ngay'; btn.disabled = false; }
+};
+
 // Merge: THEORY_DATA + custom overrides
 function getMergedTheory() {
   // Built-in cards, overridden or deleted via theoryCustomData
@@ -5441,6 +5492,7 @@ window.openAddTheoryCard = function() {
     populateTheoryCatSelect(theoryCategory!=="all"?theoryCategory:"");
     document.getElementById("te-hl-type").value = "tip";
     document.getElementById("te-delete-btn").style.display = "none";
+    var _sw=document.getElementById("te-size-warn"); if(_sw) _sw.style.display="none";
     document.getElementById("te-img-sections").innerHTML = "";
     // Build rich editors for title + highlight
     _teBuildTopRichEditors("", "");
@@ -5512,6 +5564,8 @@ window.openEditTheoryCard = function(id) {
     if(window.resetPasteTarget) window.resetPasteTarget();
     document.getElementById("modal-theory-edit").style.display = "flex";
     setTimeout(()=>document.getElementById("te-scroll-body").scrollTop=0,50);
+    // Show size warning banner if card is heavy
+    _teUpdateSizeWarn(t);
 
     // Auto-recompress heavy images in Firestore silently in background
     const _cardSizeKB = estimateKB(t);
@@ -6004,7 +6058,7 @@ window.saveTheoryCard = async function() {
 
   // Auto-recompress all images in sections if card is too large
   let sizeKB = estimateKB(card);
-  if(sizeKB > 500) {
+  if(sizeKB > 700) {
     showToast("⏳ Đang nén ảnh...");
     try {
       for(const sec of (card.sections||[])) {
@@ -6033,11 +6087,11 @@ window.saveTheoryCard = async function() {
       sizeKB = estimateKB(card);
     } catch(e) { console.error("recompress err",e); }
   }
-  if(sizeKB>950){
+  if(sizeKB>1400){
     try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
     showToast("⚠️ Quá lớn ("+sizeKB+"KB)! Xóa bớt ảnh hoặc dùng ảnh nhỏ hơn.");return;
   }
-  if(sizeKB>600){
+  if(sizeKB>1000){
     try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
     showToast("⚠️ Cảnh báo: thẻ nặng "+sizeKB+"KB — có thể lỗi khi lưu ảnh nhiều");
   }
