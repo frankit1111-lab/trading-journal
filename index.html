@@ -1971,7 +1971,7 @@ function showToast(msg) {
   t.textContent=msg; t.style.opacity="1";
   clearTimeout(t._t); t._t=setTimeout(()=>t.style.opacity="0", 2400);
 }
-function compressImage(dataUrl, maxW=1400, quality=0.6) {
+function compressImage(dataUrl, maxW=1600, quality=0.75) {
   return new Promise((res, rej) => {
     const img=new Image();
     img.onload=()=>{
@@ -1989,7 +1989,7 @@ async function recompressDataUrlIfNeeded(dataUrl, targetKB=200) {
   const kb = Math.round(dataUrl.length * 0.75 / 1024);
   if (kb <= targetKB) return dataUrl;
   // Try progressively harder compression
-  const steps = [{maxW:1200,q:0.5},{maxW:1000,q:0.42},{maxW:800,q:0.35}];
+  const steps = [{maxW:1400,q:0.65},{maxW:1200,q:0.55},{maxW:1000,q:0.45}];
   let out = dataUrl;
   for (const {maxW,q} of steps) {
     out = await compressImage(out, maxW, q);
