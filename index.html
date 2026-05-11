@@ -1967,18 +1967,32 @@ function showToast(msg) {
   t.textContent=msg; t.style.opacity="1";
   clearTimeout(t._t); t._t=setTimeout(()=>t.style.opacity="0", 2400);
 }
-function compressImage(dataUrl, maxW=1200) {
+function compressImage(dataUrl, maxW=900, quality=0.35) {
   return new Promise((res, rej) => {
     const img=new Image();
     img.onload=()=>{
       const c=document.createElement("canvas");
       const r=Math.min(1,maxW/img.width); c.width=img.width*r; c.height=img.height*r;
       c.getContext("2d").drawImage(img,0,0,c.width,c.height);
-      res(c.toDataURL("image/jpeg",0.55));
+      res(c.toDataURL("image/jpeg",quality));
     };
     img.onerror=()=>rej(new Error("Không thể đọc ảnh"));
     img.src=dataUrl;
   });
+}
+async function recompressDataUrlIfNeeded(dataUrl, targetKB=200) {
+  // Re-compress an already-compressed dataUrl if it's still too large
+  const kb = Math.round(dataUrl.length * 0.75 / 1024);
+  if (kb <= targetKB) return dataUrl;
+  // Try progressively harder compression
+  const steps = [{maxW:700,q:0.28},{maxW:600,q:0.22},{maxW:500,q:0.18}];
+  let out = dataUrl;
+  for (const {maxW,q} of steps) {
+    out = await compressImage(out, maxW, q);
+    const newKb = Math.round(out.length * 0.75 / 1024);
+    if (newKb <= targetKB) break;
+  }
+  return out;
 }
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 // escRich: render rich-text HTML safely. Detects whether content is HTML (has tags) or plain.
@@ -1998,6 +2012,7 @@ function estimateKB(obj) { return Math.round(JSON.stringify(obj).length/1024); }
 window.showToast = showToast;
 window.estimateKB = estimateKB;
 window.compressImage = compressImage;
+window.recompressDataUrlIfNeeded = recompressDataUrlIfNeeded;
 
 // Global image fullscreen viewer
 window.viewImg = function(src) {
@@ -2732,7 +2747,17 @@ window.saveTrade=async function(){
   const dateVal=document.getElementById("f-date").value, hour=document.getElementById("f-hour").value||"0", min=document.getElementById("f-minute").value||"0";
   let tradeDate=null; if(dateVal){const d=new Date(dateVal);d.setHours(+hour,+min,0);tradeDate=d.getTime();}
   const trade={title,symbol:document.getElementById("f-symbol").value.trim(),pnl:"",note:document.getElementById("f-note").value.trim(),folder:document.getElementById("f-folder").value||"",result:"",onplan:"",tags:document.getElementById("f-tags").value.split(",").map(t=>t.trim()).filter(Boolean),...getFormImagesFromSections(),orders:getFormOrders(),tradeDate,createdAt:Date.now()};
-  const sizeKB = estimateKB(trade);
+  // Auto-recompress tfs images before size check
+  let sizeKB = estimateKB(trade);
+  if(sizeKB>500){
+    showToast("⏳ Đang nén ảnh...");
+    try{
+      for(const tf of Object.keys(trade.tfs||{})){
+        if(trade.tfs[tf]?.images){trade.tfs[tf].images=await Promise.all(trade.tfs[tf].images.map(img=>recompressDataUrlIfNeeded(img,180)));}
+      }
+      sizeKB=estimateKB(trade);
+    }catch(e){console.error("recompress err",e);}
+  }
   if(sizeKB>900){alert(`⚠️ Dữ liệu quá lớn (${sizeKB}KB). Hãy xoá bớt ảnh hoặc tách thành nhiều setup.`);btn.disabled=false;btn.textContent="💾 LƯU SETUP";return;}
   try{
     const ref=await addDoc(collection(db,"trades"),trade);
@@ -3374,7 +3399,17 @@ window.updateTrade=async function(){
   const dateVal=document.getElementById("e-date").value, hour=document.getElementById("e-hour").value||"0", min=document.getElementById("e-minute").value||"0";
   let tradeDate=currentTrade.tradeDate||null; if(dateVal){const d=new Date(dateVal);d.setHours(+hour,+min,0);tradeDate=d.getTime();}
   const upd={title,symbol:document.getElementById("e-symbol").value.trim(),pnl:document.getElementById("e-pnl").value.trim(),note:document.getElementById("e-note").value.trim(),folder:document.getElementById("e-folder").value||"",result:document.querySelector('[data-group="e-result"].active')?.dataset.val||"Win",onplan:document.querySelector('[data-group="e-onplan"].active')?.dataset.val||"",tags:document.getElementById("e-tags").value.split(",").map(t=>t.trim()).filter(Boolean),images:{...editImages},captions:{...editCaptions},orders:getEditOrders(),tradeDate,createdAt:currentTrade.createdAt||Date.now(),aiResult:null,aiResultTs:null};
-  const sizeKB = estimateKB(upd);
+  // Auto-recompress images before size check
+  let sizeKB = estimateKB(upd);
+  if(sizeKB>500){
+    showToast("⏳ Đang nén ảnh...");
+    try{
+      for(const tf of Object.keys(upd.images||{})){
+        if(Array.isArray(upd.images[tf])){upd.images[tf]=await Promise.all(upd.images[tf].map(img=>recompressDataUrlIfNeeded(img,180)));}
+      }
+      sizeKB=estimateKB(upd);
+    }catch(e){console.error("recompress err",e);}
+  }
   if(sizeKB>900){alert(`⚠️ Dữ liệu quá lớn (${sizeKB}KB). Hãy xoá bớt ảnh.`);btn.disabled=false;btn.textContent="CẬP NHẬT LỆNH";return;}
   try{
     await updateDoc(doc(db,"trades",currentTrade.id),upd);
@@ -5929,7 +5964,37 @@ window.saveTheoryCard = async function() {
     }
   };
 
-  const sizeKB = estimateKB(card);
+  // Auto-recompress all images in sections if card is too large
+  let sizeKB = estimateKB(card);
+  if(sizeKB > 500) {
+    showToast("⏳ Đang nén ảnh...");
+    try {
+      for(const sec of (card.sections||[])) {
+        if(!sec) continue;
+        // tfs array
+        for(const tf of (sec.tfs||[])) {
+          if(tf && tf.images) {
+            tf.images = await Promise.all(tf.images.map(img=>recompressDataUrlIfNeeded(img,180)));
+          }
+        }
+        // rules imgs
+        for(const rule of (sec.rules||[])) {
+          if(rule && rule.imgs) {
+            rule.imgs = await Promise.all(rule.imgs.map(img=>recompressDataUrlIfNeeded(img,180)));
+          }
+        }
+        // examples tfs
+        for(const ex of (sec.examples||[])) {
+          for(const tf of (ex?.tfs||[])) {
+            if(tf && tf.images) {
+              tf.images = await Promise.all(tf.images.map(img=>recompressDataUrlIfNeeded(img,180)));
+            }
+          }
+        }
+      }
+      sizeKB = estimateKB(card);
+    } catch(e) { console.error("recompress err",e); }
+  }
   if(sizeKB>950){
     try{if(navigator.vibrate)navigator.vibrate([20,10,20]);}catch(e){}
     showToast("⚠️ Quá lớn ("+sizeKB+"KB)! Xóa bớt ảnh hoặc dùng ảnh nhỏ hơn.");return;
