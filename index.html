@@ -5512,6 +5512,44 @@ window.openEditTheoryCard = function(id) {
     if(window.resetPasteTarget) window.resetPasteTarget();
     document.getElementById("modal-theory-edit").style.display = "flex";
     setTimeout(()=>document.getElementById("te-scroll-body").scrollTop=0,50);
+
+    // Auto-recompress heavy images in Firestore silently in background
+    const _cardSizeKB = estimateKB(t);
+    if(_cardSizeKB > 500) {
+      setTimeout(async () => {
+        try {
+          let changed = false;
+          const card = theoryCustomData[id];
+          if(!card) return;
+          for(const sec of (card.sections||[])) {
+            if(!sec) continue;
+            for(const tf of (sec.tfs||[])) {
+              if(tf && tf.images) {
+                const newImgs = await Promise.all(tf.images.map(img=>recompressDataUrlIfNeeded(img,180)));
+                if(newImgs.some((img,i)=>img!==tf.images[i])){tf.images=newImgs;changed=true;}
+              }
+            }
+            for(const rule of (sec.rules||[])) {
+              if(rule && rule.imgs) {
+                const newImgs = await Promise.all(rule.imgs.map(img=>recompressDataUrlIfNeeded(img,180)));
+                if(newImgs.some((img,i)=>img!==rule.imgs[i])){rule.imgs=newImgs;changed=true;}
+              }
+            }
+            for(const ex of (sec.examples||[])) {
+              for(const exTf of (ex?.tfs||[])) {
+                if(exTf && exTf.images) {
+                  const newImgs = await Promise.all(exTf.images.map(img=>recompressDataUrlIfNeeded(img,180)));
+                  if(newImgs.some((img,i)=>img!==exTf.images[i])){exTf.images=newImgs;changed=true;}
+                }
+              }
+            }
+          }
+          if(changed) {
+            try { await window.saveOneCard(id, card); } catch(e) { console.warn("bg recompress save:", e); }
+          }
+        } catch(e) { console.warn("bg recompress err:", e); }
+      }, 800);
+    }
   } finally {
     _teApplyingHistory = false;
     _teUpdateUndoButtons();
